@@ -1104,6 +1104,13 @@ function seedDefault(){
    id:"pg"+(c++), title:p.title, divider:!!p.divider, blurb:p.blurb||"",
    items:(p.items||[]).map(x=>norm(clone(x)))
  }));
+ /* Display order only: Signage sits after the amenities so the journey
+    reads ... Amenities (3) -> Information (4). Moved AFTER ids are assigned
+    above, so every page and question id is identical to PAGES order and
+    saved answers keep resolving. Do not reorder PAGES itself. */
+ const iSig=pages.findIndex(p=>p.title==="Signage");
+ const iAacf=pages.findIndex(p=>p.title==="Accessible Adult Change Facilities");
+ if(iSig>=0&&iAacf>iSig) pages.splice(iAacf,0,pages.splice(iSig,1)[0]);
  return {meta:{title:"Premises Access Audit", nextId:c},
    rs:{ phml:{name:"Pass / High Priority / Medium Priority / Low Priority", opts:PHML},
         fnn:{name:"Found / Not Found / N/A", opts:FNN} },
