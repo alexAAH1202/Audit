@@ -94,7 +94,12 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .qrow:first-of-type{border-top:none;padding-top:8px}
 .qrow .qt{font-size:16px;line-height:1.5;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
 .qrow .qt .cl{display:block;color:var(--muted);font-size:12.5px;font-weight:400;line-height:1.4;margin-top:6px}
-.qrow .qx{display:flex;flex-direction:column;gap:6px}
+.qrow .qx{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px}
+.qx .notetoggle{order:1}.qx .addphoto{order:2;margin-top:0}.qx .qnotewrap{order:3;flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+.qx .qnotewrap[hidden]{display:none}.qx .qphotos{order:4;flex:1 1 100%;margin-top:0}.qphotos:empty{display:none}
+.notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
+.notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
+.notetoggle .notehas{color:var(--brand)}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
 .opt{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.25;color:var(--muted);text-align:center;min-height:44px;overflow-wrap:anywhere}
 .opt.on::before{content:"\2713\00a0"}
@@ -1854,9 +1859,7 @@ function rItem(it,suf){
    for(let a=0;a<(it.addl??2);a++){const ak=it.id+suf+"|addl"+a;
      h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" aria-label="Additional item description" placeholder="Additional item (optional)…" value="${esc(S[ak+"|t"]||"")}"></div>`+
         radioGroup(ak,RS("phml").opts,S[ak],'aria-label="Rating for this additional item"')+
-        `<div class="qx"><label class="qnote-lbl" for="${fieldId(ak+"|n")}">Comment</label>
-        <textarea class="qnote show" id="${fieldId(ak+"|n")}" data-a="${ak}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(S[ak+"|n"]||"")}</textarea>
-        ${photoBlock(ak)}</div></div>`;}
+        `<div class="qx">${noteBlock(ak,S[ak+"|n"]||"")}${photoBlock(ak)}</div></div>`;}
    return h+`</div>`;}
   case "sec":{
    const rep=it.rep!==false;
@@ -1913,9 +1916,16 @@ function qRow(it,suf){
  const v=S[key], note=S[key+"|n"]||"";
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}</div>`+
    radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+
-   `<div class="qx"><label class="qnote-lbl" for="${fieldId(key+"|n")}">Comment</label>
-   <textarea class="qnote show" id="${fieldId(key+"|n")}" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
-   ${photoBlock(key)}</div></div>`;
+   `<div class="qx">${noteBlock(key,note)}${photoBlock(key)}</div></div>`;
+}
+/* The comment box is folded behind a "+ Comment" button so a question is short until a note is needed. It opens by
+   itself when it already holds text, and stays as the auditor left it while they work. */
+const NOTES_OPEN=new Set(), NOTES_SHUT=new Set();
+function noteBlock(key,note){
+ const has=!!String(note).trim(), open=NOTES_OPEN.has(key)||(has&&!NOTES_SHUT.has(key)), id=fieldId(key+"|n");
+ return `<button type="button" class="notetoggle" data-notetoggle="${esc(key)}" aria-expanded="${open}" aria-controls="${id}-wrap">${open?"\u2212":"+"} Comment${has?`<span class="notehas" aria-label="(has a note)"> \u2022</span>`:""}</button>
+   <div class="qnotewrap" id="${id}-wrap" ${open?"":"hidden"}><label class="qnote-lbl" for="${id}">Comment</label>
+   <textarea class="qnote show" id="${id}" data-a="${esc(key)}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea></div>`;
 }
 function editBar(){return "";}
 function moveDel(id){
@@ -1968,6 +1978,37 @@ const IDB=(function(){
   clear:()=>tx("readwrite").then(os=>new Promise(res=>{const q=os.clear();q.onsuccess=()=>res();q.onerror=()=>res();}))
  };
 })();
+/* =====================================================================
+   PHOTO INTEGRITY (design brief, P0 data durability, item 6)
+   Photos live in IndexedDB, answers in localStorage, so one can vanish without the other. A small manifest
+   (photo id -> question key) is kept beside the answers and updated whenever a photo is added or removed.
+   On load, any photo the manifest lists that IndexedDB no longer holds is reported.
+===================================================================== */
+const PM_KEY="iac_photo_manifest_v1";
+const pmLoad=()=>{ try{ const m=JSON.parse(localStorage.getItem(PM_KEY)); return m&&typeof m==="object"&&!Array.isArray(m)?m:null; }catch(e){ return null; } };
+const pmSave=m=>{ try{ localStorage.setItem(PM_KEY,JSON.stringify(m)); }catch(e){} };
+(function(){
+ const put=IDB.put, del=IDB.del, clear=IDB.clear;
+ IDB.put=async rec=>{ const m=pmLoad(); if(m){ m[rec.id]=rec.key; pmSave(m); } return put(rec); };
+ IDB.del=async id=>{ const m=pmLoad(); if(m){ delete m[id]; pmSave(m); } return del(id); };
+ IDB.clear=async()=>{ if(pmLoad()) pmSave({}); return clear(); };
+})();
+function checkPhotoIntegrity(){
+ const m=pmLoad(), have=new Map();
+ Object.entries(PHOTOS).forEach(([k,l])=>l.forEach(p=>have.set(p.id,k)));
+ if(!m){ pmSave(Object.fromEntries(have)); clearNotice("photoloss"); return; }   // first run of this check: start from what exists
+ let grew=false; have.forEach((k,id)=>{ if(!(id in m)){ m[id]=k; grew=true; } });
+ if(grew) pmSave(m);
+ const missing=Object.entries(m).filter(([id])=>!have.has(id));
+ if(!missing.length){ clearNotice("photoloss"); return; }
+ const where=new Map(); allQs().forEach(x=>where.set(x.key,whereOf(x)));
+ const places=[...new Set(missing.map(([,k])=>where.get(k)||"an item that has since been removed"))];
+ notice("photoloss",`<b>${pl(missing.length,"photo")} missing.</b> This audit recorded ${missing.length===1?"a photo":"photos"} that this browser no longer holds,
+   for: ${places.slice(0,4).map(esc).join("; ")}${places.length>4?` and ${places.length-4} more`:""}.
+   The browser may have cleared its storage, or photo storage may be unavailable (for example in private browsing).
+   Use <b>Restore audit</b> with your latest backup file to get them back.
+   <button type="button" class="btn" data-act="photoforget">Forget missing photos</button>`,"err");
+}
 async function loadPhotos(){
  PHOTOS={};
  try{(await IDB.all()).forEach(r=>{(PHOTOS[r.key]=PHOTOS[r.key]||[]).push(r);});}catch(e){}
@@ -2217,7 +2258,7 @@ function render(){
  growNotes(c);
 }
 /* Comment boxes start four lines tall and grow with what is typed (up to a limit, then they scroll). */
-function growNote(el){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight+2,480)+"px"; }
+function growNote(el){ if(el.offsetParent===null) return; el.style.height="auto"; el.style.height=Math.min(el.scrollHeight+2,480)+"px"; }
 function growNotes(root){ (root||document).querySelectorAll("textarea.qnote").forEach(el=>{ if(el.value) growNote(el); }); }
 /* Template-editor controls have no visible labels; give each a name a screen reader can announce. */
 function nameEditControls(c){
@@ -3033,6 +3074,13 @@ content.addEventListener("click",e=>{
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
  const b=e.target.closest("[data-q]");
+ const nt=e.target.closest("[data-notetoggle]");
+ if(nt){ const key=nt.dataset.notetoggle, wrap=document.getElementById(nt.getAttribute("aria-controls")); if(!wrap) return;
+   const open=wrap.hidden; wrap.hidden=!open; nt.setAttribute("aria-expanded",String(open));
+   const has=nt.querySelector(".notehas"); nt.firstChild.textContent=(open?"\u2212":"+")+" Comment";
+   if(open){ NOTES_OPEN.add(key); NOTES_SHUT.delete(key); const ta=wrap.querySelector("textarea"); growNote(ta); ta.focus(); }
+   else{ NOTES_OPEN.delete(key); NOTES_SHUT.add(key); }
+   return; }
  const pk=e.target.closest("[data-pick]");
  if(pk){ pickAnswer(pk.dataset.pick,pk.dataset.v); return; }
  const ov=e.target.closest("[data-scopeov]");
@@ -3071,7 +3119,10 @@ content.addEventListener("input",e=>{
    if(el.type==="checkbox")S[id]=el.checked?1:"";
    else S[id]=el.value;
    saveA(); if(el.type==="checkbox")renderTop();
-   if(el.classList.contains("qnote")) growNote(el);
+   if(el.classList.contains("qnote")){ growNote(el);
+     const tg=document.querySelector('[aria-controls="'+el.id+'-wrap"]'), dot=tg&&tg.querySelector(".notehas");
+     if(tg&&el.value.trim()&&!dot) tg.insertAdjacentHTML("beforeend",`<span class="notehas" aria-label="(has a note)"> \u2022</span>`);
+     else if(tg&&!el.value.trim()&&dot) dot.remove(); }
    if(el.hasAttribute("data-instlbl")){ const rep=el.closest(".rep"), h=rep&&rep.querySelector(".rh h4");
      if(h){ const v=el.value.trim(), num=+h.dataset.num, nm=rep.querySelector(".needname");
        h.innerHTML=esc(h.dataset.base)+(v?` — <span class="rhname">${esc(v)}</span>`:(num?" #"+num:"")); if(nm) nm.hidden=!!v; } }
@@ -3271,7 +3322,7 @@ async function restoreFromFile(file){
  if(cur>=T.pages.length||cur<0) cur=0;
  saveA();
  try{ await IDB.clear(); for(const p of photos){ const er=await IDB.put(p); if(er){ saveFailed("photos",er); break; } } }catch(e){}
- await loadPhotos();
+ await loadPhotos(); checkPhotoIntegrity();
  BK.sig=auditSig(); BK.at=b.createdAt?Date.parse(b.createdAt)||Date.now():Date.now(); BK.complete=!!b.complete; saveBK();
  clearNotice("backup"); clearNotice("backupok");
  render(); updateDoneBtn();
@@ -3431,6 +3482,7 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
   if(e.target.closest('[data-act="addleave"]')) addLeaveSection();
   if(e.target.closest('[data-act="addjourney"]')) addJourneySections();
   if(e.target.closest('[data-act="addscope"]')) addSiteScope();
+  if(e.target.closest('[data-act="photoforget"]')){ const m=pmLoad(); if(m){ const have=new Set(Object.values(PHOTOS).flat().map(p=>p.id)); Object.keys(m).forEach(id=>{ if(!have.has(id)) delete m[id]; }); pmSave(m); } clearNotice("photoloss"); }
   if(e.target.closest('[data-act="resume"]')){ const hit=allQs().find(x=>x.key===lastQ); clearNotice("resume"); if(hit) goToQuestion(hit); }
  });
  /* Also available in the template editor, for a template imported later. */
@@ -3499,7 +3551,7 @@ async function boot(){
  offerJourney();
  offerScope();
  updateReviewBtn();
- loadPhotos().then(()=>{render();checkBackupStale();offerResume();});   // re-render once photos are read from IndexedDB
+ loadPhotos().then(()=>{render();checkBackupStale();offerResume();checkPhotoIntegrity();});   // re-render once photos are read from IndexedDB
 }
 boot();
 </script>
