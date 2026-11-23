@@ -100,6 +100,22 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
 .notetoggle .notehas{color:var(--brand)}
+.sidesearch{padding:12px 14px;border-bottom:1px solid var(--line)}
+.sidesearch label{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:6px}
+.sidesearch .srow{display:flex;gap:6px}
+.sidesearch input{flex:1;min-width:0;min-height:44px;padding:8px 12px;font-size:16px;border:1px solid var(--field-line);border-radius:8px;background:#fff}
+.sidesearch .btn{min-height:44px;min-width:44px;padding:0}
+.sidesearch input::-webkit-search-cancel-button{display:none}
+#qResults[hidden]{display:none}
+.sres-list{list-style:none;margin:0;padding:0}
+.sres{display:block;width:100%;text-align:left;padding:11px 16px;border:none;border-bottom:1px solid var(--line);background:none;font:inherit;cursor:pointer;color:var(--ink)}
+.sres:hover,.sres:focus-visible{background:var(--brand-lt)}
+.sres:focus-visible{outline:3px solid var(--brand);outline-offset:-3px}
+.sres .sr-q{display:block;font-size:14px;line-height:1.4;font-weight:600}
+.sres .sr-m{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
+.sres .sr-s{display:block;font-size:12px;color:var(--brand);margin-top:3px;font-weight:600}
+.sres mark{background:#FFE9A0;color:inherit;border-radius:2px}
+.sres-none,.sres-more{padding:14px 16px;font-size:13px;color:var(--muted)}
 .grpcard h3{margin-bottom:0}
 .grptoggle{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:-6px 0;padding:6px 0;background:none;border:none;
   font:inherit;font-size:17px;font-weight:700;color:var(--brand);text-align:left;cursor:pointer;flex-wrap:wrap}
@@ -426,6 +442,13 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
       <p class="logoh">Inclusive Access Co.</p>
       <small>Premises Access Audit — DDA / Premises Standards 2010 &amp; AS 1428</small>
     </div>
+    <div class="sidesearch" role="search">
+      <label for="qSearch">Search questions</label>
+      <div class="srow"><input id="qSearch" type="search" placeholder="e.g. handrail or 1428.1 Cl 12" autocomplete="off" spellcheck="false">
+        <button type="button" class="btn" id="qClear" aria-label="Clear search" hidden>&#10005;</button></div>
+      <div id="qStatus" role="status" class="vh"></div>
+    </div>
+    <div class="nav" id="qResults" aria-label="Search results" hidden></div>
     <nav class="nav" id="nav" aria-label="Audit sections"></nav>
     <div class="foot">Inclusive Access Co</div>
   </aside>
@@ -3563,6 +3586,82 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
  /* choosing an action closes the menu; Escape closes it and returns focus to the button */
  top.addEventListener("click",e=>{ if(e.target.closest(".more-item")) set(false); });
  top.addEventListener("keydown",e=>{ if(e.key==="Escape"&&top.classList.contains("open")){ set(false); more.focus(); } });
+})();
+
+/* =====================================================================
+   SEARCH ACROSS QUESTIONS (design brief, P1 information architecture)
+   Free text over question text, clause reference, page, the name of a repeated element and the auditor's own
+   comment. Every word typed must match (any order). Results replace the section list in the sidebar; choosing
+   one opens its page (and any folded group) and puts focus on its answer options. Questions on pages the
+   Site Scope has left out are included and marked.
+===================================================================== */
+(function(){
+ const input=document.getElementById("qSearch"), clear=document.getElementById("qClear"),
+       box=document.getElementById("qResults"), nav=document.getElementById("nav"), status=document.getElementById("qStatus");
+ const MAX=40; let timer=null;
+ const norm=x=>String(x||"").toLowerCase();
+ function allHits(terms){
+  const phrase=terms.join(" ");
+  const raw=[]; T.pages.forEach(p=>{ if(!p.divider) walkQs(p.items,"",raw,p); });
+  const out=[];
+  raw.forEach(x=>{
+   const t=norm(x.item.t), c=norm(x.item.c), w=norm(whereOf(x)), n=norm(S[x.key+"|n"]);
+   const hay=t+"\u0001"+c+"\u0001"+w+"\u0001"+n;
+   if(!terms.every(term=>hay.includes(term))) return;
+   /* words in the order typed, together, rank above words that merely all appear somewhere */
+   const score=terms.reduce((a,term)=>a+(t.includes(term)?4:0)+(c.includes(term)?3:0)+(w.includes(term)?2:0)+(n.includes(term)?1:0),0)
+              +(terms.length>1&&hay.includes(phrase)?20:0);
+   out.push({x,score,inNote:terms.some(term=>!t.includes(term)&&!c.includes(term)&&!w.includes(term)&&n.includes(term))});
+  });
+  return out.sort((a,b)=>b.score-a.score);
+ }
+ const mark=(txt,terms)=>{ let h=esc(txt); terms.forEach(term=>{ if(!term) return; const safe=esc(term).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); h=h.replace(new RegExp("("+safe+")","ig"),"<mark>$1</mark>"); }); return h; };
+ function stateOf(x){
+  if(isSkipped(x.page)) return "Page not applicable by scope";
+  const v=S[x.key]; if(v===undefined||v==="") return "Unanswered";
+  if(v==="na") return "Not applicable"; const o=optOf(withNA(RS(x.item.rs).opts),v); return o?o.l:"Answered";
+ }
+ function run(){
+  const q=input.value.trim(); clear.hidden=!q;
+  if(!q){ box.hidden=true; nav.hidden=false; status.textContent=""; return; }
+  const terms=norm(q).split(/\s+/).filter(Boolean), hits=allHits(terms);
+  nav.hidden=true; box.hidden=false;
+  const shown=hits.slice(0,MAX);
+  box.innerHTML=hits.length?`<ul class="sres-list">`+shown.map((h,i)=>{ const x=h.x;
+    return `<li><button type="button" class="sres" data-sres="${i}">
+      <span class="sr-q">${mark(x.item.t,terms)}</span>
+      <span class="sr-m">${mark(whereOf(x),terms)}${x.item.c?" · "+mark(x.item.c,terms):""}</span>
+      <span class="sr-s">${esc(stateOf(x))}${h.inNote?" · found in your comment":""}</span></button></li>`; }).join("")+`</ul>`
+    +(hits.length>MAX?`<p class="sres-more">Showing the first ${MAX} of ${hits.length}. Add a word to narrow it down.</p>`:"")
+   :`<p class="sres-none">Nothing matches "${esc(q)}". Try fewer or shorter words, or part of a clause such as "1428.1".</p>`;
+  box._hits=shown;
+  status.textContent=hits.length?`${hits.length} ${hits.length===1?"result":"results"} for ${q}`:`No results for ${q}`;
+ }
+ input.addEventListener("input",()=>{ clearTimeout(timer); timer=setTimeout(run,120); });
+ input.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&input.value){ e.stopPropagation(); input.value=""; run(); }
+  else if(e.key==="ArrowDown"||e.key==="Enter"){ const first=box.querySelector(".sres"); if(first){ e.preventDefault(); if(e.key==="Enter") first.click(); else first.focus(); } }
+ });
+ clear.addEventListener("click",()=>{ input.value=""; run(); input.focus(); });
+ box.addEventListener("click",e=>{
+  const b=e.target.closest(".sres"); if(!b) return;
+  const h=box._hits&&box._hits[+b.dataset.sres]; if(!h) return;
+  if(narrowMQ.matches&&sideEl.classList.contains("open")) drawer(false);
+  goToQuestion(h.x);
+ });
+ box.addEventListener("keydown",e=>{
+  const items=[...box.querySelectorAll(".sres")], i=items.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"&&i>=0&&i<items.length-1){ e.preventDefault(); items[i+1].focus(); }
+  else if(e.key==="ArrowUp"&&i>=0){ e.preventDefault(); (i===0?input:items[i-1]).focus(); }
+ });
+ /* "/" jumps to the search box from anywhere that is not a text field (opens the drawer on a phone). */
+ document.addEventListener("keydown",e=>{
+  if(e.key!=="/"||e.ctrlKey||e.metaKey||e.altKey) return;
+  const t=e.target; if(t&&(t.matches("input,textarea,select")||t.isContentEditable)) return;
+  e.preventDefault(); if(narrowMQ.matches&&!sideEl.classList.contains("open")) drawer(true);
+  input.focus();
+ });
+ window.runQuestionSearch=run;
 })();
 
 /* Convert a legacy audit (answers stored as option positions) to answer codes. Order matters: copy the raw
