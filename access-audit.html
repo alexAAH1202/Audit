@@ -158,6 +158,85 @@ input,textarea,select{font:inherit;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){
   .side,.backdrop{transition:none}
 }
+/* =====================================================================
+   REPORT v2 — styles. Paste at the END of the existing <style> block.
+   Reuses your variables; adds no new colour decisions beyond the
+   four-step scheduling ramp.
+===================================================================== */
+.report2{--z1:#104281;--z2:#256abf;--z3:#5598e7;--z4:#b7d3f6}
+.report2 h4.secbreak{font-family:Verdana,Geneva,sans-serif;font-size:13px;color:var(--brand);
+  margin:18px 0 9px;padding-bottom:5px;border-bottom:1px solid var(--line);letter-spacing:.03em}
+.report2 h4.secbreak:first-of-type{margin-top:4px}
+.rf-hint{color:var(--muted);font-size:12.5px;max-width:72ch;margin-bottom:12px}
+.rf-note{margin-top:6px;font-size:13px}
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.tile .tl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tile .statv{font-family:Verdana,Geneva,sans-serif;font-size:27px;line-height:1.15;margin-top:4px;display:block}
+.tile .tn{font-size:12px;color:var(--muted);margin-top:3px;display:block}
+.tile.c-red .statv{color:var(--red)}
+.tile.c-breach .statv{color:var(--breach)}
+.tile.c-orange .statv{color:var(--orange)}
+/* matrix */
+.mx{width:100%;border-collapse:separate;border-spacing:3px}
+.mx th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;
+  padding:5px 7px;text-align:left}
+.mx th.ch{text-align:center}
+.mx td{padding:0}
+.mx td button{width:100%;border:2px solid transparent;background:transparent;padding:12px 6px;
+  border-radius:7px;cursor:pointer;display:block;color:inherit;font:inherit}
+.mx td button.sel{border-color:var(--ink)}
+.mx td button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.mx .n{font-family:Verdana,Geneva,sans-serif;font-size:20px;font-weight:700;display:block;line-height:1.1}
+.mx .zl{font-size:10px;letter-spacing:.04em;text-transform:uppercase;display:block;margin-top:2px;opacity:.9}
+.z1{background:var(--z1);color:#fff}.z2{background:var(--z2);color:#fff}
+.z3{background:var(--z3);color:#0b0b0b}.z4{background:var(--z4);color:#0b0b0b}
+.zempty{background:#F1F2F6;color:#9A9DA8}
+.mxlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.mxlegend span{display:flex;align-items:center;gap:6px}
+.sw{width:13px;height:13px;border-radius:3px;flex:none}
+/* journey */
+.jrn{display:flex;flex-direction:column}
+.jstage{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.jstage:first-child{border-top:none}
+.jrail{flex:none;width:26px;display:flex;flex-direction:column;align-items:center;align-self:stretch}
+.jdot{width:14px;height:14px;border-radius:50%;flex:none;border:3px solid var(--card);box-shadow:0 0 0 1.5px currentColor}
+.jline{flex:1;width:2px;background:var(--line);margin-top:3px;min-height:10px}
+.jstage:last-child .jline{display:none}
+.jname{font-weight:700;font-size:14px;font-family:Verdana,Geneva,sans-serif}
+.jmeta{font-size:12.5px;color:var(--muted);margin-top:1px}
+.jchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chip{font-size:11.5px;border-radius:5px;padding:2px 8px;font-weight:700;white-space:nowrap}
+.chip.b{background:var(--breach-bg);color:var(--breach)}
+.chip.h{background:var(--red-bg);color:var(--red)}
+.chip.m{background:var(--orange-bg);color:var(--orange)}
+.chip.p{background:var(--green-bg);color:var(--green)}
+/* report-time prose fields */
+.rf{margin-top:9px}
+.rf-l{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--brand);font-weight:700;margin-bottom:3px}
+.rf-t{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;
+  font-size:13px;background:#fff;color:var(--ink);resize:vertical;min-height:42px}
+.rf-t.pos{min-height:92px;font-size:14px}
+.rf-t:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.tf-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.tag{font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;
+  color:var(--muted);background:var(--bg)}
+.tag b{color:var(--ink)}
+.schband td{background:var(--brand-lt);font-weight:700;color:var(--brand);
+  font-family:Verdana,Geneva,sans-serif;font-size:12.5px}
+@media print{
+  .rf-t{border:none;padding:0;resize:none;background:none;min-height:0}
+  .rf-hint,.tf-select{display:none!important}
+  .mx td button.sel{border-color:transparent}
+  .mx td button{padding:9px 4px}
+  .flagitem,.card,.tile{break-inside:avoid}
+}
+@media (max-width:720px){
+  .mx .zl{display:none}
+  .tf-row{gap:7px}
+}
 </style>
 </head>
 <body>
