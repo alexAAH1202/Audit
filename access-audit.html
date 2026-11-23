@@ -238,6 +238,8 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .notice .nx{margin-left:auto;min-height:44px;min-width:44px}
 @media print{#notices{display:none}}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
+.rf-i{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:inherit;font-size:13px;width:11em;background:#fff;color:var(--ink)}
+.cover{display:none}
 .rf-t:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .tf-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 .tag{font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;
@@ -251,6 +253,34 @@ input,textarea,select{font:inherit;color:var(--ink)}
   .mx td button.sel{border-color:transparent}
   .mx td button{padding:9px 4px}
   .flagitem,.card,.tile{break-inside:avoid}
+}
+/* ---- Print layout: cover page, page flow, no split findings ---- */
+@media print{
+  .report2,.report2 *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pg.report2{max-width:none;padding:0;margin:0}
+  .report2 .cover{display:flex;flex-direction:column;justify-content:center;min-height:235mm;
+    break-after:page;page-break-after:always}
+  .cv-co{font-family:Verdana,Geneva,sans-serif;color:var(--brand);font-size:15px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:28mm}
+  .cover h1{font-family:Verdana,Geneva,sans-serif;color:var(--brand);font-size:34px;line-height:1.15;margin-bottom:6mm}
+  .cv-site{font-size:22px;margin-bottom:14mm}
+  .cv-meta{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;font-size:14px;margin-bottom:12mm}
+  .cv-meta dt{color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+  .cv-meta dd{margin:0}
+  .report2 > h2,.report2 > .crumb{display:none}      /* the cover replaces the on-screen title block */
+  .scope-photo{display:none}                          /* the photo is on the cover */
+  .rf-i{border:none;padding:0;width:auto;background:none}
+  .report2 label[for="rf-revision"],.report2 .rf:has(.rf-t:placeholder-shown),
+  .report2 .rf-t:placeholder-shown{display:none!important}
+  .report2 .rf-i:placeholder-shown{display:none}
+  .report2 .card.flow{break-inside:auto}               /* long lists must be allowed to flow */
+  .report2 .card.newpage{break-before:page}
+  .report2 h3,.report2 h4,.report2 .secbreak{break-after:avoid}
+  .report2 .rep-table thead{display:table-header-group}
+  .report2 .rep-table tr{break-inside:avoid}
+  .report2 .schband{break-after:avoid}
+  .report2 .jstage,.report2 .qphoto{break-inside:avoid}
+  .report2 .rf-l{break-after:avoid}
+  body{font-size:12.5px}
 }
 @media (max-width:720px){
   .mx .zl{display:none}
@@ -1840,6 +1870,8 @@ const ZONE=[null,
 /* --- 3. Collect every flagged finding, with its derived metadata ----- */
 function collectFindings(){
  const map=sectionMap();
+ /* position of each section in the journey, so findings sort by journey order within a priority */
+ const secOrder=[]; map.forEach(v=>{ if(!secOrder.includes(v.section)) secOrder.push(v.section); });
  return allQs().map(x=>{
   const v=S[x.key], set=RS(x.item.rs).opts;
   if(v===undefined||v===""||!set[+v]) return null;
@@ -1852,7 +1884,7 @@ function collectFindings(){
            : o.flag?"md":"pass";
   return {
    key:x.key, item:x.item, page:x.page, opt:o, flag:!!o.flag,
-   gc, gl:o.l, section:meta.section, pri:meta.pri,
+   gc, gl:o.l, section:meta.section, pri:meta.pri, secIdx:Math.max(0,secOrder.indexOf(meta.section)),
    diff:S[x.key+"|diff"]||"", impact:S[x.key+"|impact"]||"",
    action:S[x.key+"|action"]||"", note:S[x.key+"|n"]||"",
    zone:zoneOf(meta.pri,S[x.key+"|diff"]||"")
@@ -1892,16 +1924,53 @@ function reportHTML(){
  const noEffort=flags.filter(f=>!f.diff);
  const site=esc(getFieldVal("Title Page","Site conducted")||"—");
 
- let h=`<div class="pg report2"><h2>${esc(T.meta.title)} — Report</h2>
-  <div class="crumb">Inclusive Access Co. — generated ${new Date().toLocaleDateString("en-AU")}</div>
+ const siteRaw=getFieldVal("Title Page","Site conducted")||"";
+ const rev=(S["report|revision"]||"").trim();
+ const today=new Date().toLocaleDateString("en-AU");
+ const client=esc(getFieldVal("Title Page","Name")||"—"), consultant=esc(getFieldVal("Title Page","Consultant Name")||"—"),
+       conducted=esc(getFieldVal("Title Page","Conducted on")||"—");
+ /* Print furniture. Page numbers and the running header are @page margin
+    boxes (Chrome/Edge); the site name has to be baked into the rule as a CSS
+    string, so every character that could end the string or the <style> is
+    hex-escaped. Browsers without margin boxes simply print without them. */
+ const cssStr=x=>String(x).replace(/[\\"<>&\r\n]/g,c=>"\\"+c.charCodeAt(0).toString(16)+" ");
+ const headTxt=cssStr((siteRaw||"Access audit")+(rev?"  ·  Rev "+rev:""));
+ let h=`<div class="pg report2"><style>
+  @page{size:A4;margin:20mm 15mm 18mm;
+   @top-left{content:"${headTxt}";width:68%;font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:bottom;padding-bottom:3mm}
+   @top-right{content:"${cssStr(T.meta.title)}";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:right;vertical-align:bottom;padding-bottom:3mm}
+   @bottom-left{content:"Inclusive Access Co.";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:top;padding-top:3mm}
+   @bottom-right{content:"Page " counter(page) " of " counter(pages);font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:right;vertical-align:top;padding-top:3mm}}
+  @page :first{@top-left{content:none}@top-right{content:none}@bottom-left{content:none}@bottom-right{content:none}}
+ </style>
+  <section class="cover" aria-label="Cover page">
+   <div class="cv-co">Inclusive Access Co.</div>
+   <h1>${esc(T.meta.title)}</h1>
+   <div class="cv-site">${site}</div>
+   <dl class="cv-meta">
+    <dt>Client</dt><dd>${client}</dd>
+    <dt>Consultant</dt><dd>${consultant}</dd>
+    <dt>Audit conducted</dt><dd>${conducted}</dd>
+    ${rev?`<dt>Revision</dt><dd>${esc(rev)}</dd>`:""}
+    <dt>Report date</dt><dd>${today}</dd>
+   </dl>
+   ${reportPhotos(getFieldKey("Title Page","Site photo / media"))}
+  </section>
+  <h2>${esc(T.meta.title)} — Report</h2>
+  <div class="crumb">Inclusive Access Co. — generated ${today}</div>
 
   <div class="card">
    <h3>Scope</h3>
-   <p><b>Site:</b> ${site} &nbsp; <b>Client:</b> ${esc(getFieldVal("Title Page","Name")||"—")}
-      &nbsp; <b>Consultant:</b> ${esc(getFieldVal("Title Page","Consultant Name")||"—")}
-      &nbsp; <b>Conducted:</b> ${esc(getFieldVal("Title Page","Conducted on")||"—")}</p>
+   <p><b>Site:</b> ${site} &nbsp; <b>Client:</b> ${client}
+      &nbsp; <b>Consultant:</b> ${consultant}
+      &nbsp; <b>Conducted:</b> ${conducted}</p>
    ${getFieldVal("Access Audit Details","Benchmark")?`<p style="margin-top:6px"><b>Benchmark:</b> ${esc(getFieldVal("Access Audit Details","Benchmark"))}</p>`:""}
-   ${reportPhotos(getFieldKey("Title Page","Site photo / media"))}
+   ${EXPORTING
+     ? (rev?`<p style="margin-top:6px"><b>Revision:</b> ${esc(rev)}</p>`:"")
+     : `<p style="margin-top:8px"><label for="rf-revision"><b>Revision:</b></label>
+        <input id="rf-revision" class="rf-i" data-rf="report" data-rfk="revision" maxlength="24" value="${esc(S["report|revision"]||"")}"
+         placeholder="e.g. A or 2.0"> <span class="rf-hint" style="display:inline">Appears on the cover and in every page header.</span></p>`}
+   <div class="scope-photo">${reportPhotos(getFieldKey("Title Page","Site photo / media"))}</div>
   </div>`;
 
  /* ---- Position statement (auditor-written, saved like any field) ---- */
@@ -1987,8 +2056,8 @@ function reportHTML(){
  const filt=!EXPORTING&&REPFILTER.pri;
  if(filt) shown=shown.filter(f=>f.pri===REPFILTER.pri&&f.diff===REPFILTER.diff);
  const RANK={br:0,hi:1,md:2,lo:3,pass:9};
- shown=shown.slice().sort((a,b)=>a.pri-b.pri||RANK[a.gc]-RANK[b.gc]);
- h+=`<div class="card"><h3>Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
+ shown=shown.slice().sort((a,b)=>a.pri-b.pri||a.secIdx-b.secIdx||RANK[a.gc]-RANK[b.gc]);
+ h+=`<div class="card flow newpage"><h3>Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
    ${filt?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>`;
  if(!shown.length){
   h+=`<p style="color:var(--muted)">No findings match.</p>`;
@@ -2017,10 +2086,10 @@ function reportHTML(){
  h+=`</div>`;
 
  /* ---- Works schedule ---- */
- h+=`<div class="card"><h3>Works schedule</h3>
+ h+=`<div class="card flow newpage"><h3>Works schedule</h3>
    <p class="rf-hint">The hand-off table. Export this as CSV beside the PDF so the client can paste it
       into their maintenance system or send it to a builder.</p>
-   <table class="rep-table"><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th></tr>`;
+   <table class="rep-table"><thead><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th></tr></thead><tbody>`;
  let any=false;
  [1,2,3,4].forEach(z=>{
   const items=flags.filter(f=>zoneOf(f.pri,f.diff)===z);
@@ -2034,12 +2103,12 @@ function reportHTML(){
   });
  });
  if(!any) h+=`<tr><td colspan="5" style="color:var(--muted)">No flagged items.</td></tr>`;
- h+=`</table></div>`;
+ h+=`</tbody></table></div>`;
 
  /* ---- Monitor list (unchanged behaviour) ---- */
  const flagKeys=new Set(flags.map(f=>f.key));
  const monitored=allQs().filter(x=>(S[x.key+"|n"]||(PHOTOS[x.key]&&PHOTOS[x.key].length))&&!flagKeys.has(x.key));
- h+=`<div class="card"><h3>Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
+ h+=`<div class="card flow"><h3>Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
  if(!monitored.length) h+=`<p style="color:var(--muted)">No additional comments or photos recorded.</p>`;
  monitored.forEach(x=>{
   h+=`<div class="flagitem med"><span class="badge md">Comment</span> &nbsp; ${esc(x.item.t)}
@@ -2095,6 +2164,19 @@ function flattenForExport(html){
  });
  return t.innerHTML;
 }
+/* Ctrl+P / "Print / PDF" in the report view prints the same flattened
+   document the export produces: chosen values as text, no dropdowns, no
+   auditor guidance. The live (editable) report is put back afterwards. */
+let PRINT_SWAPPED=false;
+window.addEventListener("beforeprint",()=>{
+ if(mode!=="report"||PRINT_SWAPPED) return;
+ PRINT_SWAPPED=true;
+ EXPORTING=true; try{ document.getElementById("content").innerHTML=flattenForExport(reportHTML()); } finally { EXPORTING=false; }
+});
+window.addEventListener("afterprint",()=>{
+ if(!PRINT_SWAPPED) return;
+ PRINT_SWAPPED=false; render();
+});
 function exportReport(){
  const site=esc(getFieldVal("Title Page","Site conducted")||"Access audit");
  const date=new Date().toLocaleDateString("en-AU");
