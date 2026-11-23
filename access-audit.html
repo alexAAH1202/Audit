@@ -2036,7 +2036,11 @@ function updatePageScore(){
    order, from where the auditor last worked, wrapping at the end, and puts
    focus on its options. Blank "additional" rows are optional and ignored.
 ===================================================================== */
+const RESUME_KEY="iac_resume_v1";
 let lastQ=null;                                   // key of the question last answered or focused
+/* Where the auditor left off is kept in the browser, so reopening the audit can offer to continue there. */
+function setLastQ(k){ lastQ=k; try{ localStorage.setItem(RESUME_KEY,JSON.stringify({k,t:Date.now()})); }catch(e){} }
+function loadLastQ(){ try{ const r=JSON.parse(localStorage.getItem(RESUME_KEY)); if(r&&typeof r.k==="string") lastQ=r.k; }catch(e){} }
 const isMainKey=k=>!String(k).includes("|addl");
 const unansweredKeys=()=>allQs().filter(x=>isMainKey(x.key)&&(S[x.key]===undefined||S[x.key]===""));
 function jumpToNextUnanswered(){
@@ -2048,15 +2052,28 @@ function jumpToNextUnanswered(){
  let hit=null;
  for(let k=0;k<qs.length;k++){ const x=qs[(start+k)%qs.length]; if(S[x.key]===undefined||S[x.key]===""){ hit=x; break; } }
  if(!hit) return;
- const pi=pidx(hit);
- if(mode!=="audit"||pi!==cur){ mode="audit"; cur=pi; saveA(); render(); }
+ goToQuestion(hit);
+}
+/* Open the page a question is on, scroll to it, put focus on its options and outline it briefly. */
+function goToQuestion(hit){
+ const pi=T.pages.indexOf(hit.page);
+ if(mode!=="audit"||pi!==cur){ mode="audit"; EDIT=false; cur=pi; saveA(); render(); }
  const btn=content.querySelector('[data-q="'+CSS.escape(hit.key)+'"]'); if(!btn) return;
  const row=btn.closest(".qrow")||btn, g=btn.closest('[role="radiogroup"]');
  const calm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
  row.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});
  (g&&g.querySelector('[role="radio"][tabindex="0"]')||btn).focus({preventScroll:true});
  row.classList.add("flash"); setTimeout(()=>row.classList.remove("flash"),1800);
- lastQ=hit.key;
+ setLastQ(hit.key);
+}
+/* On load: offer to continue from the last question worked on (only if there is something left to do). */
+function offerResume(){
+ if(!lastQ) return;
+ const qs=allQs().filter(x=>isMainKey(x.key)), hit=qs.find(x=>x.key===lastQ);
+ if(!hit||!qs.some(x=>S[x.key]===undefined||S[x.key]==="")) return;
+ const onPage=qs.filter(x=>x.page===hit.page), n=onPage.indexOf(hit)+1;
+ notice("resume",`<b>Pick up where you left off?</b> ${esc(whereOf(hit))}, question ${n} of ${onPage.length}.
+   <button type="button" class="btn" data-act="resume">Continue</button>`,"ok");
 }
 
 /* =====================================================================
@@ -3021,7 +3038,7 @@ content.addEventListener("click",e=>{
  const ov=e.target.closest("[data-scopeov]");
  if(ov){ if(ov.dataset.on==="1") S["scopeov|"+ov.dataset.scopeov]="1"; else delete S["scopeov|"+ov.dataset.scopeov]; saveA(); render(); return; }
  if(e.target.closest("[data-reviewopen]")){ reviewModal(); return; }
- if(b){const id=b.dataset.q;lastQ=id;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];delete S[id+"|nasrc"];saveA();updateAnswerUI(id);return;}
+ if(b){const id=b.dataset.q;setLastQ(id);S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];delete S[id+"|nasrc"];saveA();updateAnswerUI(id);return;}
  const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
  if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
  const nav=e.target.closest("[data-nav]");
@@ -3121,7 +3138,7 @@ function drawer(open){
 btnMenu.addEventListener("click",()=>drawer(!sideEl.classList.contains("open")));
 backdrop.addEventListener("click",()=>drawer(false));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sideEl.classList.contains("open"))drawer(false);});
-content.addEventListener("focusin",e=>{ const r=e.target.closest&&e.target.closest("[data-q]"); if(r) lastQ=r.dataset.q; });
+content.addEventListener("focusin",e=>{ const r=e.target.closest&&e.target.closest("[data-q]"); if(r&&r.dataset.q!==lastQ) setLastQ(r.dataset.q); });
 document.getElementById("btnNextUn").addEventListener("click",e=>{ if(e.currentTarget.getAttribute("aria-disabled")==="true") return; jumpToNextUnanswered(); });
 /* Arrow keys inside a priority group move to, and select, the neighbouring option; Home/End jump. */
 /* Site Scope answer: stored as a text code; tapping the selected one clears it. The page is
@@ -3201,7 +3218,7 @@ async function downloadBackup(){
  Object.values(PHOTOS).flat().forEach(p=>byId.set(p.id,p));
  const site=getFieldVal("Title Page","Site conducted")||"";
  const data={format:"iac-audit-backup",schemaVersion:BACKUP_SCHEMA,createdAt:new Date().toISOString(),
-   site,complete:!!BK.complete,answers:{v:S_FORMAT,s:S,r:REPS,cur},
+   site,complete:!!BK.complete,resume:lastQ||"",answers:{v:S_FORMAT,s:S,r:REPS,cur},
    photos:[...byId.values()],template:T};
  const name="audit-backup-"+(site.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase()||"untitled")+
    "-"+new Date().toISOString().slice(0,10)+".json";
@@ -3249,6 +3266,7 @@ async function restoreFromFile(file){
  ensureCodes(T);
  if((a.v||1)<2) convertAnswers(S,T);
  S_FORMAT=ANS_VERSION;
+ if(typeof b.resume==="string"&&b.resume) setLastQ(b.resume); else { lastQ=null; try{localStorage.removeItem(RESUME_KEY);}catch(e){} }
  saveT();
  if(cur>=T.pages.length||cur<0) cur=0;
  saveA();
@@ -3291,7 +3309,7 @@ function resetModal(){
  go.onclick=()=>{
   if(!ok()) return;
   dlg.close();
-  S={};REPS={};cur=0;saveA();
+  S={};REPS={};cur=0;lastQ=null;try{localStorage.removeItem(RESUME_KEY);}catch(e){}saveA();
   BK.sig="";BK.complete=false;saveBK();updateDoneBtn();clearNotice("backup");clearNotice("backupok");
   IDB.clear().then(()=>{PHOTOS={};saveOK("photos");render();}).catch(()=>{PHOTOS={};render();});
  };
@@ -3413,6 +3431,7 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
   if(e.target.closest('[data-act="addleave"]')) addLeaveSection();
   if(e.target.closest('[data-act="addjourney"]')) addJourneySections();
   if(e.target.closest('[data-act="addscope"]')) addSiteScope();
+  if(e.target.closest('[data-act="resume"]')){ const hit=allQs().find(x=>x.key===lastQ); clearNotice("resume"); if(hit) goToQuestion(hit); }
  });
  /* Also available in the template editor, for a template imported later. */
  const bLv=mkb("btnLeave","Add LEAVE section"); bLv.classList.add("editonly");
@@ -3472,6 +3491,7 @@ async function runMigrations(){
 async function boot(){
  syncDrawerInert();
  loadAll();
+ loadLastQ();
  await runMigrations();
  render();
  checkPersistence();
@@ -3479,7 +3499,7 @@ async function boot(){
  offerJourney();
  offerScope();
  updateReviewBtn();
- loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
+ loadPhotos().then(()=>{render();checkBackupStale();offerResume();});   // re-render once photos are read from IndexedDB
 }
 boot();
 </script>
