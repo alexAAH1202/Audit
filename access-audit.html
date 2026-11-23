@@ -31,6 +31,16 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .nav a.on{background:var(--brand-lt);border-left-color:var(--brand);font-weight:600}
 .nav a .sc{font-size:11px;color:var(--muted);white-space:nowrap}
 .nav a .sc.bad{color:var(--red);font-weight:700}
+.nav .div{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.nav .div .sc{font-size:11px;letter-spacing:0;font-weight:600;color:var(--muted)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fab{position:fixed;right:16px;bottom:16px;z-index:40;min-height:48px;padding:0 20px;border:none;border-radius:24px;
+  background:var(--brand);color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer}
+.fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.fab[aria-disabled="true"]{background:var(--green);cursor:default}
+.fab[hidden]{display:none}
+.qrow.flash{outline:3px solid var(--brand);outline-offset:3px;border-radius:8px}
+@media print{.fab{display:none}}
 .side .foot{border-top:1px solid var(--line);padding:12px 18px;font-size:12px;color:var(--muted)}
 /* ---------- main ---------- */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
@@ -349,6 +359,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
     <div class="content" id="content"></div>
   </main>
   <div class="backdrop" id="backdrop"></div>
+  <button type="button" class="fab" id="btnNextUn" hidden></button>
 </div>
 <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" aria-hidden="true">
 
@@ -1439,9 +1450,11 @@ function trailOf(q){ // page + section labels for report
    O(pages x total items) re-walk of the whole template on every render. */
 function allPageScores(){
  const map=new Map();
- T.pages.forEach(p=>{ if(!p.divider) map.set(p,{got:0,max:0,hi:0,med:0,brc:0}); });
+ T.pages.forEach(p=>{ if(!p.divider) map.set(p,{got:0,max:0,hi:0,med:0,brc:0,ans:0,n:0}); });
  allQs().forEach(x=>{
   const bucket=map.get(x.page); if(!bucket) return;
+  /* progress counts every question except the optional blank "additional" rows */
+  if(!String(x.key).includes("|addl")){ bucket.n++; const a=S[x.key]; if(a!==undefined&&a!=="") bucket.ans++; }
   const set=RS(x.item.rs).opts; if(!isScored(set)) return;
   bucket.max++; const v=S[x.key];
   if(v!==undefined&&v!==""){const o=set[+v]; if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
@@ -1749,6 +1762,35 @@ function updatePageScore(){
  el.style.display=""; el.innerHTML=pageScoreHTML(sc);
 }
 /* =====================================================================
+   JUMP TO NEXT UNANSWERED (design brief, P1 information architecture)
+   One persistent button finds the next question with no answer, in audit
+   order, from where the auditor last worked, wrapping at the end, and puts
+   focus on its options. Blank "additional" rows are optional and ignored.
+===================================================================== */
+let lastQ=null;                                   // key of the question last answered or focused
+const isMainKey=k=>!String(k).includes("|addl");
+const unansweredKeys=()=>allQs().filter(x=>isMainKey(x.key)&&(S[x.key]===undefined||S[x.key]===""));
+function jumpToNextUnanswered(){
+ const qs=allQs().filter(x=>isMainKey(x.key)); if(!qs.length) return;
+ const pidx=x=>T.pages.indexOf(x.page);
+ const li=lastQ?qs.findIndex(x=>x.key===lastQ):-1;
+ let start=(li>=0&&pidx(qs[li])===cur)?li+1:qs.findIndex(x=>pidx(x)>=cur);
+ if(start<0) start=0;
+ let hit=null;
+ for(let k=0;k<qs.length;k++){ const x=qs[(start+k)%qs.length]; if(S[x.key]===undefined||S[x.key]===""){ hit=x; break; } }
+ if(!hit) return;
+ const pi=pidx(hit);
+ if(mode!=="audit"||pi!==cur){ mode="audit"; cur=pi; saveA(); render(); }
+ const btn=content.querySelector('[data-q="'+CSS.escape(hit.key)+'"]'); if(!btn) return;
+ const row=btn.closest(".qrow")||btn, g=btn.closest('[role="radiogroup"]');
+ const calm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ row.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});
+ (g&&g.querySelector('[role="radio"][tabindex="0"]')||btn).focus({preventScroll:true});
+ row.classList.add("flash"); setTimeout(()=>row.classList.remove("flash"),1800);
+ lastQ=hit.key;
+}
+
+/* =====================================================================
    SWEEP TO PASS (design brief, P1 on-site capture)
    Most answers in a real audit are "complies". One control per Legislative
    Requirements group marks every UNANSWERED question Pass, so the auditor
@@ -1867,13 +1909,21 @@ function render(){
    <button class="btn primary" ${cur===T.pages.length-1?"disabled":""} data-nav="1">Next &rarr;</button></div></div>`;
  c.innerHTML=h; c.scrollTop=keepScroll;
 }
+/* Navigation shows progress (answered / total), not a compliance score; a finished page or
+   section reads "✓". Flag counts stay. */
+const progTxt=(ans,n)=>n?(ans>=n?"✓ ":"")+ans+"/"+n:"";
 function renderNav(){
  const scores=allPageScores();
+ const secTot=new Map(); let curDiv=null;
+ T.pages.forEach(p=>{ if(p.divider){ curDiv={ans:0,n:0}; secTot.set(p,curDiv); return; }
+   const sc=scores.get(p); if(curDiv&&sc){ curDiv.ans+=sc.ans; curDiv.n+=sc.n; } });
  document.getElementById("nav").innerHTML=T.pages.map((p,i)=>{
-  if(p.divider)return `<div class="div">${esc(p.title)}</div>`+(EDIT?`<a href="#" data-pg="${i}" class="${i===cur?"on":""}" style="font-style:italic">edit divider</a>`:`<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}" style="font-style:italic;color:var(--muted)">Section divider</a>`);
-  const sc=scores.get(p)||{got:0,max:0,hi:0,med:0};
-  const lab=sc.max?`${sc.got}/${sc.max}${sc.brc?" ⛔"+sc.brc:""}${sc.hi?" ⚑"+sc.hi:""}`:"";
-  return `<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
+  if(p.divider){ const st=secTot.get(p);
+   return `<div class="div"><span>${esc(p.title)}</span><span class="sc"><span class="vh">${st.n?" answered ":""}</span>${progTxt(st.ans,st.n)}</span></div>`+(EDIT?`<a href="#" data-pg="${i}" class="${i===cur?"on":""}" style="font-style:italic">edit divider</a>`:`<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}" style="font-style:italic;color:var(--muted)">Section divider</a>`); }
+  const sc=scores.get(p)||{got:0,max:0,hi:0,med:0,brc:0,ans:0,n:0};
+  const lab=sc.n?`${progTxt(sc.ans,sc.n)}${sc.brc?" ⛔"+sc.brc:""}${sc.hi?" ⚑"+sc.hi:""}`:"";
+  const aria=sc.n?` aria-label="${esc(p.title)}, ${sc.ans} of ${sc.n} answered${sc.ans>=sc.n?", complete":""}${sc.brc?`, ${sc.brc} breach of code`:""}${sc.hi?`, ${sc.hi} high priority`:""}"`:"";
+  return `<a href="#" data-pg="${i}"${aria} class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
  }).join("")+(EDIT?`<div style="padding:10px 18px"><button class="ebtn p" data-act="addpage">+ Add page</button></div>`:"");
 }
 function renderTop(){
@@ -1882,6 +1932,10 @@ function renderTop(){
  document.getElementById("tFlag").textContent=t.flag;
  document.getElementById("tAns").textContent=(t.n?Math.round(t.ans/t.n*100):0)+"%";
  document.getElementById("btnReport").textContent=mode==="report"?"Back to audit":"Report view";
+ const fab=document.getElementById("btnNextUn");
+ if(fab){ const un=unansweredKeys().length;
+  fab.textContent=un?`Next unanswered · ${un}`:"✓ All answered"; fab.setAttribute("aria-disabled",String(!un));
+  fab.hidden=mode!=="audit"||EDIT; }
  const eb=document.getElementById("btnEdit"); if(eb) eb.textContent=EDIT?"✓ Editing template":"Edit template";
 }
 /* Timeframe <select> options for a flagged item, capped at maxMonths
@@ -2641,7 +2695,7 @@ content.addEventListener("click",e=>{
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
  const b=e.target.closest("[data-q]");
- if(b){const id=b.dataset.q;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];saveA();updateAnswerUI(id);return;}
+ if(b){const id=b.dataset.q;lastQ=id;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];saveA();updateAnswerUI(id);return;}
  const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
  if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
  const nav=e.target.closest("[data-nav]");
@@ -2726,6 +2780,8 @@ function drawer(open){
 btnMenu.addEventListener("click",()=>drawer(!sideEl.classList.contains("open")));
 backdrop.addEventListener("click",()=>drawer(false));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sideEl.classList.contains("open"))drawer(false);});
+content.addEventListener("focusin",e=>{ const r=e.target.closest&&e.target.closest("[data-q]"); if(r) lastQ=r.dataset.q; });
+document.getElementById("btnNextUn").addEventListener("click",e=>{ if(e.currentTarget.getAttribute("aria-disabled")==="true") return; jumpToNextUnanswered(); });
 /* Arrow keys inside a priority group move to, and select, the neighbouring option; Home/End jump. */
 content.addEventListener("keydown",e=>{
  const r=e.target.closest&&e.target.closest('[role="radio"][data-q]'); if(!r) return;
