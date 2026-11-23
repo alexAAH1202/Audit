@@ -221,6 +221,14 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .rf-t{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;
   font-size:13px;background:#fff;color:var(--ink);resize:vertical;min-height:42px}
 .rf-t.pos{min-height:92px;font-size:14px}
+/* Data-durability notices (Phase 1). Text carries the meaning; colour only
+   reinforces it. */
+.notice{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:9px 16px;font-size:13.5px;
+  border-bottom:1px solid var(--line);background:var(--orange-bg);color:var(--ink)}
+.notice.err{background:var(--red-bg)}
+.notice b{color:var(--orange)}.notice.err b{color:var(--red)}
+.notice .nx{margin-left:auto;min-height:44px;min-width:44px}
+@media print{#notices{display:none}}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
 .rf-t:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .tf-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
@@ -264,6 +272,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
       <button class="btn" id="btnExport">Export report</button>
       <button class="btn danger" id="btnReset">Reset audit</button>
     </div>
+    <div id="notices" role="status" aria-live="polite"></div>
     <div class="content" id="content"></div>
   </main>
   <div class="backdrop" id="backdrop"></div>
@@ -1125,6 +1134,38 @@ function loadAll(){
  if(!T.meta) T.meta={title:"Premises Access Audit",nextId:9999};
  try{const a=JSON.parse(localStorage.getItem(AKEY)); if(a){S=a.s||{};REPS=a.r||{};cur=a.cur||0;}}catch(e){}
  if(cur>=T.pages.length) cur=0;
+}
+/* ---------------------------------------------------------------------
+   DATA DURABILITY — notices + persistent storage (design brief, P0)
+--------------------------------------------------------------------- */
+/* One notice per id; calling again replaces it. level: "warn" | "err". */
+function notice(id,html,level){
+ const box=document.getElementById("notices"); if(!box) return;
+ let n=box.querySelector(`[data-notice="${id}"]`);
+ if(!n){ n=document.createElement("div"); n.dataset.notice=id; box.appendChild(n); }
+ n.className="notice"+(level==="err"?" err":"");
+ n.innerHTML=`<span>${html}</span><button type="button" class="btn nx" aria-label="Dismiss this message">✕</button>`;
+ n.querySelector(".nx").onclick=()=>n.remove();
+}
+function clearNotice(id){
+ const n=document.querySelector(`#notices [data-notice="${id}"]`); if(n) n.remove();
+}
+/* Ask the browser to exempt this site's storage (answers in localStorage,
+   photos in IndexedDB) from automatic eviction, e.g. Safari's 7-day cap.
+   Result is kept in PERSIST and stated plainly whenever it is not granted. */
+let PERSIST="unknown";   // "granted" | "refused" | "unsupported"
+async function checkPersistence(){
+ const st=navigator.storage;
+ if(!st||!st.persist||!st.persisted){
+  PERSIST="unsupported";
+ }else{
+  try{ PERSIST=(await st.persisted()||await st.persist())?"granted":"refused"; }
+  catch(e){ PERSIST="refused"; }
+ }
+ if(PERSIST==="granted"){ clearNotice("persist"); return; }
+ notice("persist",`<b>Storage not protected.</b> This browser ${PERSIST==="refused"?"refused":"does not support"}
+   persistent storage, so it may delete this audit and its photos — Safari does so after 7 days without a visit.
+   Keep a backup file of every audit.`,"warn");
 }
 const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T))}catch(e){}};
 const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur}))}catch(e){}};
@@ -2260,6 +2301,7 @@ document.getElementById("btnReset").addEventListener("click",()=>{
 /* ---- go ---- */
 loadAll();
 render();
+checkPersistence();
 loadPhotos().then(render);   // re-render once photos are read from IndexedDB
 </script>
 </body>
