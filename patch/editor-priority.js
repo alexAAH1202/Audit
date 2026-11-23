@@ -49,7 +49,7 @@ function addJourneyDividers(commit){
     (first case-insensitive substring match wins) */
  const PLAN=[
   ["ARRIVE",      1, "Accessible Car Parking"],
-  ["ENTER",       1, "Principal Pedestrian Entrance"],
+  ["ENTER",       1, "Entrances"],
   ["MOVE AROUND", 1, "Internal Accessways"],
   ["JOIN IN",     2, "Reception"],
   ["AMENITIES",   3, "Accessible Toilet"],
