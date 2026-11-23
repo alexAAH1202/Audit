@@ -226,7 +226,9 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .notice{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:9px 16px;font-size:13.5px;
   border-bottom:1px solid var(--line);background:var(--orange-bg);color:var(--ink)}
 .notice.err{background:var(--red-bg)}
-.notice b{color:var(--orange)}.notice.err b{color:var(--red)}
+.notice.ok{background:var(--green-bg)}
+.notice b{color:var(--orange)}.notice.err b{color:var(--red)}.notice.ok b{color:var(--green)}
+.notice .btn{min-height:44px}
 .notice .nx{margin-left:auto;min-height:44px;min-width:44px}
 @media print{#notices{display:none}}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
@@ -1143,7 +1145,7 @@ function notice(id,html,level){
  const box=document.getElementById("notices"); if(!box) return;
  let n=box.querySelector(`[data-notice="${id}"]`);
  if(!n){ n=document.createElement("div"); n.dataset.notice=id; box.appendChild(n); }
- n.className="notice"+(level==="err"?" err":"");
+ n.className="notice"+(level==="err"?" err":level==="ok"?" ok":"");
  n.innerHTML=`<span>${html}</span><button type="button" class="btn nx" aria-label="Dismiss this message">✕</button>`;
  n.querySelector(".nx").onclick=()=>n.remove();
 }
@@ -2294,15 +2296,131 @@ document.getElementById("btnExport").addEventListener("click",exportReport);
 document.getElementById("btnReset").addEventListener("click",()=>{
  if(confirm("Clear all AUDIT ANSWERS, including comments and photos? (Your template is kept.)")){
    S={};REPS={};cur=0;saveA();
+   BK.sig="";BK.complete=false;saveBK();updateDoneBtn();clearNotice("backup");clearNotice("backupok");
    IDB.clear().then(()=>{PHOTOS={};render();}).catch(()=>{PHOTOS={};render();});
  }
 });
+
+/* =====================================================================
+   BACKUP & RESTORE  (design brief, P0 — data durability)
+   One JSON file holds everything needed to rebuild an audit on a clean
+   browser: answers, report fields, photos (already base64 JPEG) and the
+   template the answer keys belong to. It lives in Downloads, outside the
+   browser storage that can be evicted.
+   Format: {format:"iac-audit-backup", schemaVersion, createdAt, site,
+            complete, answers:{s,r,cur}, photos:[...], template}
+===================================================================== */
+const BKEY="iac_backup_v1", BACKUP_SCHEMA=1;
+let BK={sig:"",at:0,complete:false};   // sig = fingerprint of the audit at last backup
+try{const b=JSON.parse(localStorage.getItem(BKEY)); if(b&&typeof b==="object") BK={...BK,...b};}catch(e){}
+const saveBK=()=>{try{localStorage.setItem(BKEY,JSON.stringify(BK))}catch(e){}};
+
+/* Fingerprint of everything a backup contains that the auditor can change.
+   Key-sorted so merely re-ordering keys never looks like an edit. */
+function stableStr(v){
+ if(Array.isArray(v)) return "["+v.map(stableStr).join(",")+"]";
+ if(v&&typeof v==="object") return "{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+stableStr(v[k])).join(",")+"}";
+ return JSON.stringify(v===undefined?null:v);
+}
+function auditSig(){
+ const ids=[]; Object.keys(PHOTOS).forEach(k=>PHOTOS[k].forEach(p=>ids.push(p.id)));
+ const str=stableStr([S,REPS,ids.sort()]); let h=5381;
+ for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0;
+ return (h>>>0).toString(36)+"."+str.length;
+}
+const hasAuditData=()=>Object.keys(S).length>0||Object.keys(REPS).length>0||Object.values(PHOTOS).some(l=>l.length);
+const fmtDate=ts=>new Date(ts).toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"short"});
+const countAnswers=s=>Object.keys(s).filter(k=>!k.includes("|")&&s[k]!==""&&s[k]!==undefined).length;
+const pl=(n,w)=>n+" "+w+(n===1?"":"s");
+const countPhotos=()=>Object.values(PHOTOS).reduce((n,l)=>n+l.length,0);
+
+async function downloadBackup(){
+ await loadPhotos();                       // read photos from IndexedDB, not from memory
+ const site=getFieldVal("Title Page","Site conducted")||"";
+ const data={format:"iac-audit-backup",schemaVersion:BACKUP_SCHEMA,createdAt:new Date().toISOString(),
+   site,complete:!!BK.complete,answers:{s:S,r:REPS,cur},
+   photos:Object.values(PHOTOS).flat(),template:T};
+ const name="audit-backup-"+(site.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase()||"untitled")+
+   "-"+new Date().toISOString().slice(0,10)+".json";
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}));
+ a.download=name; document.body.appendChild(a); a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+ BK.sig=auditSig(); BK.at=Date.now(); saveBK();
+ clearNotice("backup");
+ notice("backupok",`<b>Backup downloaded:</b> ${esc(name)} — ${pl(countAnswers(S),"answer")}, ${pl(countPhotos(),"photo")}.
+   Check your Downloads folder; the browser cannot confirm the file was kept.`,"ok");
+ return name;
+}
+/* Called on load and after a backup/restore. */
+function checkBackupStale(){
+ if(!hasAuditData()||auditSig()===BK.sig){ clearNotice("backup"); return; }
+ notice("backup",`<b>Not backed up.</b> This audit has changes that are not in a backup file
+   (${BK.at?"last backed up "+esc(fmtDate(BK.at)):"never backed up"}).
+   <button type="button" class="btn" data-act="backup">Back up now</button>`,"warn");
+}
+/* Back up on the natural end-of-audit moments, but only if something changed. */
+function autoBackupIfChanged(){ if(hasAuditData()&&auditSig()!==BK.sig) downloadBackup(); }
+
+async function restoreFromFile(file){
+ let b;
+ try{ b=JSON.parse(await file.text()); }catch(e){ alert("That file is not a readable backup (it is not valid JSON). Nothing was changed."); return; }
+ if(!b||b.format!=="iac-audit-backup"){ alert("That file is not an audit backup. Nothing was changed.\n\n(An exported template or report cannot be restored here.)"); return; }
+ if(!Number.isInteger(b.schemaVersion)||b.schemaVersion>BACKUP_SCHEMA){
+  alert("This backup was made by a newer version of the tool (format "+b.schemaVersion+"). Update the tool before restoring it. Nothing was changed."); return; }
+ const a=b.answers;
+ if(!a||typeof a.s!=="object"||a.s===null||!Array.isArray(b.photos)){ alert("This backup file is damaged (answers or photos are missing). Nothing was changed."); return; }
+ const photos=b.photos.filter(p=>p&&p.id&&p.key&&typeof p.data==="string"&&p.data.startsWith("data:image/"));
+ const dropped=b.photos.length-photos.length;
+ const hasT=!!(b.template&&Array.isArray(b.template.pages));
+ const dirty=hasAuditData()&&auditSig()!==BK.sig;
+ const msg=`Restore this backup?\n\nSite: ${b.site||"(not named)"}\nSaved: ${b.createdAt?new Date(b.createdAt).toLocaleString("en-AU"):"unknown"}\n`+
+   `Contents: ${pl(countAnswers(a.s),"answer")}, ${pl(photos.length,"photo")}${dropped?` (${dropped} unreadable will be skipped)`:""}${hasT?", and the template":""}\n\n`+
+   `This REPLACES the audit currently in the tool${hasT?" and its template":""}.`+
+   (dirty?"\nThe current audit has changes that are not backed up, so a backup of it will be downloaded first.":"");
+ if(!confirm(msg)) return;
+ if(dirty) await downloadBackup();
+ S=a.s; REPS=(a.r&&typeof a.r==="object")?a.r:{}; cur=Number.isInteger(a.cur)?a.cur:0;
+ if(hasT){ T=b.template; if(!T.meta) T.meta={title:"Premises Access Audit",nextId:99999}; saveT(); }
+ if(cur>=T.pages.length||cur<0) cur=0;
+ saveA();
+ try{ await IDB.clear(); for(const p of photos) await IDB.put(p); }catch(e){}
+ await loadPhotos();
+ BK.sig=auditSig(); BK.at=b.createdAt?Date.parse(b.createdAt)||Date.now():Date.now(); BK.complete=!!b.complete; saveBK();
+ clearNotice("backup"); clearNotice("backupok");
+ render(); updateDoneBtn();
+ const got=countPhotos();
+ notice("backupok",`<b>Backup restored:</b> ${pl(countAnswers(S),"answer")}, ${pl(got,"photo")}${got<photos.length?` — only ${got} of ${photos.length} could be written`:""}.`,got<photos.length?"err":"ok");
+}
+
+let bDone=null;
+function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit":"Mark audit complete"; }
+(function(){
+ const mkb=(id,txt)=>{const b=document.createElement("button");b.className="btn";b.id=id;b.textContent=txt;return b;};
+ const bBack=mkb("btnBackup","Back up audit"), bRest=mkb("btnRestore","Restore audit");
+ bDone=mkb("btnDone","Mark audit complete");
+ const fileIn=document.createElement("input"); fileIn.type="file"; fileIn.accept=".json,application/json"; fileIn.hidden=true;
+ document.getElementById("btnCsv").after(bBack); bBack.after(bRest); bRest.after(bDone); bDone.after(fileIn);
+ bBack.onclick=()=>downloadBackup();
+ bRest.onclick=()=>fileIn.click();
+ fileIn.onchange=async()=>{const f=fileIn.files[0]; fileIn.value=""; if(f) await restoreFromFile(f);};
+ /* "Complete" is the brief's trigger for a backup: marking writes one. */
+ bDone.onclick=async()=>{
+  if(BK.complete){ BK.complete=false; saveBK(); updateDoneBtn(); return; }
+  BK.complete=true; saveBK(); updateDoneBtn(); await downloadBackup();
+ };
+ updateDoneBtn();
+ document.getElementById("notices").addEventListener("click",e=>{ if(e.target.closest('[data-act="backup"]')) downloadBackup(); });
+ /* Report view and Export report are the other end-of-audit moments. */
+ document.getElementById("btnReport").addEventListener("click",()=>{ if(mode==="report") autoBackupIfChanged(); });
+ document.getElementById("btnExport").addEventListener("click",autoBackupIfChanged);
+})();
 
 /* ---- go ---- */
 loadAll();
 render();
 checkPersistence();
-loadPhotos().then(render);   // re-render once photos are read from IndexedDB
+loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
 </script>
 </body>
 </html>
