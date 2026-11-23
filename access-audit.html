@@ -411,7 +411,7 @@ const PAGES=[
 ]},
 
 /* ---- 5. ARRIVE (divider) ---- */
-{title:"ARRIVE",divider:true,blurb:"Getting to and into the building — car parking, landscaping, kerb ramps, external accessways, TGSIs, ramps, external stairs and entrances."},
+{title:"ARRIVE",divider:true,pri:1,blurb:"Getting to the building — car parking, landscaping, kerb ramps, external accessways, TGSIs, ramps and external stairs."},
 
 /* ---- 6. Accessible Car Parking ---- */
 {title:"Accessible Car Parking",items:[
@@ -674,7 +674,7 @@ const PAGES=[
 
 /*__PAGES_A__*/
 /* ---- 14. JOIN IN (divider) ---- */
-{title:"JOIN IN",divider:true,blurb:"Using and participating in the building — service areas, internal paths of travel, meeting spaces, hearing augmentation, amenities and signage."},
+{title:"JOIN IN",divider:true,pri:2,blurb:"Using and participating in the building — service areas, meeting spaces, hearing augmentation and kitchen, dining and canteen areas."},
 
 /* ---- 15. Customer Service Areas ---- */
 {title:"Customer Service Areas",items:[
@@ -1132,6 +1132,67 @@ const LEAVE_PAGES=[
  ])
 ]}
 ];
+
+/* =====================================================================
+   JOURNEY DIVIDERS — ARRIVE · ENTER · MOVE AROUND · JOIN IN · AMENITIES ·
+   BE INFORMED · LEAVE. Dividers are template content, so they are added
+   by this function, never by editing PAGES: inserting pages into PAGES
+   would renumber every later id and break saved audits. It runs on the
+   seeded template (after ids are assigned) and, once, on a template
+   already saved in a browser. Only page ORDER changes; no id changes.
+===================================================================== */
+const JOURNEY_PLAN=[
+ ["ENTER",1,"Entrances","Getting through the door — principal and additional pedestrian entrances."],
+ ["MOVE AROUND",1,"Internal Accessways","Moving through the building — internal accessways and floor and ground surfaces."],
+ ["AMENITIES",3,"Accessible Toilets","Sanitary facilities — accessible, ambulant and adult change facilities."],
+ ["BE INFORMED",4,"Signage","Finding the way and knowing what is happening — signage and wayfinding."]
+];
+const OLD_BLURBS={
+ "ARRIVE":["Getting to and into the building — car parking, landscaping, kerb ramps, external accessways, TGSIs, ramps, external stairs and entrances.","Getting to the building — car parking, landscaping, kerb ramps, external accessways, TGSIs, ramps and external stairs."],
+ "JOIN IN":["Using and participating in the building — service areas, internal paths of travel, meeting spaces, hearing augmentation, amenities and signage.","Using and participating in the building — service areas, meeting spaces, hearing augmentation and kitchen, dining and canteen areas."]
+};
+const isDivider=t=>p=>p.divider&&p.title.trim().toUpperCase()===t;
+const journeyMissing=pages=>JOURNEY_PLAN.filter(([t])=>!pages.some(isDivider(t))).map(x=>x[0]);
+/* Returns how many dividers were added. */
+function applyJourney(pages,newId){
+ let added=0;
+ const find=f=>pages.findIndex(f), byTitle=t=>find(p=>!p.divider&&p.title===t);
+ const pull=t=>{const i=byTitle(t);return i<0?null:pages.splice(i,1)[0];};
+ const mk=([t,pri,,blurb])=>({id:newId(),title:t,divider:true,blurb,pri,items:[]});
+ const plan=Object.fromEntries(JOURNEY_PLAN.map(x=>[x[0],x]));
+ /* existing dividers: give them an explicit priority, refresh a blurb only if it is still the old default */
+ Object.entries(OLD_BLURBS).forEach(([t,[oldB,newB]])=>{
+  const d=pages.find(isDivider(t)); if(!d) return;
+  if(!validPri(d.pri)) d.pri=t==="ARRIVE"?1:2;
+  if(d.blurb===oldB) d.blurb=newB;
+ });
+ /* ENTER: just before Entrances */
+ if(!pages.some(isDivider("ENTER"))){
+  const i=find(p=>!p.divider&&p.title.toLowerCase().includes("entrances"));
+  if(i>=0){ pages.splice(i,0,mk(plan["ENTER"])); added++; }
+ }
+ /* MOVE AROUND: internal accessways + floor surfaces move ahead of JOIN IN */
+ if(!pages.some(isDivider("MOVE AROUND"))){
+  const ia=byTitle("Internal Accessways");
+  if(ia>=0){
+   const moved=["Internal Accessways","Floor / Ground Surfaces"].map(pull).filter(Boolean);
+   let at=find(isDivider("JOIN IN")); if(at<0) at=find(p=>p.title==="Customer Service Areas"); if(at<0) at=Math.min(ia,pages.length);
+   pages.splice(at,0,mk(plan["MOVE AROUND"]),...moved); added++;
+  }
+ }
+ /* AMENITIES: before the first accessible toilet page */
+ if(!pages.some(isDivider("AMENITIES"))){
+  const i=find(p=>!p.divider&&p.title.toLowerCase().includes("accessible toilets"));
+  if(i>=0){ pages.splice(i,0,mk(plan["AMENITIES"])); added++; }
+ }
+ /* BE INFORMED: Signage moves to the end of the journey, ahead of LEAVE */
+ if(!pages.some(isDivider("BE INFORMED"))&&byTitle("Signage")>=0){
+  const sg=pull("Signage");
+  let at=find(isDivider("LEAVE")); if(at<0) at=find(p=>p.title==="Access Consultant Declaration"); if(at<0) at=pages.length;
+  pages.splice(at,0,mk(plan["BE INFORMED"]),sg); added++;
+ }
+ return added;
+}
 /* =====================================================================
    ENGINE
 ===================================================================== */
@@ -1196,6 +1257,7 @@ function seedDefault(){
  const iLv=pages.findIndex(p=>p.title==="LEAVE"&&p.divider);
  const iDecl=pages.findIndex(p=>p.title==="Access Consultant Declaration");
  if(iLv>=0&&iDecl>=0&&iDecl<iLv) pages.splice(iDecl,0,...pages.splice(iLv,4));
+ applyJourney(pages,()=>"pg"+(c++));   // ENTER / MOVE AROUND / AMENITIES / BE INFORMED
  return {meta:{title:"Premises Access Audit", nextId:c},
    rs:{ phml:{name:"Pass / High Priority / Medium Priority / Low Priority", opts:PHML},
         fnn:{name:"Found / Not Found / N/A", opts:FNN} },
@@ -2545,6 +2607,24 @@ function addLeaveSection(){
  clearNotice("leave"); render();
  return true;
 }
+function addJourneySections(){
+ if(!journeyMissing(T.pages).length) return false;
+ applyJourney(T.pages,()=>"pg"+genId());
+ saveT(); try{localStorage.removeItem(JOURNEY_DISMISS);}catch(e){}
+ clearNotice("journey"); render();
+ return true;
+}
+const JOURNEY_DISMISS="iac_journey_offer_dismissed";
+function offerJourney(){
+ let gone=false; try{gone=!!localStorage.getItem(JOURNEY_DISMISS);}catch(e){}
+ const miss=journeyMissing(T.pages);
+ if(!miss.length||gone) return;
+ notice("journey",`<b>Journey sections missing:</b> ${esc(miss.join(", "))}. Adding them also moves Internal Accessways,
+   Floor / Ground Surfaces and Signage so the report reads in the order a visitor moves. Answers are not affected.
+   <button type="button" class="btn" data-act="addjourney">Add journey sections</button>`,"warn");
+ document.querySelector('#notices [data-notice="journey"] .nx').addEventListener("click",()=>{
+  try{localStorage.setItem(JOURNEY_DISMISS,"1");}catch(e){} });
+}
 const LEAVE_DISMISS="iac_leave_offer_dismissed";
 function offerLeave(){
  let gone=false; try{gone=!!localStorage.getItem(LEAVE_DISMISS);}catch(e){}
@@ -2576,12 +2656,17 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
  document.getElementById("notices").addEventListener("click",e=>{
   if(e.target.closest('[data-act="backup"]')) downloadBackup();
   if(e.target.closest('[data-act="addleave"]')) addLeaveSection();
+  if(e.target.closest('[data-act="addjourney"]')) addJourneySections();
  });
  /* Also available in the template editor, for a template imported later. */
  const bLv=mkb("btnLeave","Add LEAVE section"); bLv.classList.add("editonly");
  bLv.onclick=()=>{ if(hasLeave()){ alert("This template already has a LEAVE section."); return; }
    if(confirm("Add the draft LEAVE section (3 pages) before the Access Consultant Declaration? Existing answers are not affected.")) addLeaveSection(); };
  bDone.after(bLv);
+ const bJr=mkb("btnJourney","Add journey sections"); bJr.classList.add("editonly");
+ bJr.onclick=()=>{ const m=journeyMissing(T.pages); if(!m.length){ alert("All journey sections are already in this template."); return; }
+   if(confirm("Add "+m.join(", ")+"? This also moves Internal Accessways, Floor / Ground Surfaces and Signage so the journey reads in order. Existing answers are not affected.")) addJourneySections(); };
+ bLv.after(bJr);
  /* Report view and Export report are the other end-of-audit moments. */
  document.getElementById("btnReport").addEventListener("click",()=>{ if(mode==="report") autoBackupIfChanged(); });
  document.getElementById("btnExport").addEventListener("click",autoBackupIfChanged);
@@ -2592,6 +2677,7 @@ loadAll();
 render();
 checkPersistence();
 offerLeave();
+offerJourney();
 loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
 </script>
 </body>
