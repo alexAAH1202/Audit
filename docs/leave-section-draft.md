@@ -109,6 +109,58 @@ building's emergency plan.
 | 28 | There is a way for deaf and hearing-impaired people to raise an alarm or ask for help in an emergency | Best practice. Clause TBC | C |
 | 29 | Staff have been told how to assist people with different disabilities to evacuate, and this is recorded | AS 3745, clause TBC | C |
 
+## Research update (NCC 2022 Volume One, read directly)
+
+I read NCC 2022 Parts D3, D4, E3 and E4 on the ABCB site. This corrects and firms up the draft.
+Everything below was read in the clause text, not recalled.
+
+**Corrected**
+
+- **Latch height (D3D26(1)).** The draft's "900–1200mm" was wrong. The clause gives two options:
+  a single-hand *downward* action on one device **900mm to 1.1m** above the floor, or a single-hand
+  *pushing* action on one device **900mm to 1.2m**. Where a downward-action handle serves an area
+  required to be accessible, a person who cannot grip must not slip off it, with **35mm to 45mm**
+  clearance behind the centre grip. Doors to sanitary compartments, small sole-occupancy units and
+  some secure areas are exempt (D3D26(3)).
+- **Exit handrails are a code requirement.** D3D22(1)(f) (2019: D2.17): handrails in a required exit
+  serving an area required to be accessible must comply with AS 1428.1 clause 12. The draft had this as
+  best practice and said "both sides"; the code says one side, or each side if the width is 2m or more.
+  It moves to Legislative, reworded.
+- **Stair requirements depend on fire isolation.** D4D4 (2019: D3.3): stairways must meet AS 1428.1
+  clause 11, **except fire-isolated stairways, which only need clause 11.1(f) and (g)**. The draft's
+  nosing and tactile indicator question is therefore Legislative for ordinary exit stairs and best
+  practice only for fire-isolated ones. I split it that way.
+
+**Added (Legislative, newly confirmed)**
+
+- Braille and tactile signs stating "Exit", "Level" and the floor level on each door that needs an
+  exit sign: **D4D7(1) (2019: D3.6)** with Specification 15. Exit signs themselves: **E4D5 (2019: E4.5)**.
+- A warning sign against using lifts in a fire near every passenger lift call button: **E3D4 (2019: E3.3)**.
+
+**Confirmed**
+
+- NCC 2022 renumbering: D3D26 = 2019 D2.21; D4D4 = D3.3; D4D5 = D3.4; D4D6 = D3.5; D4D7 = D3.6; D4D8 = D3.7.
+- E4D5 exit signs, E4D6 direction signs, E4D8 design of exit signs, E4D9 emergency warning and
+  intercom systems (AS 1670.4, only for certain buildings). **E4D9 contains no visual alarm
+  requirement for deaf occupants**, so that question stays best practice.
+- Part D2 itself says provision for horizontal exits was originally made partly because some occupants
+  "have a disability". Nothing in Parts D2, D3 or D4 requires refuge areas.
+
+**Still not confirmed**
+
+- AS 1670.1 visual alarms, refuge area dimensions (the 800 x 1300mm figure), the WHS emergency-plan
+  clause number, and the exact content of AS 1428.1 clause 11.1(f) and (g). AS 1428.1 and AS 3745 are
+  paid standards and not readable here. These rows still say "clause TBC".
+
+**Where the app stands.** The built LEAVE section now has 31 questions (19, 7 and 7), with the
+corrections above. Templates that already added LEAVE keep the earlier wording until their questions
+are edited in the template editor.
+
+Sources read: [Part D4](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/d-access-and-egress/part-d4-access-people-disability),
+[Part D3](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/d-access-and-egress/part-d3-construction-exits),
+[Part E3](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/e-services-and-equipment/part-e3-lift-installations),
+[Part E4](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/e-services-and-equipment/part-e4-visibility-emergency-exit-signs-and-warning-systems).
+
 ## Open questions for you
 
 1. **Group placement.** Which questions, if any, do you want treated as Legislative? My

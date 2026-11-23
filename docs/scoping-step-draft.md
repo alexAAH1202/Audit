@@ -49,7 +49,7 @@ after the Title Page, and be listed in the report's scope section.
 | Ambulant Toilets | 20 | sanitary = No or Shared |
 | Accessible Adult Change Facilities | 10 | sanitary = No or Shared |
 | Refuge & Assisted Evacuation | 7 | storeys = 1 |
-| Customer Service Areas | 14 | use = Staff only |
+| Customer Service Areas | 14 | ~~use = Staff only~~ **withdrawn, see research update** |
 
 Pages I deliberately did **not** tie to any answer, because a wrong skip loses a required check:
 Hearing Augmentation, Meeting Spaces, Kitchen / Dining, Signage, Entrances, and every external page.
@@ -81,6 +81,37 @@ meeting spaces is not something I could confirm.
   templates need no migration and no question or page id changes. If a page is renamed, its rule
   stops applying and the page simply stays in.
 - **Existing audits are unaffected.** With no scope answers recorded, nothing is skipped.
+
+## Research update (NCC 2022 Part D4, read directly)
+
+This changes two of the rules above.
+
+- **Staff-only must not skip anything.** D4D2(6) requires access to "all areas normally used by the
+  occupants" for Class 5, 6, 7b, 8 and 9a buildings, and says "occupants" means "visitors,
+  employees, employers and owners". Staff areas are covered. Only D4D5 exemptions (areas where
+  access would be inappropriate for their purpose, areas posing a health or safety risk, and paths
+  serving only those areas) apply, case by case. **I withdraw the rule that skips Customer Service Areas
+  for "Staff only".** Customer Service Areas would be left in, or the auditor marks the page not
+  applicable with a reason.
+- **Building class does decide what is required**, so question 1 is more than a label. D4D2 sets the
+  extent: Class 1b (a ratio of rooms and common areas), Class 2 (common areas only, not the inside of
+  sole-occupancy units), Class 3 and 9c (ratio of units plus common areas), Classes 5, 6, 7b, 8 and
+  9a (all areas), Class 7a (only levels with accessible parking), Class 9b (all areas, with seating
+  exceptions) and certain Class 10a structures. It still cannot skip a page on its own, because the
+  pages are organised by element, not by class. It does matter for the report's scope statement.
+- **Parking has an exception.** D4D6 (2019: D3.5) says accessible spaces need not be provided where a
+  parking service is used and the public has no direct access to the spaces. Add an option: "Parking
+  provided, attended or valet only", treated like No.
+- **Upper storeys can be legitimately not required.** D4D4 says a lift or ramp need not serve a level
+  other than the entrance storey in a Class 5, 6, 7b or 8 building of not more than 3 storeys where each
+  other storey is not more than 200 m2. For the storeys question this means a multi-storey answer
+  does not always mean upper floors are in scope.
+
+Still open: which pages a "Class 2" or "Class 3" building should skip (the inside of
+sole-occupancy units is out of scope, but the template has no such pages), and the AHRC guideline's
+class chart, which I could not read (the Commission's site blocked the request).
+
+Sources read: [Part D4](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/d-access-and-egress/part-d4-access-people-disability).
 
 ## Open questions for you
 
