@@ -2057,6 +2057,11 @@ function rsModal(){
  top.insertBefore(bEdit,grow.nextSibling);
  top.appendChild(bRs);top.appendChild(bExp);top.appendChild(bImp);top.appendChild(fileIn);
  bEdit.onclick=()=>{EDIT=!EDIT;if(EDIT)mode="audit";render();};
+ /* Works schedule CSV, placed beside "Export report" rather than appended
+    after Reset, so it sits with the other report exports. */
+ const bCsv=mk("btnCsv","Export schedule (CSV)");
+ document.getElementById("btnExport").after(bCsv);
+ bCsv.onclick=exportScheduleCSV;
  bRs.onclick=rsModal;
  bExp.onclick=()=>{const blob=new Blob([JSON.stringify(T,null,2)],{type:"application/json"});
    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="access-audit-template.json";a.click();};
