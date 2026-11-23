@@ -40,6 +40,12 @@ architectural changes.
 | Effort | localStorage | `S[key + "\|diff"]` |
 | Impact | localStorage | `S[key + "\|impact"]` |
 | Action | localStorage | `S[key + "\|action"]` |
+| Name of a repeated element | localStorage | `S[sectionId + suffix + "~" + n + "\|lbl"]` |
+| Passed by group sweep | localStorage | `S[key + "\|sw"]` = `"1"` |
+| Photo caption | localStorage | `S[key + "\|cap:" + photoId]` |
+| Site Scope answer | localStorage | `S[itemId]`, a text code such as `"no"` |
+| Page switched back on despite scope | localStorage | `S["scopeov\|" + pageId]` |
+| Report-level text | localStorage | `S["report\|position"]`, `"report\|limits"`, `"report\|revision"` |
 | Photos | IndexedDB (`iac-audit-photos`) | same answer key |
 | Template | localStorage | `T` |
 
