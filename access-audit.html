@@ -242,6 +242,12 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .cover{display:none}
 .cov{margin-top:8px;font-size:12.5px}.cov td:nth-child(2),.cov td:nth-child(3){white-space:nowrap}
 .cov tr.none td{color:var(--muted)}
+.sweep{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:2px 0 12px}
+.sweep .btn{min-height:44px}.sweep .btn[aria-disabled="true"]{opacity:.55;cursor:default}
+.sweptchip{display:inline-block;font-size:12.5px;font-weight:700;border-radius:5px;padding:3px 9px;white-space:nowrap;background:var(--brand-lt);color:var(--brand)}
+.sweep [hidden]{display:none!important}.sweepmsg{flex-basis:100%}
+.sweepmsg{font-size:12.5px;color:var(--muted)}
+@media print{.sweep{display:none}}
 .defs{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;font-size:13px;margin:4px 0 0}
 .defs dt{font-weight:700}.defs dd{margin:0}
 .figrefs{margin-top:8px;font-size:12.5px}.figrefs a{color:var(--brand)}
@@ -1555,6 +1561,7 @@ function rItem(it,suf){
     return h;
    }
    let h=`<div class="card"><h3>${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
+   h+=sweepHTML(it,suf);
    h+=rItems(it.items,suf);
    for(let a=0;a<(it.addl??2);a++){const ak=it.id+suf+"|addl"+a;
      h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" placeholder="Additional item…" value="${esc(S[ak+"|t"]||"")}">
@@ -1729,6 +1736,51 @@ function updatePageScore(){
  if(!sc.max){el.style.display="none";el.innerHTML="";return;}
  el.style.display=""; el.innerHTML=pageScoreHTML(sc);
 }
+/* =====================================================================
+   SWEEP TO PASS (design brief, P1 on-site capture)
+   Most answers in a real audit are "complies". One control per Legislative
+   Requirements group marks every UNANSWERED question Pass, so the auditor
+   then taps only the exceptions. Guards:
+   - it never overwrites an existing answer, so a recorded finding is safe;
+   - each question it sets is marked S[key+"|sw"]="1": "passed by sweep", not
+     assessed item by item. The mark is cleared the moment the auditor touches
+     that question, and the report states how many answers came from sweeps;
+   - Undo sweep puts those questions back to unanswered.
+===================================================================== */
+const passIdx=()=>String(RS("phml").opts.findIndex(o=>o.score===1));
+const sweepKeys=card=>[...card.querySelectorAll('[role="radiogroup"][aria-labelledby]')].map(g=>g.querySelector("[data-q]").dataset.q);
+const isSwept=k=>S[k+"|sw"]==="1"&&S[k]===passIdx();
+function sweepHTML(it,suf){
+ if(!/legislative/i.test(it.t)) return "";
+ const qs=[]; walkQs(it.items,suf,qs,null);
+ const keys=qs.filter(x=>x.item.rs==="phml"&&!String(x.key).includes("|addl")).map(x=>x.key);
+ if(!keys.length) return "";
+ const un=keys.filter(k=>S[k]===undefined||S[k]==="").length, sw=keys.filter(isSwept).length;
+ return `<div class="sweep"><button type="button" class="btn" data-sweepgo aria-disabled="${!un}">${un?`Mark ${un} remaining as Pass`:"Nothing left to sweep"}</button>
+  <button type="button" class="btn" data-sweepundo ${sw?"":"hidden"}>Undo sweep</button>
+  <span class="sweptchip" data-sweepchip ${sw?"":"hidden"}>Swept · ${sw} of ${keys.length}</span>
+  <span class="sweepmsg" role="status" data-sweepmsg></span></div>`;
+}
+function refreshSweep(card,msg){
+ const ctl=card&&card.querySelector(".sweep"); if(!ctl) return;
+ const keys=sweepKeys(card), un=keys.filter(k=>S[k]===undefined||S[k]==="").length, sw=keys.filter(isSwept).length;
+ const go=ctl.querySelector("[data-sweepgo]");
+ go.textContent=un?`Mark ${un} remaining as Pass`:"Nothing left to sweep"; go.setAttribute("aria-disabled",String(!un));
+ ctl.querySelector("[data-sweepundo]").hidden=!sw;
+ const chip=ctl.querySelector("[data-sweepchip]"); chip.hidden=!sw; chip.textContent=`Swept · ${sw} of ${keys.length}`;
+ if(msg!==undefined) ctl.querySelector("[data-sweepmsg]").textContent=msg;
+}
+function sweepGroup(card,undo){
+ const keys=sweepKeys(card), pass=passIdx(); let n=0;
+ keys.forEach(k=>{
+  if(undo){ if(isSwept(k)){ delete S[k]; delete S[k+"|sw"]; n++; } }
+  else if(S[k]===undefined||S[k]===""){ S[k]=pass; S[k+"|sw"]="1"; n++; }
+  const g=card.querySelector(`[data-q="${CSS.escape(k)}"]`); if(g) syncRadioGroup(g.closest('[role="radiogroup"]'),S[k]);
+ });
+ saveA(); renderNav(); renderTop(); updatePageScore();
+ refreshSweep(card,undo?`Sweep undone: ${n} item${n===1?"":"s"} cleared.`:`${n} item${n===1?"":"s"} marked Pass by sweep.`);
+}
+
 /* Priority options are a radio group (WCAG 1.3.1 / 4.1.2): the group is named by its question,
    each button reports aria-checked, and only one button is in the tab order (roving tabindex).
    Clicking the selected option still clears it, as before. */
@@ -1751,8 +1803,8 @@ function syncRadioGroup(group,v){
 }
 function updateAnswerUI(key){
  const v=S[key], sel='[data-q="'+key+'"]';
- new Set([...document.querySelectorAll(sel)].map(b=>b.closest('[role="radiogroup"]')).filter(Boolean))
-   .forEach(g=>syncRadioGroup(g,v));
+ const groups=new Set([...document.querySelectorAll(sel)].map(b=>b.closest('[role="radiogroup"]')).filter(Boolean));
+ groups.forEach(g=>{ syncRadioGroup(g,v); refreshSweep(g.closest(".card")); });
  renderNav(); renderTop(); updatePageScore();
 }
 function render(){
@@ -1981,11 +2033,12 @@ const figText=(FIG,key)=>(PHOTOS[key]||[]).map(p=>FIG.no.get(p.id)).filter(Boole
 function scopeHTML(all){
  const gv=l=>getFieldVal("Access Audit Details",l).trim();
  const lab=(l,v)=>v?`<div class="rf"><span class="rf-l">${esc(l)}</span><div class="rf-v">${esc(v)}</div></div>`:"";
- const by=new Map();
+ const by=new Map(), pass=passIdx();
  allQs().forEach(x=>{ const id=x.page.id;
   if(x.page.title==="Summary") return;          // the auditor's own summary page is not an assessed area
-  if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0}); by.get(id).total++; });
- all.forEach(f=>{ const r=f.page&&by.get(f.page.id); if(r){ r.ans++; if(f.flag) r.flag++; } });
+  if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0,sw:0}); by.get(id).total++; });
+ all.forEach(f=>{ const r=f.page&&by.get(f.page.id); if(r){ r.ans++; if(f.flag) r.flag++; if(S[f.key+"|sw"]==="1"&&S[f.key]===pass) r.sw++; } });
+ const swTotal=[...by.values()].reduce((n,r)=>n+r.sw,0);
  const pages=[...by.values()], gap=pages.filter(r=>!r.ans);
  const agree=[gv("Access Audit Agreement")?esc(gv("Access Audit Agreement")):"",
    gv("Access Audit Agreement Supplied")?"Agreement supplied: "+esc(gv("Access Audit Agreement Supplied")):"",
@@ -1996,11 +2049,13 @@ function scopeHTML(all){
   ${agree.length?`<div class="rf"><span class="rf-l">Engagement</span><div class="rf-v">${agree.join("<br>")}</div></div>`:""}
   <div class="rf"><span class="rf-l">Coverage</span>
    <p>${pages.length-gap.length} of ${pages.length} assessable pages have answers recorded.</p>
+   ${swTotal?`<p style="margin-top:6px"><b>${swTotal} Pass answer${swTotal===1?" was":"s were"} recorded by sweeping a whole group of requirements</b>,
+     not by assessing each item individually. Any answer the auditor changed or confirmed by hand is not counted here.</p>`:""}
    ${gap.length?`<p style="margin-top:6px"><b>No items recorded for:</b> ${gap.map(r=>esc(r.t)).join("; ")}. These were either not
      assessed or do not apply to this building.</p>
      <p class="rf-hint">Say which in the field below, for each area, so the report states why it was left out.</p>`:""}
-   <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Flagged</th></tr></thead><tbody>`+
-   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total}`:"Not assessed"}</td><td>${r.ans?r.flag:"—"}</td></tr>`).join("")+
+   <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Flagged</th>${swTotal?"<th>Passed by sweep</th>":""}</tr></thead><tbody>`+
+   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total}`:"Not assessed"}</td><td>${r.ans?r.flag:"—"}</td>${swTotal?`<td>${r.sw||"—"}</td>`:""}</tr>`).join("")+
    `</tbody></table></div>
   ${rfField("report","limits","Limitations and exclusions — areas not assessed, and why","e.g. The roof terrace was locked and not assessed. Staff-only areas were excluded by agreement.")}
   ${lab("Priority rating system",gv("Priority Rating System"))}
@@ -2574,7 +2629,9 @@ content.addEventListener("click",e=>{
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
  const b=e.target.closest("[data-q]");
- if(b){const id=b.dataset.q;S[id]=S[id]===b.dataset.v?"":b.dataset.v;saveA();updateAnswerUI(id);return;}
+ if(b){const id=b.dataset.q;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];saveA();updateAnswerUI(id);return;}
+ const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
+ if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
  const nav=e.target.closest("[data-nav]");
  if(nav){cur=Math.min(T.pages.length-1,Math.max(0,cur+ +nav.dataset.nav));saveA();render();return;}
  const ar=e.target.closest("[data-addrep]");
@@ -2666,7 +2723,7 @@ content.addEventListener("keydown",e=>{
  const i=btns.indexOf(r), step=keys[e.key];
  const next=step==="first"?btns[0]:step==="last"?btns[btns.length-1]:btns[(i+step+btns.length)%btns.length];
  e.preventDefault();
- const id=next.dataset.q; S[id]=next.dataset.v; saveA(); updateAnswerUI(id);   // updates in place: focus is not lost
+ const id=next.dataset.q; S[id]=next.dataset.v; delete S[id+"|sw"]; saveA(); updateAnswerUI(id);   // updates in place: focus is not lost
  next.focus();
 });
 
