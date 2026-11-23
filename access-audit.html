@@ -1735,7 +1735,7 @@ function reportHTML(){
   h+=`<tr><th scope="row">${p} · ${PRI_LABEL[p]}</th>`;
   DIFFS.forEach(([d])=>{
    const n=flags.filter(f=>f.pri===p&&f.diff===d).length, z=ZONE[zoneOf(p,d)];
-   const on=REPFILTER.pri===p&&REPFILTER.diff===d;
+   const on=!EXPORTING&&REPFILTER.pri===p&&REPFILTER.diff===d;
    h+=`<td><button class="${n?z.k:"zempty"}${on?" sel":""}" data-mx="${p}:${d}"
       aria-label="${n} findings, ${PRI_LABEL[p]}, ${DIFF_LABEL[d]}, ${z.l}">
       <span class="n">${n||"—"}</span><span class="zl">${n?z.l:""}</span></button></td>`;
@@ -1784,11 +1784,12 @@ function reportHTML(){
 
  /* ---- Findings ---- */
  let shown=flags;
- if(REPFILTER.pri) shown=shown.filter(f=>f.pri===REPFILTER.pri&&f.diff===REPFILTER.diff);
+ const filt=!EXPORTING&&REPFILTER.pri;
+ if(filt) shown=shown.filter(f=>f.pri===REPFILTER.pri&&f.diff===REPFILTER.diff);
  const RANK={br:0,hi:1,md:2,lo:3,pass:9};
  shown=shown.slice().sort((a,b)=>a.pri-b.pri||RANK[a.gc]-RANK[b.gc]);
- h+=`<div class="card"><h3>Findings &amp; recommended actions <span class="cnt">${shown.length}${REPFILTER.pri?` of ${flags.length}`:""}</span>
-   ${REPFILTER.pri?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>`;
+ h+=`<div class="card"><h3>Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
+   ${filt?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>`;
  if(!shown.length){
   h+=`<p style="color:var(--muted)">No findings match.</p>`;
  }else{
@@ -1964,11 +1965,19 @@ function exportReport(){
    <button type="button" class="rbtn" onclick="window.print()">🖨️ Print / Save as PDF</button>
    <span class="rhint" id="rHint">Click "Edit this report" to correct wording before sending it on.</span>
   </div>`;
+ /* The report v2 styles live once, in the app's own <style> block. Copy
+    them (plus the :root colour tokens they reference) into the export
+    rather than duplicating them here, so the two cannot drift apart. */
+ const appCss=document.querySelector("style").textContent;
+ const rootVars=(appCss.match(/:root\{[^}]*\}/)||[""])[0];
+ const mark=appCss.indexOf("REPORT v2 — styles");
+ const v2Css=mark<0?"":appCss.slice(appCss.lastIndexOf("/*",mark));
+ const fullCss=rootVars+"*,*::before,*::after{box-sizing:border-box}"+css+v2Css;
  let reportBody;
  EXPORTING=true; try{ reportBody=reportHTML(); } finally { EXPORTING=false; }
  const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">`+
    `<meta name="viewport" content="width=device-width, initial-scale=1">`+
-   `<title>${site} — Access Audit Report (${date})</title><style>${css}</style></head>`+
+   `<title>${site} — Access Audit Report (${date})</title><style>${fullCss}</style></head>`+
    `<body>${toolbar}<div id="rContent">${reportBody}</div><script>${js}<\/script></body></html>`;
  const blob=new Blob([doc],{type:"text/html"});
  const a=document.createElement("a");
