@@ -82,6 +82,7 @@ Print header, footer and page numbers use a feature only Chrome and Edge support
 | `ed21fc6` | **Name each repeated element** ("Bay 2 near the door"), carried into the report, schedule, CSV and photo plates |
 | `2ec0332`, `ca06d44`, `d0af660`, `75cd5c5` | Question layout restyled (stacked, readable); **Not applicable** as a sixth answer on every question; **+ Comment** toggle; **Best Practice groups folded** by default |
 | `6994bb2` | **Search across questions** (text, clause, page, element name, your comments) |
+| (see git log) | **Photo mark-up**: after a photo is taken, an optional editor adds an arrow and "790 mm" style labels by tapping (also keyboard-operable); Skip keeps the photo as taken; thumbnails reopen it; the marked-up picture is used everywhere and the original is kept |
 
 ## 6. Accessibility
 
@@ -160,7 +161,7 @@ the WHS emergency-plan clause, and AS 1428.1 clause 11.1(f) and (g).
 ## 13. How it was tested
 
 A set of headless-browser scripts was run after each change and is now in the repository as **`tests/`**:
-29 suites covering answering, navigation, template migrations, backup and restore, the text-code migration against
+30 suites covering answering, navigation, template migrations, backup and restore, the text-code migration against
 an audit saved by the previous build, printing and export, and axe-core accessibility checks on 10 screens plus the
 export. `node tests/run.js` runs them in about 1.5 minutes; each suite's output is compared with a saved snapshot and
 a page error fails the run. I confirmed the suite is stable over repeated runs and that it catches a deliberately
@@ -169,7 +170,7 @@ what is not covered.
 
 ## 14. Left undone
 
-- **From the brief:** photo annotation, voice notes, measurement fields (need your consultant's values), the Phase 3
+- **From the brief:** voice notes, measurement fields (need your consultant's values), the Phase 3
   field test, multiple audits, re-audit and rectification, and the Firebase option.
 - **Needs you:** the Review list; whether the tool is hosted anywhere (offline use and Add to Home Screen need a web address).
 - **Known rough edges:** Next unanswered's first jump from a fresh audit lands on the Summary page; open Best

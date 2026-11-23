@@ -36,7 +36,7 @@ architectural changes.
 
 ## Tests
 
-`tests/` holds developer-only regression tests (Playwright and axe-core, 29 suites, about 1.5 minutes). Run
+`tests/` holds developer-only regression tests (Playwright and axe-core, 30 suites, about 1.5 minutes). Run
 `node tests/run.js` before committing a change to the tool, and `node tests/run.js --update` only after reading
 the snapshot diff. They are not part of the tool: constraint 2 (no build, no install) is about
 `access-audit.html`, which loads nothing from this folder. See `tests/README.md`.
@@ -58,7 +58,7 @@ the snapshot diff. They are not part of the tool: constraint 2 (no build, no ins
 | Site Scope answer | localStorage | `S[itemId]`, a text code such as `"no"` |
 | Page switched back on despite scope | localStorage | `S["scopeov\|" + pageId]` |
 | Report-level text | localStorage | `S["report\|position"]`, `"report\|limits"`, `"report\|revision"` |
-| Photos | IndexedDB (`iac-audit-photos`) | same answer key |
+| Photos | IndexedDB (`iac-audit-photos`) | same answer key. Record `{id,key,data,ts}`; a marked-up photo also has `orig` (the untouched image) and `ann` (the marks), and `data` is the marked-up picture |
 | Template | localStorage | `T` |
 
 New per-finding fields use the same `key + "|suffix"` pattern. That needs no

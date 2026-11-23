@@ -13,7 +13,7 @@ reload, backup and restore, print to PDF), and prints what it saw. The runner co
 cd tests
 npm install                 # once: playwright and axe-core (only for the tests)
 npx playwright install chromium   # once, if you have no Chromium yet
-node run.js                 # all 29 suites, about 1.5 minutes
+node run.js                 # all 30 suites, about 1.5 minutes
 node run.js --only search   # suites whose name contains "search"
 node run.js --update        # accept the current output as the new snapshots
 ```
@@ -39,7 +39,7 @@ reading turns the test into a rubber stamp.
 
 | Area | Suites |
 | --- | --- |
-| Answering | `radio-groups`, `sweep-to-pass`, `not-applicable`, `comment-toggle`, `comment-box-size`, `best-practice-groups`, `repeated-elements` |
+| Answering | `photo-markup`, `radio-groups`, `sweep-to-pass`, `not-applicable`, `comment-toggle`, `comment-box-size`, `best-practice-groups`, `repeated-elements` |
 | Moving around | `next-unanswered`, `resume`, `search`, `top-bar`, `keyboard-focus` |
 | Template and scope | `leave-and-saved-templates`, `journey-dividers`, `add-site-scope`, `site-scope`, `scope-section` |
 | Data safety | `backup-restore`, `answer-codes-migration`, `save-failure-and-reset`, `photo-integrity`, `persistence-notices` |

@@ -100,6 +100,17 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
 .notetoggle .notehas{color:var(--brand)}
+.annotdlg{max-width:min(96vw,760px);max-height:94vh;overflow:auto}
+.annotdlg h3{margin-bottom:6px}
+.annwrap{display:flex;justify-content:center;background:#1b1e2b;border-radius:8px;margin:10px 0}
+.annwrap canvas{display:block;max-width:100%;max-height:52vh;width:auto;height:auto;touch-action:manipulation;cursor:crosshair;border-radius:8px}
+.annwrap canvas:focus-visible{outline:3px solid #FFD400;outline-offset:2px}
+.annstatus{min-height:1.5em;font-size:14px;font-weight:600;color:var(--brand);margin-bottom:6px}
+.anntools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.anntools .btn[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.anntools .annlbl{flex:1 1 9em;min-width:0}.anntools .annlbl input{width:100%;min-height:44px;font-size:16px;padding:8px 12px;border:1px solid var(--field-line);border-radius:8px}
+.annotdlg .annauto{display:flex;align-items:center;gap:10px;margin:14px 0 0;font-size:14px}
+.annauto input{width:24px;height:24px}
 .sidesearch{padding:12px 14px;border-bottom:1px solid var(--line)}
 .sidesearch label{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand);margin-bottom:6px}
 .sidesearch .srow{display:flex;gap:6px}
@@ -145,8 +156,10 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .qphoto{position:relative;width:74px;height:74px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#eef}
 .qphoto img{width:100%;height:100%;object-fit:cover;display:block}
 .qphoto a.view{position:absolute;inset:0}
-.qphoto button{position:absolute;top:2px;right:2px;width:20px;height:20px;line-height:1;border:none;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
-.qphoto button:hover{background:var(--red)}
+.qphoto .qp-open{position:absolute;inset:0;width:100%;height:100%;padding:0;border:none;background:none;border-radius:0;cursor:pointer}
+.qphoto .qp-open:focus-visible{outline:3px solid var(--brand);outline-offset:-3px}
+.qphoto button[data-delphoto]{position:absolute;top:3px;right:3px;z-index:1;width:28px;height:28px;line-height:1;border:none;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.qphoto button[data-delphoto]:hover{background:var(--red)}
 .qnote{width:100%;margin-top:0;border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:15px;line-height:1.5;display:block;min-height:96px;max-height:480px;resize:vertical;background:#fff}
 .qnote.show{display:block}
 .addl input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-size:16px;background:#fff}
@@ -2077,6 +2090,114 @@ async function loadPhotos(){
  PHOTOS={};
  try{(await IDB.all()).forEach(r=>{(PHOTOS[r.key]=PHOTOS[r.key]||[]).push(r);});}catch(e){}
 }
+/* =====================================================================
+   PHOTO MARK-UP (design brief, P1 on-site capture)
+   Right after a photo is taken, a dialog offers an arrow and a measurement label drawn on a canvas over the
+   compressed JPEG ("790 mm", pointing at the gap), while the auditor still remembers what they were pointing at.
+   Marks are placed by TAPPING (tail, then head), never dragging, and the canvas can also be driven from the
+   keyboard. The photo is saved before the dialog opens; Skip keeps it as taken. The marked-up picture replaces
+   the photo everywhere (thumbnail, report plate, export); the untouched original and the marks are kept on the
+   record so they can be edited again.
+===================================================================== */
+const ANNOT_AUTO="iac_annot_auto";
+const annotAuto=()=>{ try{ return localStorage.getItem(ANNOT_AUTO)!=="0"; }catch(e){ return true; } };
+function annotLoadImage(src){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src; }); }
+function annotDraw(ctx,img,marks,extra){
+ const W=img.naturalWidth, H=img.naturalHeight, u=Math.max(W,H);
+ ctx.clearRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+ const lw=Math.max(5,u/170), fs=Math.max(24,u/30);
+ const arrow=(x1,y1,x2,y2)=>{
+  const a=Math.atan2(y2-y1,x2-x1), hl=Math.max(22,u/28), spread=Math.PI/7;
+  const path=()=>{ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.moveTo(x2,y2); ctx.lineTo(x2-hl*Math.cos(a-spread),y2-hl*Math.sin(a-spread));
+    ctx.moveTo(x2,y2); ctx.lineTo(x2-hl*Math.cos(a+spread),y2-hl*Math.sin(a+spread)); };
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.strokeStyle="#000"; ctx.lineWidth=lw*1.9; path(); ctx.stroke();      // dark outline so it shows on any photo
+  ctx.strokeStyle="#FFD400"; ctx.lineWidth=lw; path(); ctx.stroke();
+ };
+ const label=(x,y,t)=>{
+  ctx.font="700 "+fs+"px Arial,Helvetica,sans-serif"; ctx.textBaseline="middle";
+  const w=ctx.measureText(t).width, pad=fs*.45, bw=w+pad*2, bh=fs+pad*1.2;
+  const bx=Math.min(Math.max(x-bw/2,4),W-bw-4), by=Math.min(Math.max(y-bh/2,4),H-bh-4);
+  ctx.fillStyle="rgba(0,0,0,.82)"; ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(bx,by,bw,bh,fs*.3); else ctx.rect(bx,by,bw,bh); ctx.fill();
+  ctx.lineWidth=Math.max(2,u/500); ctx.strokeStyle="#FFD400"; ctx.stroke();
+  ctx.fillStyle="#fff"; ctx.fillText(t,bx+pad,by+bh/2+1);
+ };
+ marks.forEach(m=>{ if(m.t==="arrow") arrow(m.x1,m.y1,m.x2,m.y2); else label(m.x,m.y,m.text); });
+ if(extra){ // pending tail, or the keyboard pointer
+  ctx.save(); ctx.lineWidth=Math.max(3,u/300);
+  if(extra.tail){ ctx.fillStyle="#FFD400"; ctx.strokeStyle="#000"; ctx.beginPath(); ctx.arc(extra.tail.x,extra.tail.y,lw*1.4,0,7); ctx.fill(); ctx.stroke(); }
+  if(extra.cursor){ const c=extra.cursor, r=u/40; ctx.strokeStyle="#fff"; ctx.beginPath(); ctx.moveTo(c.x-r,c.y); ctx.lineTo(c.x+r,c.y); ctx.moveTo(c.x,c.y-r); ctx.lineTo(c.x,c.y+r); ctx.stroke();
+    ctx.strokeStyle="#000"; ctx.lineWidth=Math.max(1.5,u/600); ctx.stroke(); }
+  ctx.restore();
+ }
+}
+/* Open the editor for one photo record. Resolves when the dialog closes; saves into the record and IndexedDB. */
+function annotatePhoto(rec,key){
+ return new Promise(async resolve=>{
+  const base=await annotLoadImage(rec.orig||rec.data); if(!base){ resolve(false); return; }
+  let marks=(rec.ann||[]).map(m=>({...m})), mode=null, tail=null, cursor={x:base.naturalWidth/2,y:base.naturalHeight/2}, kb=false;
+  const dlg=document.createElement("dialog"); dlg.className="resetdlg annotdlg"; dlg.setAttribute("aria-labelledby","annTitle");
+  dlg.innerHTML=`<h3 id="annTitle" aria-level="2" style="color:var(--brand)">Mark up this photo</h3>
+   <p class="revd" id="annHelp">Optional. Add an arrow to show what you are pointing at and a label such as "790 mm". Tap to place each mark. <b>Skip</b> keeps the photo as taken.</p>
+   <div class="annwrap"><canvas tabindex="0" role="img" aria-describedby="annHelp annKeys" aria-label="Photo to mark up"></canvas></div>
+   <p class="revd vh" id="annKeys">With the canvas focused, arrow keys move a pointer, Shift moves it further, Enter places the mark.</p>
+   <div id="annStatus" class="annstatus" role="status"></div>
+   <div class="anntools">
+    <button type="button" class="btn" data-tool="arrow" aria-pressed="false">Arrow</button>
+    <span class="annlbl"><label for="annText" class="vh">Measurement label text</label><input id="annText" type="text" maxlength="24" placeholder="e.g. 790 mm" autocomplete="off"></span>
+    <button type="button" class="btn" data-tool="label" aria-pressed="false">Add label</button>
+    <button type="button" class="btn" data-undo>Undo</button>
+    <button type="button" class="btn" data-clear>Clear marks</button>
+   </div>
+   <label class="annauto"><input type="checkbox" id="annAuto" ${annotAuto()?"checked":""}> Offer this after every photo</label>
+   <div class="rsact"><button type="button" class="btn" data-skip>Skip</button><button type="button" class="btn primary" data-save>Save photo</button></div>`;
+  document.body.appendChild(dlg);
+  const cv=dlg.querySelector("canvas"); cv.width=base.naturalWidth; cv.height=base.naturalHeight; const ctx=cv.getContext("2d");
+  const status=dlg.querySelector("#annStatus"), txt=dlg.querySelector("#annText");
+  const say=t=>{ status.textContent=t; };
+  const redraw=()=>annotDraw(ctx,base,marks,{tail:mode==="head"?tail:null,cursor:kb?cursor:null});
+  const setMode=m=>{ mode=m; tail=null;
+   dlg.querySelectorAll("[data-tool]").forEach(b=>b.setAttribute("aria-pressed",String((m==="tail"||m==="head")?b.dataset.tool==="arrow":m==="label"&&b.dataset.tool==="label")));
+   say(m==="tail"?"Tap where the arrow starts.":m==="label"?"Tap where the label goes.":""); redraw(); };
+  const place=(x,y)=>{
+   if(mode==="tail"){ tail={x,y}; mode="head"; say("Now tap what the arrow points at."); redraw(); }
+   else if(mode==="head"){ marks.push({t:"arrow",x1:tail.x,y1:tail.y,x2:x,y2:y}); setMode(null); say("Arrow added. Save when you are done."); }
+   else if(mode==="label"){ marks.push({t:"label",x,y,text:txt.value.trim()}); setMode(null); say("Label added. Save when you are done."); }
+   else say("Choose Arrow or Add label first.");
+  };
+  cv.addEventListener("click",e=>{ const r=cv.getBoundingClientRect(); kb=false;
+   place((e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height); });
+  cv.addEventListener("keydown",e=>{
+   const step=(e.shiftKey?0.1:0.02), k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+   if(k){ e.preventDefault(); kb=true; cursor.x=Math.min(cv.width,Math.max(0,cursor.x+k[0]*step*cv.width)); cursor.y=Math.min(cv.height,Math.max(0,cursor.y+k[1]*step*cv.height)); redraw(); }
+   else if(e.key==="Enter"||e.key===" "){ e.preventDefault(); kb=true; place(cursor.x,cursor.y); }
+  });
+  cv.addEventListener("blur",()=>{ kb=false; redraw(); });
+  dlg.querySelector('[data-tool="arrow"]').onclick=()=>setMode(mode==="tail"||mode==="head"?null:"tail");
+  const armLabel=()=>{ if(!txt.value.trim()){ say("Type the measurement first, for example 790 mm."); txt.focus(); return; } setMode("label"); };
+  dlg.querySelector('[data-tool="label"]').onclick=armLabel;
+  txt.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); armLabel(); } });
+  dlg.querySelector("[data-undo]").onclick=()=>{ if(mode){ setMode(null); return; } if(marks.pop()) say("Last mark removed."); else say("Nothing to undo."); redraw(); };
+  dlg.querySelector("[data-clear]").onclick=()=>{ marks=[]; setMode(null); say("All marks cleared."); };
+  let saved=false;
+  dlg.querySelector("[data-skip]").onclick=()=>dlg.close();
+  dlg.querySelector("[data-save]").onclick=async()=>{
+   try{ localStorage.setItem(ANNOT_AUTO,dlg.querySelector("#annAuto").checked?"1":"0"); }catch(e){}
+   const had=!!(rec.ann&&rec.ann.length);
+   if(marks.length){ kb=false; mode=null; tail=null; redraw();
+    if(!rec.orig) rec.orig=rec.data;
+    rec.data=cv.toDataURL("image/jpeg",0.88); rec.ann=marks; rec.ts=Date.now(); saved=true;
+   }else if(had){ rec.data=rec.orig||rec.data; delete rec.orig; delete rec.ann; saved=true; }   // marks cleared: back to the original
+   if(saved){ const er=await IDB.put(rec); if(er) saveFailed("photos",er); else saveOK("photos"); }
+   dlg.close();
+  };
+  dlg.querySelector("#annAuto").onchange=e=>{ try{ localStorage.setItem(ANNOT_AUTO,e.target.checked?"1":"0"); }catch(x){} };
+  dlg.addEventListener("close",()=>{ dlg.remove(); if(saved&&key) refreshPhotos(key); resolve(saved); });
+  redraw(); dlg.showModal(); dlg.querySelector('[data-tool="arrow"]').focus();
+ });
+}
 /* Shrink a captured image so many photos fit within device storage. */
 function compressImage(file,max=1400,quality=0.7){
  return new Promise(res=>{
@@ -2096,8 +2217,8 @@ function compressImage(file,max=1400,quality=0.7){
 }
 function photoStripHTML(key){
  const list=PHOTOS[key]||[];
- return list.map(p=>`<span class="qphoto"><img src="${p.data}" alt="Site photo for this item">`+
-   `<button type="button" data-delphoto="${p.id}" data-key="${esc(key)}" aria-label="Remove photo">✕</button></span>`).join("");
+ return list.map((p,i)=>`<span class="qphoto"><button type="button" class="qp-open" data-annotate="${esc(p.id)}" data-key="${esc(key)}" aria-label="Photo ${i+1} of ${list.length}${p.ann&&p.ann.length?", marked up":""}. Open to mark up"><img src="${p.data}" alt=""></button>`+
+   `<button type="button" data-delphoto="${p.id}" data-key="${esc(key)}" aria-label="Remove photo ${i+1}">✕</button></span>`).join("");
 }
 function photoBlock(key){
  const n=(PHOTOS[key]||[]).length;
@@ -3135,6 +3256,8 @@ content.addEventListener("click",e=>{
    else op(a,act.dataset.id);return;}
  const ap=e.target.closest("[data-addphoto]");
  if(ap){photoKey=ap.dataset.addphoto;photoInput.value="";photoInput.click();return;}
+ const an=e.target.closest("[data-annotate]");
+ if(an){ const rec=(PHOTOS[an.dataset.key]||[]).find(p=>p.id===an.dataset.annotate); if(rec) annotatePhoto(rec,an.dataset.key); return; }
  const dp=e.target.closest("[data-delphoto]");
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
@@ -3226,6 +3349,8 @@ photoInput.addEventListener("change",async()=>{
   const perr=await IDB.put(rec);
   if(perr) saveFailed("photos",perr); else saveOK("photos");
   (PHOTOS[k]=PHOTOS[k]||[]).push(rec);   // kept in memory even if storing failed, so the backup can still include it
+  refreshPhotos(k);
+  if(annotAuto()) await annotatePhoto(rec,k);   // the photo is already saved; marking it up is optional
  }
  photoInput.value=""; refreshPhotos(k);
 });
@@ -3321,7 +3446,7 @@ function stableStr(v){
  return JSON.stringify(v===undefined?null:v);
 }
 function auditSig(){
- const ids=[]; Object.keys(PHOTOS).forEach(k=>PHOTOS[k].forEach(p=>ids.push(p.id)));
+ const ids=[]; Object.keys(PHOTOS).forEach(k=>PHOTOS[k].forEach(p=>ids.push(p.id+"."+(p.data||"").length)));
  const str=stableStr([S,REPS,ids.sort()]); let h=5381;
  for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0;
  return (h>>>0).toString(36)+"."+str.length;
@@ -3371,7 +3496,8 @@ async function restoreFromFile(file){
   alert("This backup was made by a newer version of the tool (format "+b.schemaVersion+"). Update the tool before restoring it. Nothing was changed."); return; }
  const a=b.answers;
  if(!a||typeof a.s!=="object"||a.s===null||!Array.isArray(b.photos)){ alert("This backup file is damaged (answers or photos are missing). Nothing was changed."); return; }
- const photos=b.photos.filter(p=>p&&p.id&&p.key&&typeof p.data==="string"&&p.data.startsWith("data:image/"));
+ const photos=b.photos.filter(p=>p&&p.id&&p.key&&typeof p.data==="string"&&p.data.startsWith("data:image/"))
+   .map(p=>{ if(p.orig&&!(typeof p.orig==="string"&&p.orig.startsWith("data:image/"))){ p=({...p}); delete p.orig; delete p.ann; } return p; });
  const dropped=b.photos.length-photos.length;
  const hasT=!!(b.template&&Array.isArray(b.template.pages));
  const dirty=hasAuditData()&&auditSig()!==BK.sig;

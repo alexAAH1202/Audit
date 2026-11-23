@@ -1,0 +1,26 @@
+1 after capture the editor opens: true | photo already stored before any marking: 1 | dialog title: Mark up this photo
+  focus starts on: Arrow | canvas size matches the photo: 1200x800
+2 arrow armed: Tap where the arrow starts. | pressed: true
+   after the tail: Now tap what the arrow points at.
+   after the head: Arrow added. Save when you are done.
+3 label with no text: Type the measurement first, for example 790 mm.
+   armed: Tap where the label goes.
+   placed: Label added. Save when you are done.
+4 undo removes the label: Last mark removed.
+5 saved: {"ann":"arrow,label:790 mm","hasOrig":true} | dialog closed: true | thumbnail now yellow pixels: true | original has none: true
+   stored in IndexedDB with the marks: true | thumbnail label: Photo 1 of 1, marked up. Open to mark up
+6 reopened, undo, save: "arrow"
+7 clearing all marks restores the original: {"ann":"","hasOrig":false} | yellow: 0
+8 Skip keeps the photo unmarked: true
+   Escape closes without marking: true | photos: 2
+9 keyboard: arrow placed: Arrow added. Save when you are done.
+   saved with the keyboard-placed arrow: "arrow"
+10 with 'Offer after every photo' off, the editor stays closed: true | photos kept: 2
+11 a mark-up changes the backup fingerprint: true
+   backup holds marks + original: 1 1 true
+   restored: {"ann":"arrow","hasOrig":true,"len":15963}
+12 report plate uses the marked-up image: true
+13 axe on the editor: no violations
+    controls under 44px high (checkbox excepted): [ 'Arrow', 'Add label', 'Undo', 'Clear marks', 'Skip', 'Save photo' ]
+14 phone: dialog fits the screen: true | no sideways scroll: true
+errors: []
