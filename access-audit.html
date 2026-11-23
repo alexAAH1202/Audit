@@ -1071,6 +1071,67 @@ const PAGES=[
 /*__PAGES_C__*/
 /*__PAGES_END__*/
 ];
+
+/* =====================================================================
+   LEAVE section — DRAFT content from docs/leave-section-draft.md.
+   Kept in its own array and appended AFTER the last page in
+   seedDefault(), then moved into place there. Inserting these pages into
+   PAGES itself would renumber every later page and question id and
+   silently break saved audits. Clauses marked "TBC" are unconfirmed and
+   are shown in the report until the consultant resolves them.
+===================================================================== */
+const LEAVE_PAGES=[
+{title:"LEAVE",divider:true,pri:1,blurb:"Leaving the building, including in an emergency — exits, the route to a safe place, refuge and assisted evacuation, and emergency information. Emergency egress for people with disability is largely not prescribed by the Premises Standards, so most items here are best practice."},
+{title:"Exits & Egress Routes",items:[
+ std(["AS1428.1","AS1428.4.1"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Doors in required exits, and in the path of travel to them, can be opened from the egress side without a key","NCC D3D26 (NCC 2019: D2.21)"),
+  q("Exit door latches are operable with one hand, on a single device, 900–1200mm above the floor","NCC D3D26 (NCC 2019: D2.21)"),
+  q("Exit doors that form part of an accessible path of travel provide a minimum clear opening of 850mm","AS 1428.1 Cl 13.2"),
+  q("Exit door opening force does not exceed 20N (or the door is power-assisted)","AS 1428.1 Cl 13.5")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Every accessible area has at least one exit reachable without using stairs","Best practice. Clause TBC"),
+  q("The accessible path of travel continues from each exit to the exit discharge point without steps, kerbs or level changes","AS 1428.1 Cl 10 / 11"),
+  q("Exit discharge leads to an accessible route to a safe assembly area, not only to a street or laneway","Best practice. Clause TBC"),
+  q("The route from the exit to the assembly area has a firm, even, slip-resistant surface","AS 1428.1 Cl 7"),
+  q("Exit routes are free of stored goods, bins and equipment that reduce clear width below 1000mm","AS 1428.1 Cl 6.4"),
+  q("Where exit stairs are provided, handrails are continuous on both sides with compliant extensions and returns","AS 1428.1 Cl 12"),
+  q("Where exit stairs are provided, stair nosings have a contrasting strip and tactile indicators are provided at the top and bottom","AS 1428.1 Cl 11 / AS 1428.4.1"),
+  q("Exit door hardware is identifiable by contrast against the door and is not a hidden or recessed mechanism","AS 1428.1 Cl 13"),
+  q("Exit signs can be seen and understood from the approach, including by people seated or of low vision","NCC Part E4, clause TBC"),
+  q("Exit doors that open onto a footpath, ramp or step do not swing across the clear path of travel","Best practice. Clause TBC"),
+  q("Passenger lifts are not signed or relied on as an exit route unless the emergency plan says they are for evacuation","NCC Part E3 and ABCB lift-evacuation guidance, clause TBC")
+ ])
+]},
+{title:"Refuge & Assisted Evacuation",items:[
+ txt("Details:",false,true),
+ grp("Best Practice Recommendations",[
+  q("A refuge area or other safe waiting area is provided, or a documented alternative exists, for people who cannot use stairs","AS 3745 / ABCB guidance, clause TBC"),
+  q("Each refuge area is within or beside a fire-isolated exit and does not obstruct the exit width","Best practice. Clause TBC"),
+  q("Each refuge area has clear floor space of at least 800 x 1300mm per wheelchair space","Best practice. Dimension TBC"),
+  q("Each refuge area is signed, and the sign is tactile or high-contrast and readable from the approach","Best practice. Clause TBC"),
+  q("Each refuge area has a way to call for help that works for deaf and hearing-impaired people as well as speakers","Best practice. Clause TBC"),
+  q("Staff or wardens know where refuge areas are and have a documented way to help a person from them","AS 3745, clause TBC"),
+  q("Where an evacuation device or lift is intended for assisted evacuation, it is tested and its use is in the emergency plan","ABCB lift-evacuation guidance, clause TBC")
+ ])
+]},
+{title:"Emergency Information & Alarms",pri:4,items:[
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("A written emergency plan exists for the premises","WHS Regulations, emergency plans; AS 3745")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("The emergency plan addresses people who may need help to evacuate, including a way to record a personal emergency evacuation plan (PEEP)","AS 3745, clause TBC"),
+  q("Alarm warnings are given in visual form as well as sound, for example flashing devices, in areas used by the public","AS 1670.1, clause TBC"),
+  q("Evacuation floor plans are displayed at each exit route, show the accessible route and refuge areas, and are readable from a seated position","AS 3745, clause TBC"),
+  q("Emergency instructions are available in more than one format (large print, plain language, tactile or audio)","Best practice. Clause TBC"),
+  q("There is a way for deaf and hearing-impaired people to raise an alarm or ask for help in an emergency","Best practice. Clause TBC"),
+  q("Staff have been told how to assist people with different disabilities to evacuate, and this is recorded","AS 3745, clause TBC")
+ ])
+]}
+];
 /* =====================================================================
    ENGINE
 ===================================================================== */
@@ -1120,8 +1181,8 @@ function seedDefault(){
    if(Array.isArray(it.items)) it.items.forEach(norm);
    return it;
  }
- const pages=PAGES.map(p=>({
-   id:"pg"+(c++), title:p.title, divider:!!p.divider, blurb:p.blurb||"",
+ const pages=PAGES.concat(LEAVE_PAGES).map(p=>({
+   id:"pg"+(c++), title:p.title, divider:!!p.divider, blurb:p.blurb||"", pri:p.pri||0,
    items:(p.items||[]).map(x=>norm(clone(x)))
  }));
  /* Display order only: Signage sits after the amenities so the journey
@@ -1131,6 +1192,10 @@ function seedDefault(){
  const iSig=pages.findIndex(p=>p.title==="Signage");
  const iAacf=pages.findIndex(p=>p.title==="Accessible Adult Change Facilities");
  if(iSig>=0&&iAacf>iSig) pages.splice(iAacf,0,pages.splice(iSig,1)[0]);
+ /* LEAVE sits last in the journey, just before the consultant's declaration. */
+ const iLv=pages.findIndex(p=>p.title==="LEAVE"&&p.divider);
+ const iDecl=pages.findIndex(p=>p.title==="Access Consultant Declaration");
+ if(iLv>=0&&iDecl>=0&&iDecl<iLv) pages.splice(iDecl,0,...pages.splice(iLv,4));
  return {meta:{title:"Premises Access Audit", nextId:c},
    rs:{ phml:{name:"Pass / High Priority / Medium Priority / Low Priority", opts:PHML},
         fnn:{name:"Found / Not Found / N/A", opts:FNN} },
@@ -2459,6 +2524,38 @@ function resetModal(){
  dlg.showModal(); inp.focus();
 }
 
+/* ---------------------------------------------------------------------
+   ADD LEAVE SECTION to a template that was saved before it existed.
+   Additive only: nothing is changed or renumbered, so no saved answer is
+   affected. New pages and questions get fresh ids from genId(). Safe to
+   run twice (it does nothing if a LEAVE divider is already there).
+--------------------------------------------------------------------- */
+const hasLeave=()=>T.pages.some(p=>p.divider&&p.title.trim().toUpperCase()==="LEAVE");
+function addLeaveSection(){
+ if(hasLeave()) return false;
+ const fresh=it=>{ const o=clone(it); o.id=genId();
+   if(o.k==="fnn"){o.k="q";o.rs="fnn";if(o.c===undefined)o.c=null;}
+   if(o.k==="q"&&!o.rs) o.rs="phml";
+   if(Array.isArray(o.items)) o.items=o.items.map(fresh); return o; };
+ const add=LEAVE_PAGES.map(p=>({id:"pg"+genId(),title:p.title,divider:!!p.divider,blurb:p.blurb||"",pri:p.pri||0,
+   items:(p.items||[]).map(fresh)}));
+ let at=T.pages.findIndex(p=>p.title==="Access Consultant Declaration"); if(at<0) at=T.pages.length;
+ T.pages.splice(at,0,...add);
+ saveT(); try{localStorage.removeItem(LEAVE_DISMISS);}catch(e){}
+ clearNotice("leave"); render();
+ return true;
+}
+const LEAVE_DISMISS="iac_leave_offer_dismissed";
+function offerLeave(){
+ let gone=false; try{gone=!!localStorage.getItem(LEAVE_DISMISS);}catch(e){}
+ if(hasLeave()||gone) return;
+ notice("leave",`<b>New: LEAVE section.</b> This template has no emergency-egress pages. Add them (draft questions, 3 pages) —
+   existing answers are not affected.
+   <button type="button" class="btn" data-act="addleave">Add LEAVE section</button>`,"warn");
+ document.querySelector('#notices [data-notice="leave"] .nx').addEventListener("click",()=>{
+  try{localStorage.setItem(LEAVE_DISMISS,"1");}catch(e){} });
+}
+
 let bDone=null;
 function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit":"Mark audit complete"; }
 (function(){
@@ -2476,7 +2573,15 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
   BK.complete=true; saveBK(); updateDoneBtn(); await downloadBackup();
  };
  updateDoneBtn();
- document.getElementById("notices").addEventListener("click",e=>{ if(e.target.closest('[data-act="backup"]')) downloadBackup(); });
+ document.getElementById("notices").addEventListener("click",e=>{
+  if(e.target.closest('[data-act="backup"]')) downloadBackup();
+  if(e.target.closest('[data-act="addleave"]')) addLeaveSection();
+ });
+ /* Also available in the template editor, for a template imported later. */
+ const bLv=mkb("btnLeave","Add LEAVE section"); bLv.classList.add("editonly");
+ bLv.onclick=()=>{ if(hasLeave()){ alert("This template already has a LEAVE section."); return; }
+   if(confirm("Add the draft LEAVE section (3 pages) before the Access Consultant Declaration? Existing answers are not affected.")) addLeaveSection(); };
+ bDone.after(bLv);
  /* Report view and Export report are the other end-of-audit moments. */
  document.getElementById("btnReport").addEventListener("click",()=>{ if(mode==="report") autoBackupIfChanged(); });
  document.getElementById("btnExport").addEventListener("click",autoBackupIfChanged);
@@ -2486,6 +2591,7 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
 loadAll();
 render();
 checkPersistence();
+offerLeave();
 loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
 </script>
 </body>
