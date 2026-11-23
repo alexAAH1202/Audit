@@ -1558,36 +1558,48 @@ const TF_MAX_MONTHS={br:3,hi:6,md:9,lo:12};
    already saved is touched and no migration is needed.
 ===================================================================== */
 
-/* --- 1. Journey sections, derived from your divider pages -------------
-   A divider page opens a section; every page after it belongs to that
-   section until the next divider. Priority is the section's position in
-   the visitor's journey, NOT the size of the breach. Adjust the table to
-   match your own divider titles — match is case-insensitive substring. */
-const SECTION_PRI=[
- [/arriv|park|approach|external/i, 1],
- [/enter|entra|door|foyer/i,       1],
- [/circulat|corridor|move|vertical|lift|stair|ramp/i, 1],
- [/use|service|counter|facilit|room/i, 2],
- [/amenit|toilet|sanitary|wc|shower|change/i, 3],
- [/sign|wayfind|communicat|inform/i, 4],
- [/egress|evacuat|emergenc/i,      1]
-];
-const PRI_LABEL={1:"Path of travel",2:"Services",3:"Amenities",4:"Information & other"};
+/* --- 1. Journey sections ---------------------------------------------
+   Priority is a PROPERTY OF THE PAGE, set once in the template editor
+   (see editor-priority.js). A divider sets the priority for its whole
+   section; an individual page can override it — a Lifts page sitting
+   inside a late section is still path of travel.
 
-/* page.id -> {section, pri}. Rebuilt each render so template edits apply. */
+   Priority answers "where in the visitor's journey", never "how bad".
+   Severity already carries that on the other axis, so a non-compliant
+   adult change facility stays priority 3 and takes its weight from the
+   Breach of Code classification instead.
+
+   SECTION_PRI is now only a fallback, used for dividers whose priority
+   has not been set yet. First match wins, so specific rows come first. */
+const SECTION_PRI=[
+ [/amenit|toilet|sanitary|\bwc\b|shower|change|ablution/i,                3],
+ [/sign|wayfind|be informed|communicat|inform/i,                          4],
+ [/arriv|park|approach|external|kerb|landscap/i,                          1],
+ [/enter|entra|door|foyer|lobby/i,                                        1],
+ [/move around|circulat|accessway|corridor|floor|surface|ramp|stair|lift|handrail/i, 1],
+ [/leave|egress|evacuat|emergenc|refuge/i,                                1],
+ [/join in|particip|service|counter|reception|seating|hearing|kitchen/i,  2]
+];
+const PRI_LABEL={1:"Path of travel",2:"Services & participation",
+                 3:"Amenities",4:"Information & other"};
+const PRI_OPTIONS=[[1,"1 \u00b7 Path of travel"],[2,"2 \u00b7 Services & participation"],
+                   [3,"3 \u00b7 Amenities"],[4,"4 \u00b7 Information & other"]];
+
+const validPri=v=>(v>=1&&v<=4)?+v:0;
+function fallbackPri(title){
+ const hit=SECTION_PRI.find(([re])=>re.test(title||""));
+ return hit?hit[1]:2;
+}
+/* page.id -> {section, pri, secPri}. Rebuilt each render so edits apply. */
 function sectionMap(){
  const m=new Map(); let sec="General", pri=2;
  T.pages.forEach(p=>{
   if(p.divider){
-   sec=p.title; pri=2;
-   const hit=SECTION_PRI.find(([re])=>re.test(p.title));
-   if(hit) pri=hit[1];
+   sec=p.title;
+   pri=validPri(p.pri)||fallbackPri(p.title);
    return;
   }
-  let ppri=pri;
-  const hit=SECTION_PRI.find(([re])=>re.test(p.title));
-  if(hit) ppri=hit[1];          // a page title can override its section
-  m.set(p.id,{section:sec,pri:ppri});
+  m.set(p.id,{section:sec,secPri:pri,pri:validPri(p.pri)||pri});
  });
  return m;
 }
@@ -1713,21 +1725,30 @@ function reportHTML(){
   </div>`;
 
  /* ---- Journey ---- */
- const secs=[];
- flags.forEach(f=>{ if(!secs.some(s=>s.name===f.section)) secs.push({name:f.section,pri:f.pri}); });
- const allSecs=[]; sectionMap().forEach(v=>{ if(!allSecs.some(s=>s.name===v.section)) allSecs.push({name:v.section,pri:v.pri}); });
+ const smap=sectionMap(); const allSecs=[];
+ smap.forEach(v=>{ if(!allSecs.some(s=>s.name===v.section)) allSecs.push({name:v.section,pri:v.secPri}); });
+ /* Admin pages (Title, Introduction, Summary) land in a synthetic
+    "General" section and hold no assessed items — drop any such stage
+    rather than rendering an empty rung on the journey. */
+ const liveSecs=allSecs.filter(s=>all.some(f=>f.section===s.name));
  h+=`<div class="card"><h3>The building, walked through</h3>
    <p class="rf-hint">A section with a breach breaks the chain: everything beyond it is unreachable for someone,
       however compliant it is in isolation.</p><div class="jrn">`;
- allSecs.forEach(s=>{
+ liveSecs.forEach(s=>{
   const items=all.filter(f=>f.section===s.name), fl=items.filter(f=>f.flag);
   const worst=fl.some(f=>f.gc==="br")?"breach":fl.some(f=>f.gc==="hi")?"red":fl.length?"orange":"green";
   const col=`var(--${worst==="breach"?"breach":worst==="red"?"red":worst==="orange"?"orange":"green"})`;
   const counts={}; fl.forEach(f=>{counts[f.gl]=(counts[f.gl]||0)+1;});
+  /* A section normally carries one priority. If a page inside it has been
+     overridden, say so honestly rather than reporting the section's. */
+  const prisIn=[...new Set(items.map(f=>f.pri))].sort();
+  const priTxt = prisIn.length===1
+    ? `Priority ${prisIn[0]} \u00b7 ${PRI_LABEL[prisIn[0]]}`
+    : `Priorities ${prisIn.join(", ")}`;
   h+=`<div class="jstage"><div class="jrail" style="color:${col}">
      <i class="jdot" style="background:${col}"></i><i class="jline"></i></div>
     <div class="jbody"><div class="jname">${esc(s.name)}</div>
-     <div class="jmeta">Priority ${s.pri} · ${PRI_LABEL[s.pri]} · ${items.length} assessed · ${fl.length} flagged</div>
+     <div class="jmeta">${priTxt} \u00b7 ${items.length} assessed \u00b7 ${fl.length} flagged</div>
      <div class="jchips">`+
      (Object.keys(counts).length?Object.entries(counts).map(([l,n])=>
        `<span class="chip ${/breach/i.test(l)?"b":/high/i.test(l)?"h":"m"}">${n} ${esc(l)}</span>`).join("")

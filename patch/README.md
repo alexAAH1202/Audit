@@ -1,14 +1,21 @@
 # Report v2 — patch for access-audit.html
 
-Three files. Apply in order. Nothing touches the capture flow, the `PHML`
-array, or any stored answer, so existing audits keep working.
+Apply in order. Nothing touches the capture flow, the `PHML` array, or any
+stored answer, so existing audits keep working.
 
-## 1. `styles.css` → paste at the END of the existing `<style>` block
-Before the closing `</style>`. Adds the matrix, tiles, journey rail and
-report-time field styles. Reuses your existing CSS variables.
+| File | Where it goes |
+|---|---|
+| `styles.css` | End of the existing `<style>` block |
+| `patch.js` | Replaces `reportHTML()` |
+| `wiring.js` | EVENTS section, after `const content=…` |
+| `editor-priority.js` | Two small edits to existing lines in the editor |
 
-## 2. `patch.js` → replaces `reportHTML()`
-Delete the whole existing function, from the line
+## 1. styles.css
+Paste before the closing `</style>`. Adds the matrix, tiles, journey rail
+and report-field styles. Reuses your existing CSS variables.
+
+## 2. patch.js
+Delete the whole existing function, from
 
     function reportHTML(){
 
@@ -17,18 +24,19 @@ down to and including its closing
     return h+`</div></div>`;
     }
 
-Leave `tfOptions()`, `TF_MAX_MONTHS` and `PRIORITY_GROUPS` directly above it
-in place — `tfOptions` and `TF_MAX_MONTHS` are still used. `PRIORITY_GROUPS`
-becomes dead and can go.
+Keep `tfOptions()` and `TF_MAX_MONTHS` directly above it — both are still
+called. `PRIORITY_GROUPS` becomes dead; remove it. Paste `patch.js` in.
 
-Paste the contents of `patch.js` in its place.
-
-## 3. `wiring.js` → paste into the EVENTS section
+## 3. wiring.js
 Anywhere after `const content=document.getElementById("content");`. It
 registers its own listeners instead of editing yours, so none of your
 existing handlers can regress.
 
-## 4. Optional — the CSV button
+## 4. editor-priority.js
+Two marked edits to existing lines — one in `render()`, one in the change
+listener. Adds the journey-priority control to the page editor.
+
+## 5. Optional — the CSV button
 In the top-bar injection IIFE, beside `btnExport`:
 
     const bCsv=mk("btnCsv","Export schedule (CSV)");
@@ -37,44 +45,74 @@ In the top-bar injection IIFE, beside `btnExport`:
 
 ---
 
-## What changes for the auditor
+## How priority now works
 
-Nothing on site. The question rows, the Pass/High/Medium/Low/Breach taps,
-the camera, the notes are all untouched.
+Priority is a **property of the page**, set in the template editor. A
+divider sets the priority for its whole section; an individual page can
+override it, so a Lifts page inside a late section is still path of travel.
 
-Three new controls appear **in the report view only**, which is the right
-place for them: on site you tap and photograph, at the desk you write the
-client-facing wording.
+`SECTION_PRI` is now only a fallback for dividers you haven't set yet. The
+editor shows an amber "not set — falling back to …" hint so you can see
+which dividers are still guessing.
 
-| Control | Stored at | Purpose |
-|---|---|---|
-| Position paragraph | `S["report\|position"]` | Replaces the percentage score |
-| Effort select | `S[key+"\|diff"]` | The second axis of the matrix |
-| Impact textarea | `S[key+"\|impact"]` | Who is excluded, and from what |
-| Action textarea | `S[key+"\|action"]` | The works instruction |
+Priority answers **where in the journey**, never **how bad**. Severity
+already carries that on the other axis. A non-compliant adult change
+facility therefore stays priority 3 and takes its weight from the Breach of
+Code classification, which lands it in the breaches tile regardless.
+
+## New fields (report view only)
+
+Nothing changes on site. Three controls appear in the report, which is
+where this writing actually happens.
+
+| Control | Stored at |
+|---|---|
+| Position paragraph | `S["report\|position"]` |
+| Effort select | `S[key+"\|diff"]` |
+| Impact textarea | `S[key+"\|impact"]` |
+| Action textarea | `S[key+"\|action"]` |
 
 Same `key + "|suffix"` pattern as your existing `|n` and `|tf`, so
-`saveA()` persists them with no migration and `Reset audit` clears them.
+`saveA()` persists them with no migration and Reset audit clears them.
 
-## What you must tune
+---
 
-`SECTION_PRI` at the top of `patch.js` maps your divider page titles to a
-journey priority 1–4 by regex. I seeded it from `ARRIVE` plus the usual
-access-audit sections. Check it against your actual dividers — anything
-unmatched defaults to priority 2, which is a safe but blunt placement.
+## What this patch does NOT do
 
-A page title can override its section, so a `Lifts` page inside a late
-section still scores priority 1.
+**It cannot create dividers.** They are template content, not code. With
+only ARRIVE and JOIN IN, the journey view has two rungs and earns little —
+this is the highest-value remaining change and it is yours to make.
+
+Suggested set, mapped to the pages in your template:
+
+| Divider | Priority | Covers |
+|---|---|---|
+| ARRIVE | 1 | Car parking, Landscaping, Kerb ramps, External accessways, External ramps & stairs |
+| ENTER | 1 | Principal pedestrian entrance, Additional entrances |
+| MOVE AROUND | 1 | Internal accessways, Floor & ground surfaces, Internal ramps, Stairs, Lifts |
+| JOIN IN | 2 | Reception & counters, Seating, Hearing augmentation, Kitchens & servery |
+| AMENITIES | 3 | Accessible toilets, Ambulant cubicles, Showers & change, Adult change facilities |
+| BE INFORMED | 4 | Signage, Wayfinding, Braille & tactile, Emergency information |
+| LEAVE | 1 | Egress, Evacuation, Refuge areas |
+
+`addJourneyDividers()` at the foot of `editor-priority.js` will insert them
+for you. Edit its map to match your real page titles, run it with no
+argument for a dry run, then `addJourneyDividers(true)` to commit. Export
+template first as a backup.
+
+**It does not add an egress section.** If your template has no LEAVE pages,
+that is an audit content gap rather than a reporting one. Egress for people
+with disability is the most consistently under-audited area in Australian
+practice, because the Premises Standards largely stop at the door on the
+way out. Worth closing regardless of this work.
 
 ## Known rough edges
 
-- Findings with no effort set land in the "not yet set" column of the
-  matrix logic (treated as moderate). The report tells the client how many
-  are outstanding rather than hiding it.
-- `exportReport()` still serialises `reportHTML()`, so the exported
-  standalone HTML inherits all of this for free — but the textareas export
-  as editable fields. If you want them flattened to plain text in the
-  export, swap `rfField()` for a read-only `<div>` behind an `EXPORTING`
-  flag.
-- The journey view lists sections in template order. That is correct as
-  long as your pages are ordered the way a visitor moves.
+- Findings with no effort set are treated as moderate for placement. The
+  report states how many are outstanding rather than hiding them.
+- `exportReport()` serialises `reportHTML()`, so the standalone export
+  inherits all of this — but the textareas export as editable fields. To
+  flatten them, swap `rfField()` for a read-only `<div>` behind an
+  `EXPORTING` flag.
+- The journey lists sections in template order, which is correct only if
+  your pages are ordered the way a visitor moves.
