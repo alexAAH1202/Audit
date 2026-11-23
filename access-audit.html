@@ -267,7 +267,22 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .sweep{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:2px 0 12px}
 .sweep .btn{min-height:44px}.sweep .btn[aria-disabled="true"]{opacity:.55;cursor:default}
 .sweptchip{display:inline-block;font-size:12.5px;font-weight:700;border-radius:5px;padding:3px 9px;white-space:nowrap;background:var(--brand-lt);color:var(--brand)}
-.sweep [hidden]{display:none!important}.sweepmsg{flex-basis:100%}
+.sweep [hidden]{display:none!important}
+.opts.wrap{flex-wrap:wrap}
+.nav a.na{color:var(--muted);font-style:italic}
+.draftchip{display:inline-block;background:var(--orange-bg);color:var(--orange);font-size:11px;font-weight:700;border-radius:4px;padding:1px 7px;font-style:normal;margin-left:4px}
+.draftbar,.draftbox{background:var(--orange-bg);border:1px solid var(--orange);color:var(--ink);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
+.draftbox .btn{min-height:44px;margin:6px 8px 0 0}
+.skipbar{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13.5px}
+.skipbar.on{border-left-color:var(--orange)}
+.skipbar .btn{min-height:44px;margin-top:8px}
+.linkbtn{background:none;border:none;color:var(--brand);text-decoration:underline;font:inherit;padding:0;cursor:pointer}
+.reviewdlg{max-width:640px;max-height:88vh;overflow:auto}
+.revg{margin:14px 0 4px;color:var(--brand);font-size:13px}
+.reviewdlg .revitem{display:flex;gap:10px;align-items:flex-start;margin:0;padding:8px 0;border-bottom:1px solid var(--line)}
+.revitem input{width:22px;height:22px;margin-top:2px;flex:none}
+.revd{color:var(--muted);font-size:12.5px}
+@media print{.draftbar,.draftbox,.draftchip,.skipbar{display:none!important}}.sweepmsg{flex-basis:100%}
 .sweepmsg{font-size:12.5px;color:var(--muted)}
 @media print{.sweep{display:none}}
 .defs{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;font-size:13px;margin:4px 0 0}
@@ -1273,6 +1288,89 @@ function applyJourney(pages,newId){
  }
  return added;
 }
+
+/* =====================================================================
+   SITE SCOPE — six questions at the start of an audit decide which pages are
+   left out. DRAFT RULES, set from best-practice defaults and not yet reviewed
+   with the access consultant: see REVIEW_ITEMS (the "Review list" button).
+   Answers are stored as text codes ("no", "shared"), not array indices.
+   Rules live here, keyed by page title, so saved templates need no migration.
+   A page is only left out while it has no answers and has not been switched
+   back on with "Assess anyway".
+===================================================================== */
+const SCOPE_Q={
+ cls:"Building class (NCC)",
+ storeys:"Storeys used by the public, counting basements",
+ lift:"Is a passenger lift provided for the public?",
+ parking:"Is on-site car parking provided for the building?",
+ sanitary:"Are sanitary facilities provided for the public?",
+ built:"When were the sanitary facilities built or last refurbished?",
+ use:"Who uses the building?"
+};
+const pick=(t,opts,needs)=>({k:"pick",t,opts,needs});
+const SCOPE_PAGE={title:"Site Scope",items:[
+ {k:"inst",t:"Before you start",body:"Answer these questions first. They decide which pages are left out of this audit. A page that is left out stays in the list, greyed, with the reason, and can be switched back on with Assess anyway. Tap a selected answer again to clear it. DRAFT: these rules are best-practice defaults, still to be reviewed with the access consultant."},
+ pick(SCOPE_Q.cls,[["1b","Class 1b"],["2","Class 2"],["3","Class 3"],["5","Class 5"],["6","Class 6"],["7a","Class 7a"],["7b","Class 7b"],["8","Class 8"],["9a","Class 9a"],["9b","Class 9b"],["9c","Class 9c"],["10","Class 10"],["mixed","Mixed"],["unsure","Not sure"]]),
+ pick(SCOPE_Q.storeys,[["1","1"],["2","2"],["3+","3 or more"]]),
+ pick(SCOPE_Q.lift,[["yes","Yes"],["no","No"]]),
+ pick(SCOPE_Q.parking,[["yes","Yes"],["no","No (street parking only)"],["attended","Attended or valet only"]]),
+ pick(SCOPE_Q.sanitary,[["yes","Yes"],["no","No"],["shared","Shared, outside the audited area"]]),
+ pick(SCOPE_Q.built,[["before","Before 1 May 2011"],["after","On or after 1 May 2011"],["both","Both"],["unknown","Unknown"]],["sanitary","yes"]),
+ pick(SCOPE_Q.use,[["public","Public"],["staff","Staff only"],["both","Both"]])
+]};
+const scopeAns=name=>getFieldVal("Site Scope",SCOPE_Q[name])||"";
+const scopeAnswers=()=>({cls:scopeAns("cls"),storeys:scopeAns("storeys"),lift:scopeAns("lift"),parking:scopeAns("parking"),
+ sanitary:scopeAns("sanitary"),built:scopeAns("built"),use:scopeAns("use")});
+const sanOff=a=>a.sanitary==="no"?"No sanitary facilities for the public":a.sanitary==="shared"?"Sanitary facilities are shared and outside the audited area":"";
+/* page title -> function(answers) returning a reason, or "" to keep the page */
+const SCOPE_RULES=[
+ ["Accessible Car Parking",a=>a.parking==="no"?"No on-site parking":a.parking==="attended"?"Parking is attended or valet only":""],
+ ["Accessible Toilets — Prior 1 May 2011",a=>sanOff(a)||(a.built==="after"?"Sanitary facilities built on or after 1 May 2011":"")],
+ ["Accessible Toilets — On/After 1 May 2011",a=>sanOff(a)||(a.built==="before"?"Sanitary facilities built before 1 May 2011":"")],
+ ["Ambulant Toilets",sanOff],
+ ["Accessible Adult Change Facilities",sanOff],
+ ["Refuge & Assisted Evacuation",a=>a.storeys==="1"?"Single-storey building, no levels above or below":""]
+];
+/* null if the page is not touched by a rule */
+function pageSkip(p){
+ if(p.divider) return null;
+ const rule=SCOPE_RULES.find(r=>r[0]===p.title); if(!rule) return null;
+ const reason=rule[1](scopeAnswers()); if(!reason) return null;
+ const raw=[]; walkQs(p.items,"",raw,p);
+ const answered=raw.some(x=>S[x.key]!==undefined&&S[x.key]!==""&&!String(x.key).includes("|addl"));
+ const overridden=S["scopeov|"+p.id]==="1";
+ return {reason,answered,overridden,off:!answered&&!overridden};
+}
+const isSkipped=p=>{ const k=pageSkip(p); return !!(k&&k.off); };
+
+/* =====================================================================
+   REVIEW LIST — every place a best-practice default was used instead of a
+   confirmed decision. Ticked off per template once reviewed with the
+   access consultant (stored in T.meta.reviewed). The top bar shows how many
+   are still open.
+===================================================================== */
+const REVIEW_ITEMS=[
+ {id:"leave-tbc",g:"LEAVE section",t:"Questions whose clause is still \"TBC\"",d:"AS 1670.1 visual alarms, AS 3745 emergency plans and PEEPs, ABCB lift-evacuation guidance and the refuge items have no confirmed clause. The text 'clause TBC' prints in the report until each is resolved."},
+ {id:"leave-refuge-size",g:"LEAVE section",t:"Refuge space of 800 x 1300mm",d:"A placeholder figure, not confirmed. Give the dimension actually applied, or delete the number."},
+ {id:"leave-groups",g:"LEAVE section",t:"Legislative or Best Practice placement",d:"Doubtful: the 20N door opening force (fire doors often exceed it) and the WHS written emergency plan (workplaces only). Most of the section is best practice, so Breach of Code should rarely apply."},
+ {id:"leave-pri",g:"LEAVE section",t:"Journey priority of Emergency Information & Alarms",d:"Set to 4 (information). A missing visual alarm could arguably block leaving, which would make it 1."},
+ {id:"scope-class",g:"Site Scope",t:"Building class only records, skips nothing",d:"NCC D4D2 sets the extent of access by class, but the pages are organised by element, so no page is skipped by class. Confirm, or say which classes drop which pages."},
+ {id:"scope-storeys",g:"Site Scope",t:"One storey skips Refuge & Assisted Evacuation",d:"The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift."},
+ {id:"scope-lift",g:"Site Scope",t:"Lift answer only records",d:"The template has no lift page. About nine lift questions on other pages are not switched off. Needs per-question not-applicable."},
+ {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
+ {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
+ {id:"scope-built",g:"Site Scope",t:"Build-date follow-up skips the other 2011 toilet page",d:"My addition to the six questions. Remove it if unwanted."},
+ {id:"scope-staff",g:"Site Scope",t:"Staff only skips nothing",d:"NCC D4D2(6) covers employees as occupants, so no automatic skip. Confirm whether any page should be left out."},
+ {id:"scope-accept",g:"Site Scope",t:"Acceptance criterion",d:"The brief says a single-storey building with no lift and no parking skips four pages. With toilets, the template skips three. Restate it or add lift and stairs pages."},
+ {id:"report-ratings",g:"Report",t:"'How to read the ratings' wording",d:"Written from project terminology, not by the consultant. Confirm each definition."},
+ {id:"report-liability",g:"Report",t:"No standard disclaimer or liability wording",d:"Only the template's own Disclaimer field appears. Decide whether standard wording is wanted, with your insurer."},
+ {id:"report-zones",g:"Report",t:"Timeframes: Do first, Programme, Plan, Monitor",d:"The mapping from journey priority and effort to timeframe comes from the original patch. Confirm the meaning of each timeframe."},
+ {id:"capture-sweep",g:"Capture",t:"Sweep to Pass only on Legislative groups",d:"The brief names Legislative groups only. Decide whether Best Practice groups should have it too."}
+];
+const reviewedMap=()=>((T&&T.meta&&T.meta.reviewed)||{});
+const reviewOpen=()=>REVIEW_ITEMS.filter(i=>!reviewedMap()[i.id]);
+const reviewOpenIn=g=>REVIEW_ITEMS.filter(i=>i.g===g&&!reviewedMap()[i.id]).length;
+const tbcQuestions=()=>{ const o=[]; T.pages.forEach(p=>{ if(!p.divider) walkQs(p.items,"",o,p); }); return o.filter(x=>/TBC/.test(x.item.c||"")); };
 /* =====================================================================
    ENGINE
 ===================================================================== */
@@ -1322,7 +1420,7 @@ function seedDefault(){
    if(Array.isArray(it.items)) it.items.forEach(norm);
    return it;
  }
- const pages=PAGES.concat(LEAVE_PAGES).map(p=>({
+ const pages=PAGES.concat(LEAVE_PAGES,[SCOPE_PAGE]).map(p=>({
    id:"pg"+(c++), title:p.title, divider:!!p.divider, blurb:p.blurb||"", pri:p.pri||0,
    items:(p.items||[]).map(x=>norm(clone(x)))
  }));
@@ -1338,6 +1436,8 @@ function seedDefault(){
  const iDecl=pages.findIndex(p=>p.title==="Access Consultant Declaration");
  if(iLv>=0&&iDecl>=0&&iDecl<iLv) pages.splice(iDecl,0,...pages.splice(iLv,4));
  applyJourney(pages,()=>"pg"+(c++));   // ENTER / MOVE AROUND / AMENITIES / BE INFORMED
+ { const iS=pages.findIndex(p=>p.title==="Site Scope"), iT=pages.findIndex(p=>p.title==="Title Page");
+   if(iS>=0&&iT>=0&&iS>iT+1) pages.splice(iT+1,0,pages.splice(iS,1)[0]); }
  return {meta:{title:"Premises Access Audit", nextId:c},
    rs:{ phml:{name:"Pass / High Priority / Medium Priority / Low Priority", opts:PHML},
         fnn:{name:"Found / Not Found / N/A", opts:FNN} },
@@ -1445,7 +1545,9 @@ function walkQs(items,suf,out,page){
   else if(it.k==="card"){walkQs(it.items,suf,out,page);}
  });
 }
-function allQs(){const o=[];T.pages.forEach(p=>{if(!p.divider)walkQs(p.items,"",o,p);});return o;}
+/* Every assessable question. Pages the Site Scope leaves out (and that have no answers and were not
+   switched back on) are not assessable, so they drop out of progress, scores and coverage. */
+function allQs(){const o=[];T.pages.forEach(p=>{if(!p.divider&&!isSkipped(p))walkQs(p.items,"",o,p);});return o;}
 function trailOf(q){ // page + section labels for report
  return [q.page?q.page.title:""];
 }
@@ -1535,7 +1637,7 @@ function getFieldKey(pageTitle,label){
  let foundId=null;
  (function look(arr){
   return arr.some(it=>{
-   if(it.t===label&&(it.k==="txt"||it.k==="dt"||it.k==="q"||it.k==="media")){foundId=it.id;return true;}
+   if(it.t===label&&(it.k==="txt"||it.k==="dt"||it.k==="q"||it.k==="media"||it.k==="pick")){foundId=it.id;return true;}
    if(it.items)return look(it.items);
    return false;
   });
@@ -1561,6 +1663,18 @@ function rItem(it,suf){
      <input class="ein" data-edit="${it.id}" data-field="opts" value="${esc((it.opts||[]).join(', '))}" placeholder="AS1428.1, AS1428.2, …"></div>`;
    return `<div class="card"><h3>Relevant Australian Standards</h3>`+
      (it.opts||[]).map((o,j)=>`<label class="chk"><input type="checkbox" data-a="${it.id}${suf}|${j}" ${S[it.id+suf+"|"+j]?"checked":""}> ${esc(o)}</label>`).join("")+`</div>`;}
+  case "pick":{
+   const key=it.id+suf;
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Site scope choice</span>${moveDel(it.id)}</div>
+     <div class="emeta">${esc(it.t)} — a fixed question: its rules are in the tool's code, not the template.</div></div>`;
+   if(it.needs&&scopeAns(it.needs[0])!==it.needs[1]) return "";          // follow-up, shown only when it applies
+   const v=S[key], has=v!==undefined&&v!==""&&it.opts.some(o=>o[0]===v);
+   return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span></div>
+     <div class="opts wrap" role="radiogroup" aria-labelledby="${qlId(key)}">`+it.opts.map(([c,l],j)=>{
+      const on=has&&v===c, tab=has?on:j===0;
+      return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt n ${on?"on":""}" data-pick="${key}" data-v="${esc(c)}">${esc(l)}</button>`;
+     }).join("")+`</div></div>`;
+  }
   case "txt":{
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Text field</span>${moveDel(it.id)}
      <label class="emeta"><input type="checkbox" data-edit="${it.id}" data-field="multi" ${it.multi?"checked":""}> multi-line</label></div>
@@ -1646,7 +1760,7 @@ function qRow(it,suf){
     <select class="ein" style="flex:1" data-rs="${it.id}">${opts}</select></div></div>`;
  }
  const v=S[key], note=S[key+"|n"]||"";
- return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}</span>`:""}
+ return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}
    <label class="qnote-lbl">Comment</label>
    <textarea class="qnote show" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
    ${photoBlock(key)}</div>`+
@@ -1895,7 +2009,18 @@ function render(){
   h+=`<div class="divpage"><h2>${esc(p.title)}</h2><p>${esc(p.blurb||"")}</p></div>`;
  }else if(!p.divider){
   if(!EDIT){h+=`<h2>${esc(p.title)}</h2><div class="crumb">Page ${cur+1} of ${T.pages.length} — ${esc(T.meta.title)}</div>`;}
-  h+=rItems(p.items,"");
+  const sk=EDIT?null:pageSkip(p);
+  if(!EDIT&&p.title==="Site Scope"&&reviewOpenIn("Site Scope"))
+   h+=`<div class="draftbar" role="note"><b>DRAFT RULES.</b> Set from best-practice defaults, not yet reviewed with the access consultant. ${reviewOpenIn("Site Scope")} scope items open in the <button type="button" class="linkbtn" data-reviewopen>Review list</button>.</div>`;
+  if(sk){
+   const dr=reviewOpenIn("Site Scope")?` <span class="draftchip">Draft rule: review with the access consultant</span>`:"";
+   if(sk.off) h+=`<div class="skipbar" role="note"><b>Not applicable:</b> ${esc(sk.reason)}.${dr}<br>
+     This page is left out of the audit, its progress and its score. <button type="button" class="btn" data-scopeov="${p.id}" data-on="1">Assess this page anyway</button></div>`;
+   else if(sk.overridden) h+=`<div class="skipbar on" role="note">Site Scope would leave this page out (${esc(sk.reason)}), but you are assessing it anyway.${dr}
+     ${sk.answered?"":`<button type="button" class="btn" data-scopeov="${p.id}" data-on="0">Leave it out again</button>`}</div>`;
+   else h+=`<div class="skipbar on" role="note">Site Scope would leave this page out (${esc(sk.reason)}), but it already has answers, so it stays.${dr}</div>`;
+  }
+  if(!(sk&&sk.off)) h+=rItems(p.items,"");
   if(EDIT){
    h+=`<div class="eb"><div class="ebar"><span class="etag">Add block to page</span></div><div class="ebar">
      <button class="ebtn" data-act="addstd" data-id="${p.id}">+ Standards</button>
@@ -1904,7 +2029,7 @@ function render(){
      <button class="ebtn" data-act="addsec" data-id="${p.id}">+ Repeatable section</button>
      <button class="ebtn" data-act="addcard" data-id="${p.id}">+ Sub-section</button>
      <button class="ebtn" data-act="addinst" data-id="${p.id}">+ Instruction</button></div></div>`;
-  }else{
+  }else if(!(sk&&sk.off)){
    const sc=pageScore(p);
    h+=`<div class="card" id="pageScore"${sc.max?"":' style="display:none"'}>${sc.max?pageScoreHTML(sc):""}</div>`;
   }
@@ -1924,7 +2049,11 @@ function renderNav(){
  document.getElementById("nav").innerHTML=T.pages.map((p,i)=>{
   if(p.divider){ const st=secTot.get(p);
    return `<div class="div"><span>${esc(p.title)}</span><span class="sc"><span class="vh">${st.n?" answered ":""}</span>${progTxt(st.ans,st.n)}</span></div>`+(EDIT?`<a href="#" data-pg="${i}" class="${i===cur?"on":""}" style="font-style:italic">edit divider</a>`:`<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}" style="font-style:italic;color:var(--muted)">Section divider</a>`); }
+  const sk=pageSkip(p);
+  if(sk&&sk.off) return `<a href="#" data-pg="${i}" class="na ${i===cur&&mode==="audit"?"on":""}" aria-label="${esc(p.title)}, not applicable: ${esc(sk.reason)}"><span>${i+1}. ${esc(p.title)}</span><span class="sc">N/A</span></a>`;
   const sc=scores.get(p)||{got:0,max:0,hi:0,med:0,brc:0,ans:0,n:0};
+  if(p.title==="Site Scope"){ const ps=p.items.filter(x=>x.k==="pick"&&!(x.needs&&scopeAns(x.needs[0])!==x.needs[1]));
+    sc.n=ps.length; sc.ans=ps.filter(x=>{const v=S[x.id];return v!==undefined&&v!=="";}).length; }
   const lab=sc.n?`${progTxt(sc.ans,sc.n)}${sc.brc?" ⛔"+sc.brc:""}${sc.hi?" ⚑"+sc.hi:""}`:"";
   const aria=sc.n?` aria-label="${esc(p.title)}, ${sc.ans} of ${sc.n} answered${sc.ans>=sc.n?", complete":""}${sc.brc?`, ${sc.brc} breach of code`:""}${sc.hi?`, ${sc.hi} high priority`:""}"`:"";
   return `<a href="#" data-pg="${i}"${aria} class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
@@ -2117,6 +2246,12 @@ function scopeHTML(all){
   ${lab("Scope of the audit",gv("Scope"))}
   ${lab("Benchmark",gv("Benchmark"))}
   ${agree.length?`<div class="rf"><span class="rf-l">Engagement</span><div class="rf-v">${agree.join("<br>")}</div></div>`:""}
+  ${(()=>{ const a=scopeAnswers(); const pg=T.pages.find(p=>p.title==="Site Scope"); if(!pg||!Object.values(a).some(Boolean)) return "";
+    const rows=pg.items.filter(x=>x.k==="pick"&&S[x.id]).map(x=>{const o=x.opts.find(o=>o[0]===S[x.id]);return o?`<tr><td>${esc(x.t)}</td><td>${esc(o[1])}</td></tr>`:"";}).join("");
+    const na=T.pages.map(p=>({p,k:pageSkip(p)})).filter(x=>x.k&&x.k.off);
+    return `<div class="rf"><span class="rf-l">Scope declared before the audit</span>
+     <table class="rep-table cov"><tbody>${rows}</tbody></table>
+     ${na.length?`<p style="margin-top:6px"><b>Not applicable by scope:</b> ${na.map(x=>esc(x.p.title)+" ("+esc(x.k.reason.toLowerCase())+")").join("; ")}.</p>`:""}</div>`; })()}
   <div class="rf"><span class="rf-l">Coverage</span>
    <p>${pages.length-gap.length} of ${pages.length} assessable pages have answers recorded.</p>
    ${swTotal?`<p style="margin-top:6px"><b>${swTotal} Pass answer${swTotal===1?" was":"s were"} recorded by sweeping a whole group of requirements</b>,
@@ -2172,7 +2307,11 @@ function reportHTML(){
     hex-escaped. Browsers without margin boxes simply print without them. */
  const cssStr=x=>String(x).replace(/[\\"<>&\r\n]/g,c=>"\\"+c.charCodeAt(0).toString(16)+" ");
  const headTxt=cssStr((siteRaw||"Access audit")+(rev?"  ·  Rev "+rev:""));
- let h=`<div class="pg report2"><style>
+ const draftOpen=reviewOpen().length, tbcInReport=flags.filter(f=>/TBC/.test(f.item.c||""));
+ let h=`<div class="pg report2">${draftOpen||tbcInReport.length?`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
+   ${draftOpen} item${draftOpen===1?"":"s"} still need review with the access consultant.
+   ${tbcInReport.length?`${tbcInReport.length} finding${tbcInReport.length===1?"":"s"} in this report cite a clause marked "TBC": ${tbcInReport.slice(0,4).map(f=>esc(f.item.t.length>70?f.item.t.slice(0,70)+"…":f.item.t)).join("; ")}${tbcInReport.length>4?" and more":""}.`:""}
+   <button type="button" class="btn" data-reviewopen>Open the Review list</button> This box is not printed or exported.</div>`:""}<style>
   @page{size:A4;margin:20mm 15mm 18mm;
    @top-left{content:"${headTxt}";width:68%;font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:bottom;padding-bottom:3mm}
    @top-right{content:"${cssStr(T.meta.title)}";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:right;vertical-align:bottom;padding-bottom:3mm}
@@ -2406,7 +2545,7 @@ function exportScheduleCSV(){
    its "Fix by:" label when it has one. */
 function flattenForExport(html){
  const t=document.createElement("template"); t.innerHTML=html;
- t.content.querySelectorAll(".rf-hint").forEach(n=>n.remove());
+ t.content.querySelectorAll(".rf-hint,.draftbox,.draftchip").forEach(n=>n.remove());
  t.content.querySelectorAll("select").forEach(sel=>{
   const opt=sel.querySelector("option[selected]");
   const host=sel.closest("label")||sel;
@@ -2699,6 +2838,11 @@ content.addEventListener("click",e=>{
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
  const b=e.target.closest("[data-q]");
+ const pk=e.target.closest("[data-pick]");
+ if(pk){ pickAnswer(pk.dataset.pick,pk.dataset.v); return; }
+ const ov=e.target.closest("[data-scopeov]");
+ if(ov){ if(ov.dataset.on==="1") S["scopeov|"+ov.dataset.scopeov]="1"; else delete S["scopeov|"+ov.dataset.scopeov]; saveA(); render(); return; }
+ if(e.target.closest("[data-reviewopen]")){ reviewModal(); return; }
  if(b){const id=b.dataset.q;lastQ=id;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];saveA();updateAnswerUI(id);return;}
  const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
  if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
@@ -2787,7 +2931,23 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sideEl.classList.co
 content.addEventListener("focusin",e=>{ const r=e.target.closest&&e.target.closest("[data-q]"); if(r) lastQ=r.dataset.q; });
 document.getElementById("btnNextUn").addEventListener("click",e=>{ if(e.currentTarget.getAttribute("aria-disabled")==="true") return; jumpToNextUnanswered(); });
 /* Arrow keys inside a priority group move to, and select, the neighbouring option; Home/End jump. */
+/* Site Scope answer: stored as a text code; tapping the selected one clears it. The page is
+   re-rendered because the answer changes follow-up questions and which pages are left out. */
+function pickAnswer(key,code){
+ S[key]=S[key]===code?"":code; saveA(); render();
+ const sel=content.querySelector(`[data-pick="${CSS.escape(key)}"][aria-checked="true"]`)||content.querySelector(`[data-pick="${CSS.escape(key)}"]`);
+ if(sel) sel.focus({preventScroll:true});
+}
 content.addEventListener("keydown",e=>{
+ const pr=e.target.closest&&e.target.closest('[role="radio"][data-pick]');
+ if(pr){
+  const k={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1,Home:"first",End:"last"}; if(!(e.key in k)) return;
+  const bs=[...pr.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]')], i=bs.indexOf(pr), st=k[e.key];
+  const nx=st==="first"?bs[0]:st==="last"?bs[bs.length-1]:bs[(i+st+bs.length)%bs.length];
+  e.preventDefault(); const key=nx.dataset.pick; S[key]=nx.dataset.v; saveA(); render();
+  const el=content.querySelector(`[data-pick="${CSS.escape(key)}"][aria-checked="true"]`); if(el) el.focus({preventScroll:true});
+  return;
+ }
  const r=e.target.closest&&e.target.closest('[role="radio"][data-q]'); if(!r) return;
  const keys={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1,Home:"first",End:"last"};
  if(!(e.key in keys)) return;
@@ -2980,6 +3140,48 @@ function offerJourney(){
  document.querySelector('#notices [data-notice="journey"] .nx').addEventListener("click",()=>{
   try{localStorage.setItem(JOURNEY_DISMISS,"1");}catch(e){} });
 }
+const hasSiteScope=()=>T.pages.some(p=>p.title==="Site Scope");
+function addSiteScope(){
+ if(hasSiteScope()) return false;
+ const fresh=it=>{ const o=clone(it); o.id=genId(); if(Array.isArray(o.items)) o.items=o.items.map(fresh); return o; };
+ const pg={id:"pg"+genId(),title:SCOPE_PAGE.title,divider:false,blurb:"",pri:0,items:SCOPE_PAGE.items.map(fresh)};
+ const at=T.pages.findIndex(p=>p.title==="Title Page");
+ T.pages.splice(at>=0?at+1:0,0,pg);
+ saveT(); try{localStorage.removeItem(SCOPE_DISMISS);}catch(e){}
+ clearNotice("scope"); render(); return true;
+}
+const SCOPE_DISMISS="iac_scope_offer_dismissed";
+function offerScope(){
+ let gone=false; try{gone=!!localStorage.getItem(SCOPE_DISMISS);}catch(e){}
+ if(hasSiteScope()||gone) return;
+ notice("scope",`<b>New: Site Scope page.</b> Six questions at the start that leave out pages that do not apply (draft rules).
+   Existing answers are not affected.
+   <button type="button" class="btn" data-act="addscope">Add Site Scope</button>`,"warn");
+ document.querySelector('#notices [data-notice="scope"] .nx').addEventListener("click",()=>{
+  try{localStorage.setItem(SCOPE_DISMISS,"1");}catch(e){} });
+}
+/* Review list: everything done from a best-practice default, to review with the access consultant. */
+function reviewModal(){
+ const dlg=document.createElement("dialog"); dlg.className="resetdlg reviewdlg"; dlg.setAttribute("aria-labelledby","reviewTitle");
+ const draw=()=>{
+  const done=REVIEW_ITEMS.length-reviewOpen().length; let g="";
+  dlg.innerHTML=`<h3 id="reviewTitle" style="color:var(--brand)">Review with the access consultant</h3>
+   <p>These were set from best-practice defaults, not confirmed decisions. Tick each one once it has been reviewed or changed.
+      <b>${done} of ${REVIEW_ITEMS.length} reviewed.</b> Wording and rules can be edited later; nothing here is locked.</p>`+
+   REVIEW_ITEMS.map(i=>{ const head=i.g!==g?`<h4 class="revg">${esc(i.g)}</h4>`:""; g=i.g;
+    return head+`<label class="revitem"><input type="checkbox" data-rev="${i.id}" ${reviewedMap()[i.id]?"checked":""}>
+     <span><b>${esc(i.t)}</b><br><span class="revd">${esc(i.d)}</span></span></label>`; }).join("")+
+   `<p class="revd">Questions still showing a "TBC" clause: <b>${tbcQuestions().length}</b>. Find them by the orange "Needs review" tag.</p>
+    <div class="rsact"><button type="button" class="btn" data-close>Close</button></div>`;
+  dlg.querySelector("[data-close]").onclick=()=>dlg.close();
+  dlg.querySelectorAll("[data-rev]").forEach(cb=>cb.onchange=()=>{
+   if(!T.meta.reviewed) T.meta.reviewed={}; if(cb.checked) T.meta.reviewed[cb.dataset.rev]=true; else delete T.meta.reviewed[cb.dataset.rev];
+   saveT(); const y=dlg.scrollTop; draw(); dlg.scrollTop=y; updateReviewBtn(); });
+ };
+ draw(); document.body.appendChild(dlg); dlg.addEventListener("close",()=>{dlg.remove(); render();});
+ dlg.showModal();
+}
+function updateReviewBtn(){ const b=document.getElementById("btnReview"); if(b) b.textContent=reviewOpen().length?`Review list (${reviewOpen().length})`:"Review list ✓"; }
 const LEAVE_DISMISS="iac_leave_offer_dismissed";
 function offerLeave(){
  let gone=false; try{gone=!!localStorage.getItem(LEAVE_DISMISS);}catch(e){}
@@ -3012,6 +3214,7 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
   if(e.target.closest('[data-act="backup"]')) downloadBackup();
   if(e.target.closest('[data-act="addleave"]')) addLeaveSection();
   if(e.target.closest('[data-act="addjourney"]')) addJourneySections();
+  if(e.target.closest('[data-act="addscope"]')) addSiteScope();
  });
  /* Also available in the template editor, for a template imported later. */
  const bLv=mkb("btnLeave","Add LEAVE section"); bLv.classList.add("editonly");
@@ -3022,6 +3225,11 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
  bJr.onclick=()=>{ const m=journeyMissing(T.pages); if(!m.length){ alert("All journey sections are already in this template."); return; }
    if(confirm("Add "+m.join(", ")+"? This also moves Internal Accessways, Floor / Ground Surfaces and Signage so the journey reads in order. Existing answers are not affected.")) addJourneySections(); };
  bLv.after(bJr);
+ const bSc=mkb("btnScope","Add Site Scope"); bSc.classList.add("editonly");
+ bSc.onclick=()=>{ if(hasSiteScope()){ alert("This template already has a Site Scope page."); return; }
+   if(confirm("Add the Site Scope page (draft rules) after the Title Page? Existing answers are not affected.")) addSiteScope(); };
+ bJr.after(bSc);
+ const bRv=mkb("btnReview","Review list"); bRv.onclick=()=>reviewModal(); bDone.before(bRv); updateReviewBtn();
  /* Report view and Export report are the other end-of-audit moments. */
  document.getElementById("btnReport").addEventListener("click",()=>{ if(mode==="report") autoBackupIfChanged(); });
  document.getElementById("btnExport").addEventListener("click",autoBackupIfChanged);
@@ -3047,6 +3255,8 @@ render();
 checkPersistence();
 offerLeave();
 offerJourney();
+offerScope();
+updateReviewBtn();
 loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
 </script>
 </body>

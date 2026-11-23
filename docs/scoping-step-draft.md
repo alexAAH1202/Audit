@@ -113,6 +113,24 @@ class chart, which I could not read (the Commission's site blocked the request).
 
 Sources read: [Part D4](https://ncc.abcb.gov.au/editions/ncc-2022/adopted/volume-one/d-access-and-egress/part-d4-access-people-disability).
 
+## Built, with these best-practice defaults (2026-11-23)
+
+The scoping step is now in the tool as a **Site Scope** page after the Title Page. Where the open
+questions below were not yet answered, I used the following defaults. **All are marked in the tool as
+draft** (see `docs/review-with-consultant.md`) so they get reviewed:
+
+| Open question | Default used |
+| --- | --- |
+| 1 Class | Recorded only, skips nothing |
+| 2 Storeys | One storey skips Refuge & Assisted Evacuation; the question counts basements |
+| 3 Staff only | Skips nothing (NCC D4D2(6) covers employees) |
+| 4 Build-date follow-up | Kept |
+| 5 Acceptance criterion | Left unchanged in the brief; flagged for decision |
+| 6 Lift = No | Recorded only; lift questions stay on |
+| 7 Shared facilities | Treated the same as No |
+
+Also added from the research: an "Attended or valet only" parking option, treated like No.
+
 ## Open questions for you
 
 1. **Class.** Does any building class change which pages apply? If so, which?
