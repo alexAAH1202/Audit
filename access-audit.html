@@ -1560,8 +1560,8 @@ function rItem(it,suf){
      h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" placeholder="Additional item…" value="${esc(S[ak+"|t"]||"")}">
         <label class="qnote-lbl">Comment</label>
         <textarea class="qnote show" data-a="${ak}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(S[ak+"|n"]||"")}</textarea>
-        ${photoBlock(ak)}</div><div class="opts">`+
-        RS("phml").opts.map((o,j)=>`<button class="opt ${o.cls} ${S[ak]==String(j)?"on":""}" data-q="${ak}" data-v="${j}">${esc(o.l)}</button>`).join("")+`</div></div>`;}
+        ${photoBlock(ak)}</div>`+
+        radioGroup(ak,RS("phml").opts,S[ak],'aria-label="Rating for this additional item"')+`</div>`;}
    return h+`</div>`;}
   case "sec":{
    const rep=it.rep!==false;
@@ -1610,11 +1610,11 @@ function qRow(it,suf){
     <select class="ein" style="flex:1" data-rs="${it.id}">${opts}</select></div></div>`;
  }
  const v=S[key], note=S[key+"|n"]||"";
- return `<div class="qrow"><div class="qt">${esc(it.t)}${it.c?`<span class="cl">${esc(it.c)}</span>`:""}
+ return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}</span>`:""}
    <label class="qnote-lbl">Comment</label>
    <textarea class="qnote show" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
-   ${photoBlock(key)}</div>
-   <div class="opts">`+set.map((o,j)=>`<button class="opt ${o.cls} ${v==String(j)?"on":""}" data-q="${key}" data-v="${j}">${esc(o.l)}</button>`).join("")+`</div></div>`;
+   ${photoBlock(key)}</div>`+
+   radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+`</div>`;
 }
 function editBar(){return "";}
 function moveDel(id){
@@ -1729,10 +1729,30 @@ function updatePageScore(){
  if(!sc.max){el.style.display="none";el.innerHTML="";return;}
  el.style.display=""; el.innerHTML=pageScoreHTML(sc);
 }
+/* Priority options are a radio group (WCAG 1.3.1 / 4.1.2): the group is named by its question,
+   each button reports aria-checked, and only one button is in the tab order (roving tabindex).
+   Clicking the selected option still clears it, as before. */
+const qlId=key=>"ql-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
+function radioGroup(key,set,v,nameAttr){
+ const sel=v!==undefined&&v!==""&&set[+v]?String(v):null;
+ return `<div class="opts" role="radiogroup" ${nameAttr}>`+set.map((o,j)=>{
+  const on=sel===String(j), tab=sel===null?j===0:on;
+  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${j}">${esc(o.l)}</button>`;
+ }).join("")+`</div>`;
+}
+function syncRadioGroup(group,v){
+ const btns=[...group.querySelectorAll('[role="radio"]')];
+ const has=v!==undefined&&v!==""&&btns.some(b=>b.dataset.v===v);
+ btns.forEach((b,i)=>{
+  const on=has&&b.dataset.v===v;
+  b.classList.toggle("on",on); b.setAttribute("aria-checked",on?"true":"false");
+  b.tabIndex=(has?on:i===0)?0:-1;
+ });
+}
 function updateAnswerUI(key){
  const v=S[key], sel='[data-q="'+key+'"]';
- const btns=document.querySelectorAll(sel);
- btns.forEach(btn=>btn.classList.toggle("on", v!==undefined && v!=="" && btn.dataset.v===v));
+ new Set([...document.querySelectorAll(sel)].map(b=>b.closest('[role="radiogroup"]')).filter(Boolean))
+   .forEach(g=>syncRadioGroup(g,v));
  renderNav(); renderTop(); updatePageScore();
 }
 function render(){
@@ -2637,6 +2657,18 @@ function drawer(open){
 btnMenu.addEventListener("click",()=>drawer(!sideEl.classList.contains("open")));
 backdrop.addEventListener("click",()=>drawer(false));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sideEl.classList.contains("open"))drawer(false);});
+/* Arrow keys inside a priority group move to, and select, the neighbouring option; Home/End jump. */
+content.addEventListener("keydown",e=>{
+ const r=e.target.closest&&e.target.closest('[role="radio"][data-q]'); if(!r) return;
+ const keys={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1,Home:"first",End:"last"};
+ if(!(e.key in keys)) return;
+ const btns=[...r.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]')];
+ const i=btns.indexOf(r), step=keys[e.key];
+ const next=step==="first"?btns[0]:step==="last"?btns[btns.length-1]:btns[(i+step+btns.length)%btns.length];
+ e.preventDefault();
+ const id=next.dataset.q; S[id]=next.dataset.v; saveA(); updateAnswerUI(id);   // updates in place: focus is not lost
+ next.focus();
+});
 
 document.getElementById("nav").addEventListener("click",e=>{
  const a=e.target.closest("[data-pg]");if(!a)return;e.preventDefault();
