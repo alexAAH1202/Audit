@@ -100,6 +100,17 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
 .notetoggle .notehas{color:var(--brand)}
+.grpcard h3{margin-bottom:0}
+.grptoggle{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:-6px 0;padding:6px 0;background:none;border:none;
+  font:inherit;font-size:17px;font-weight:700;color:var(--brand);text-align:left;cursor:pointer;flex-wrap:wrap}
+.grptoggle .cnt{color:var(--muted);font-weight:400;font-size:13px}
+.grptoggle .grpstat{margin-left:auto;font-size:13px;font-weight:600;color:var(--muted)}
+.grptoggle .flagn{color:var(--red)}
+.grptoggle .chev{display:inline-block;transition:transform .15s;font-size:15px}
+.grptoggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.grptoggle:focus-visible{outline:3px solid var(--brand);outline-offset:4px;border-radius:6px}
+.grpbody{margin-top:16px}.grpbody[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.grptoggle .chev{transition:none}}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
 .opt{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.25;color:var(--muted);text-align:center;min-height:44px;overflow-wrap:anywhere}
 .opt.on::before{content:"\2713\00a0"}
@@ -1853,14 +1864,21 @@ function rItem(it,suf){
     h+=`<button class="ebtn p" data-act="addq" data-id="${it.id}">+ Add question</button></div>`;
     return h;
    }
-   let h=`<div class="card"><h3 aria-level="2">${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
+   const gkey=it.id+suf, bp=/best practice/i.test(it.t);
+   let h;
+   if(bp){
+    const st=grpStats(it,suf), open=GRP_OPEN.has(gkey)||(st.ans>0&&!GRP_SHUT.has(gkey));
+    h=`<div class="card grpcard"><h3 aria-level="2"><button type="button" class="grptoggle" data-grptoggle="${esc(gkey)}" aria-expanded="${open}" aria-controls="gb-${fieldId(gkey)}">
+       <span class="chev" aria-hidden="true">\u25B8</span><span class="gt">${esc(it.t)}</span> <span class="cnt">${pl(it.items.length,"item")}</span>
+       <span class="grpstat">${grpStatText(st)}</span></button></h3><div class="grpbody" id="gb-${fieldId(gkey)}" ${open?"":"hidden"}>`;
+   }else h=`<div class="card"><h3 aria-level="2">${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
    h+=sweepHTML(it,suf);
    h+=rItems(it.items,suf);
    for(let a=0;a<(it.addl??2);a++){const ak=it.id+suf+"|addl"+a;
      h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" aria-label="Additional item description" placeholder="Additional item (optional)…" value="${esc(S[ak+"|t"]||"")}"></div>`+
         radioGroup(ak,RS("phml").opts,S[ak],'aria-label="Rating for this additional item"')+
         `<div class="qx">${noteBlock(ak,S[ak+"|n"]||"")}${photoBlock(ak)}</div></div>`;}
-   return h+`</div>`;}
+   return h+(bp?`</div></div>`:`</div>`);}
   case "sec":{
    const rep=it.rep!==false;
    if(EDIT){
@@ -1917,6 +1935,29 @@ function qRow(it,suf){
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}</div>`+
    radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+
    `<div class="qx">${noteBlock(key,note)}${photoBlock(key)}</div></div>`;
+}
+/* Best Practice groups are folded by default (design brief): they matter, but they are not what gets audited
+   first. The header shows how many items, how many are answered and how many are flagged, and the group opens
+   by itself once any question in it has an answer, so nothing recorded is ever hidden. */
+const GRP_OPEN=new Set(), GRP_SHUT=new Set();
+function grpStats(it,suf){
+ const qs=[]; walkQs(it.items,suf,qs,null); let n=0,ans=0,flag=0,na=0;
+ qs.forEach(x=>{ if(!isMainKey(x.key)) return; n++; const v=S[x.key];
+  if(v!==undefined&&v!==""){ ans++; if(v==="na") na++; const o=optOf(RS(x.item.rs).opts,v); if(o&&o.flag) flag++; } });
+ return {n,ans,flag,na};
+}
+const grpStatText=st=>`${st.ans} of ${st.n} answered${st.flag?` \u00B7 <span class="flagn">${st.flag} flagged</span>`:""}`;
+function refreshGrpStat(card){
+ const tg=card&&card.querySelector(".grptoggle"); if(!tg) return;
+ const keys=sweepKeys(card); let ans=0,flag=0;
+ keys.forEach(k=>{ const v=S[k]; if(v!==undefined&&v!==""){ ans++; const o=optOf(optsForKey(k),v); if(o&&o.flag) flag++; } });
+ tg.querySelector(".grpstat").innerHTML=grpStatText({ans,n:keys.length,flag});
+}
+function openGroup(body){
+ if(!body||!body.hidden) return;
+ const tg=document.querySelector('[aria-controls="'+body.id+'"]');
+ body.hidden=false; if(tg){ tg.setAttribute("aria-expanded","true"); GRP_OPEN.add(tg.dataset.grptoggle); GRP_SHUT.delete(tg.dataset.grptoggle); }
+ growNotes(body);
 }
 /* The comment box is folded behind a "+ Comment" button so a question is short until a note is needed. It opens by
    itself when it already holds text, and stays as the auditor left it while they work. */
@@ -2100,6 +2141,7 @@ function goToQuestion(hit){
  const pi=T.pages.indexOf(hit.page);
  if(mode!=="audit"||pi!==cur){ mode="audit"; EDIT=false; cur=pi; saveA(); render(); }
  const btn=content.querySelector('[data-q="'+CSS.escape(hit.key)+'"]'); if(!btn) return;
+ openGroup(btn.closest(".grpbody"));                  // a question inside a folded Best Practice group opens it first
  const row=btn.closest(".qrow")||btn, g=btn.closest('[role="radiogroup"]');
  const calm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
  row.scrollIntoView({block:"center",behavior:calm?"auto":"smooth"});
@@ -2192,7 +2234,7 @@ function syncRadioGroup(group,v){
 function updateAnswerUI(key){
  const v=S[key], sel='[data-q="'+key+'"]';
  const groups=new Set([...document.querySelectorAll(sel)].map(b=>b.closest('[role="radiogroup"]')).filter(Boolean));
- groups.forEach(g=>{ syncRadioGroup(g,v); refreshSweep(g.closest(".card")); });
+ groups.forEach(g=>{ syncRadioGroup(g,v); const card=g.closest(".card"); refreshSweep(card); refreshGrpStat(card); });
  renderNav(); renderTop(); updatePageScore();
 }
 function render(){
@@ -3074,6 +3116,11 @@ content.addEventListener("click",e=>{
  if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
    IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
  const b=e.target.closest("[data-q]");
+ const gt=e.target.closest("[data-grptoggle]");
+ if(gt){ const body=document.getElementById(gt.getAttribute("aria-controls")); if(!body) return;
+   if(body.hidden) openGroup(body);
+   else{ body.hidden=true; gt.setAttribute("aria-expanded","false"); GRP_OPEN.delete(gt.dataset.grptoggle); GRP_SHUT.add(gt.dataset.grptoggle); }
+   return; }
  const nt=e.target.closest("[data-notetoggle]");
  if(nt){ const key=nt.dataset.notetoggle, wrap=document.getElementById(nt.getAttribute("aria-controls")); if(!wrap) return;
    const open=wrap.hidden; wrap.hidden=!open; nt.setAttribute("aria-expanded",String(open));
