@@ -229,6 +229,12 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .notice.ok{background:var(--green-bg)}
 .notice b{color:var(--orange)}.notice.err b{color:var(--red)}.notice.ok b{color:var(--green)}
 .notice .btn{min-height:44px}
+.resetdlg{margin:auto;border:none;border-radius:12px;padding:22px;max-width:480px;width:92%;color:var(--ink)}
+.resetdlg::backdrop{background:rgba(20,30,45,.5)}
+.resetdlg h3{margin-bottom:10px;color:var(--red)}.resetdlg p{margin-bottom:10px}
+.resetdlg label{display:block;margin:14px 0 6px}.resetdlg .ein{width:100%}
+.resetdlg .rsact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.resetdlg .btn[disabled]{opacity:.5;cursor:not-allowed}
 .notice .nx{margin-left:auto;min-height:44px;min-width:44px}
 @media print{#notices{display:none}}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
@@ -1144,7 +1150,9 @@ function loadAll(){
 function notice(id,html,level){
  const box=document.getElementById("notices"); if(!box) return;
  let n=box.querySelector(`[data-notice="${id}"]`);
+ if(n&&n.dataset.sig===level+html) return;
  if(!n){ n=document.createElement("div"); n.dataset.notice=id; box.appendChild(n); }
+ n.dataset.sig=level+html;
  n.className="notice"+(level==="err"?" err":level==="ok"?" ok":"");
  n.innerHTML=`<span>${html}</span><button type="button" class="btn nx" aria-label="Dismiss this message">✕</button>`;
  n.querySelector(".nx").onclick=()=>n.remove();
@@ -1169,8 +1177,24 @@ async function checkPersistence(){
    persistent storage, so it may delete this audit and its photos — Safari does so after 7 days without a visit.
    Keep a backup file of every audit.`,"warn");
 }
-const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T))}catch(e){}};
-const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur}))}catch(e){}};
+/* A save that fails silently is worse than one that refuses (design brief).
+   Every write reports success or failure; failure raises a persistent
+   notice that clears itself as soon as that kind of write succeeds again. */
+const SAVE_FAIL={};                       // what -> "full" | "unavailable"
+const isQuota=e=>!!e&&(e.name==="QuotaExceededError"||e.name==="NS_ERROR_DOM_QUOTA_REACHED"||e.code===22||e.code===1014);
+function saveFailed(what,e){ SAVE_FAIL[what]=isQuota(e)?"full":"unavailable"; showSaveFail(); }
+function saveOK(what){ if(what in SAVE_FAIL){ delete SAVE_FAIL[what]; showSaveFail(); } }
+function showSaveFail(){
+ const w=Object.keys(SAVE_FAIL);
+ if(!w.length){ clearNotice("savefail"); return; }
+ const full=w.some(k=>SAVE_FAIL[k]==="full");
+ notice("savefail",`<b>Not saved.</b> Your latest ${esc(w.join(" and "))} could not be stored — this browser's storage
+   ${full?"is full":"is unavailable (private browsing or blocked)"}. What is on screen will be lost if this page closes.
+   <button type="button" class="btn" data-act="backup">Back up now</button>
+   ${full?"Then free space, for example by removing photos you no longer need.":""}`,"err");
+}
+const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T));saveOK("template")}catch(e){saveFailed("template",e)}};
+const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur}));saveOK("answers")}catch(e){saveFailed("answers",e)}};
 const genId=()=>"d"+(T.meta.nextId++);
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const RS=k=>(T.rs[k]||T.rs.phml);
@@ -1456,7 +1480,13 @@ const IDB=(function(){
  function tx(mode){return open().then(db=>db.transaction("photos",mode).objectStore("photos"));}
  return {
   all:()=>tx("readonly").then(os=>new Promise(res=>{const q=os.getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([]);})),
-  put:rec=>tx("readwrite").then(os=>new Promise(res=>{const q=os.put(rec);q.onsuccess=()=>res();q.onerror=()=>res();})),
+  /* Resolves null once the transaction has committed, or the error if it did not. */
+  put:rec=>tx("readwrite").then(os=>new Promise(res=>{
+    const t=os.transaction; let err=null;
+    t.oncomplete=()=>res(null);
+    t.onabort=()=>res(err||t.error||new Error("aborted"));
+    const q=os.put(rec); q.onerror=()=>{err=q.error;};
+  })).catch(e=>e||new Error("unavailable")),
   del:id=>tx("readwrite").then(os=>new Promise(res=>{const q=os.delete(id);q.onsuccess=()=>res();q.onerror=()=>res();})),
   clear:()=>tx("readwrite").then(os=>new Promise(res=>{const q=os.clear();q.onsuccess=()=>res();q.onerror=()=>res();}))
  };
@@ -2257,8 +2287,9 @@ photoInput.addEventListener("change",async()=>{
   const data=await compressImage(f);
   if(!data)continue;
   const rec={id:k+":"+Date.now()+":"+Math.random().toString(36).slice(2,7),key:k,data,ts:Date.now()};
-  try{await IDB.put(rec);}catch(e){}
-  (PHOTOS[k]=PHOTOS[k]||[]).push(rec);
+  const perr=await IDB.put(rec);
+  if(perr) saveFailed("photos",perr); else saveOK("photos");
+  (PHOTOS[k]=PHOTOS[k]||[]).push(rec);   // kept in memory even if storing failed, so the backup can still include it
  }
  photoInput.value=""; refreshPhotos(k);
 });
@@ -2293,13 +2324,7 @@ document.getElementById("nav").addEventListener("click",e=>{
 });
 document.getElementById("btnReport").addEventListener("click",()=>{if(EDIT)EDIT=false;mode=mode==="report"?"audit":"report";render();});
 document.getElementById("btnExport").addEventListener("click",exportReport);
-document.getElementById("btnReset").addEventListener("click",()=>{
- if(confirm("Clear all AUDIT ANSWERS, including comments and photos? (Your template is kept.)")){
-   S={};REPS={};cur=0;saveA();
-   BK.sig="";BK.complete=false;saveBK();updateDoneBtn();clearNotice("backup");clearNotice("backupok");
-   IDB.clear().then(()=>{PHOTOS={};render();}).catch(()=>{PHOTOS={};render();});
- }
-});
+document.getElementById("btnReset").addEventListener("click",()=>resetModal());
 
 /* =====================================================================
    BACKUP & RESTORE  (design brief, P0 — data durability)
@@ -2335,11 +2360,14 @@ const pl=(n,w)=>n+" "+w+(n===1?"":"s");
 const countPhotos=()=>Object.values(PHOTOS).reduce((n,l)=>n+l.length,0);
 
 async function downloadBackup(){
- await loadPhotos();                       // read photos from IndexedDB, not from memory
+ /* Union of what is on screen and what is stored, so a photo that failed
+    to save to IndexedDB still goes into the backup file. */
+ const byId=new Map(); try{(await IDB.all()).forEach(p=>byId.set(p.id,p));}catch(e){}
+ Object.values(PHOTOS).flat().forEach(p=>byId.set(p.id,p));
  const site=getFieldVal("Title Page","Site conducted")||"";
  const data={format:"iac-audit-backup",schemaVersion:BACKUP_SCHEMA,createdAt:new Date().toISOString(),
    site,complete:!!BK.complete,answers:{s:S,r:REPS,cur},
-   photos:Object.values(PHOTOS).flat(),template:T};
+   photos:[...byId.values()],template:T};
  const name="audit-backup-"+(site.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase()||"untitled")+
    "-"+new Date().toISOString().slice(0,10)+".json";
  const a=document.createElement("a");
@@ -2384,13 +2412,51 @@ async function restoreFromFile(file){
  if(hasT){ T=b.template; if(!T.meta) T.meta={title:"Premises Access Audit",nextId:99999}; saveT(); }
  if(cur>=T.pages.length||cur<0) cur=0;
  saveA();
- try{ await IDB.clear(); for(const p of photos) await IDB.put(p); }catch(e){}
+ try{ await IDB.clear(); for(const p of photos){ const er=await IDB.put(p); if(er){ saveFailed("photos",er); break; } } }catch(e){}
  await loadPhotos();
  BK.sig=auditSig(); BK.at=b.createdAt?Date.parse(b.createdAt)||Date.now():Date.now(); BK.complete=!!b.complete; saveBK();
  clearNotice("backup"); clearNotice("backupok");
  render(); updateDoneBtn();
  const got=countPhotos();
  notice("backupok",`<b>Backup restored:</b> ${pl(countAnswers(S),"answer")}, ${pl(got,"photo")}${got<photos.length?` — only ${got} of ${photos.length} could be written`:""}.`,got<photos.length?"err":"ok");
+}
+
+/* Reset audit: a confirm() becomes muscle memory by the fiftieth audit, so
+   the auditor must type the site name (or RESET if none is entered). */
+function resetModal(){
+ const site=(getFieldVal("Title Page","Site conducted")||"").trim();
+ const word=site||"RESET";
+ const norm=x=>x.trim().replace(/\s+/g," ").toLowerCase();
+ const dlg=document.createElement("dialog"); dlg.className="resetdlg"; dlg.setAttribute("aria-labelledby","resetTitle");
+ const status=()=>!hasAuditData()?"There is nothing in this audit yet."
+   :auditSig()===BK.sig?`This audit matches its last backup (${esc(fmtDate(BK.at))}).`
+   :`<b>This audit is not backed up.</b> ${BK.at?"Last backed up "+esc(fmtDate(BK.at))+".":"It has never been backed up."}`;
+ dlg.innerHTML=`<h3 id="resetTitle">Reset this audit?</h3>
+  <p>This permanently deletes <b>${pl(countAnswers(S),"answer")}</b>, all notes and report text, and
+     <b>${pl(countPhotos(),"photo")}</b> from this device. The template is kept. It cannot be undone.</p>
+  <p role="status" data-st>${status()}</p>
+  <button type="button" class="btn" data-bk>Back up first</button>
+  <label for="resetConfirm">To confirm, type <b>${esc(word)}</b></label>
+  <input id="resetConfirm" class="ein" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="rsact"><button type="button" class="btn" data-cancel>Cancel</button>
+   <button type="button" class="btn danger" data-go disabled>Reset audit</button></div>`;
+ document.body.appendChild(dlg);
+ const inp=dlg.querySelector("#resetConfirm"), go=dlg.querySelector("[data-go]");
+ const ok=()=>norm(inp.value)===norm(word);
+ inp.oninput=()=>{go.disabled=!ok();};
+ inp.onkeydown=e=>{ if(e.key==="Enter"&&ok()){ e.preventDefault(); go.click(); } };
+ dlg.querySelector("[data-cancel]").onclick=()=>dlg.close();
+ dlg.querySelector("[data-bk]").onclick=async()=>{ const n=await downloadBackup();
+   dlg.querySelector("[data-st]").innerHTML=`<b>Backup downloaded:</b> ${esc(n)}`; };
+ go.onclick=()=>{
+  if(!ok()) return;
+  dlg.close();
+  S={};REPS={};cur=0;saveA();
+  BK.sig="";BK.complete=false;saveBK();updateDoneBtn();clearNotice("backup");clearNotice("backupok");
+  IDB.clear().then(()=>{PHOTOS={};saveOK("photos");render();}).catch(()=>{PHOTOS={};render();});
+ };
+ dlg.addEventListener("close",()=>dlg.remove());
+ dlg.showModal(); inp.focus();
 }
 
 let bDone=null;
