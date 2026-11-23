@@ -240,6 +240,15 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
 .rf-i{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:inherit;font-size:13px;width:11em;background:#fff;color:var(--ink)}
 .cover{display:none}
+.figrefs{margin-top:8px;font-size:12.5px}.figrefs a{color:var(--brand)}
+.thumbs{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.plate{margin:0 0 20px}
+.plate img{display:block;max-width:100%;max-height:520px;margin:0 auto;object-fit:contain;
+  border:1px solid var(--line);border-radius:6px;background:#F1F2F6}
+.plate figcaption{margin-top:7px;font-size:13px}
+.plate .fp{color:var(--muted);font-size:12px}
+.rf-i.cap{display:block;width:100%;margin-top:6px}
+.rf-v.cap{margin-top:4px}
 .rf-t:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .tf-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 .tag{font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;
@@ -279,6 +288,10 @@ input,textarea,select{font:inherit;color:var(--ink)}
   .report2 .rep-table tr{break-inside:avoid}
   .report2 .schband{break-after:avoid}
   .report2 .jstage,.report2 .qphoto{break-inside:avoid}
+  .report2 .thumbs{display:none}                       /* photos are referenced by figure number and printed as plates */
+  .report2 .plate{break-inside:avoid;margin-bottom:7mm}
+  .report2 .plate img{max-height:100mm}
+  .report2 .rf-i.cap:placeholder-shown{display:none}
   .report2 .rf-l{break-after:avoid}
   body{font-size:12.5px}
 }
@@ -1912,12 +1925,43 @@ function rfField(key,suffix,label,placeholder){
      placeholder="${esc(placeholder)}" rows="2">${esc(v)}</textarea></div>`;
 }
 
+/* --- 4b. Photo plates: figure numbers ---------------------------------
+   Every photo attached to a flagged finding, then every other item that has
+   one, gets a Figure number in the order it appears in the report. Findings
+   and the works schedule refer to figures; the plates themselves are the
+   large photographs at the end. Numbering ignores the on-screen matrix
+   filter, so a figure keeps its number whatever is being viewed. */
+function buildFigures(all){
+ const RK={br:0,hi:1,md:2,lo:3,pass:9};
+ const flags=all.filter(f=>f.flag).sort((a,b)=>a.pri-b.pri||a.secIdx-b.secIdx||RK[a.gc]-RK[b.gc]);
+ const no=new Map(), list=[];
+ const add=(key,item,page,label)=>(PHOTOS[key]||[]).forEach(p=>{
+  if(no.has(p.id)) return;
+  no.set(p.id,list.length+1);
+  list.push({n:list.length+1,p,key,title:item.t,page:page?page.title:"",label});
+ });
+ flags.forEach(f=>add(f.key,f.item,f.page,f.gl));
+ const fk=new Set(flags.map(f=>f.key));
+ allQs().filter(x=>!fk.has(x.key)).forEach(x=>add(x.key,x.item,x.page,"Comment"));
+ return {no,list};
+}
+const figText=(FIG,key)=>(PHOTOS[key]||[]).map(p=>FIG.no.get(p.id)).filter(Boolean).join(", ");
+
 /* --- 5. The report -------------------------------------------------- */
 let REPFILTER={pri:null,diff:null};      // set by clicking a matrix cell
 
 function reportHTML(){
  const all=collectFindings();
  const flags=all.filter(f=>f.flag);
+ const FIG=buildFigures(all);
+ /* In the report a photo is a reference, not a thumbnail: "Figure 3" links to its plate.
+    Small thumbnails show on screen only, so the auditor can still see the picture beside the finding. */
+ const figRefs=key=>{
+  const l=PHOTOS[key]||[]; if(!l.length) return "";
+  return `<div class="figrefs"><b>${l.length===1?"Photo":"Photos"}:</b> `+
+    l.map(p=>`<a href="#fig-${FIG.no.get(p.id)}">Figure ${FIG.no.get(p.id)}</a>`).join(", ")+`</div>`+
+    `<div class="thumbs">`+l.map(p=>`<span class="qphoto"><img src="${p.data}" alt=""></span>`).join("")+`</div>`;
+ };
  const breaches=flags.filter(f=>f.gc==="br");
  const onPath=flags.filter(f=>f.pri===1);
  const quick=flags.filter(f=>f.diff==="low");
@@ -2080,7 +2124,7 @@ function reportHTML(){
          <select class="tf-select" data-tf="${esc(f.key)}">${tfOptions(TF_MAX_MONTHS[f.gc]||12,S[f.key+"|tf"])}</select></label>
        <span class="tag">When <b>${z.l}</b></span>
      </div>
-     ${reportPhotos(f.key)}</div>`;
+     ${figRefs(f.key)}</div>`;
   });
  }
  h+=`</div>`;
@@ -2089,20 +2133,21 @@ function reportHTML(){
  h+=`<div class="card flow newpage"><h3>Works schedule</h3>
    <p class="rf-hint">The hand-off table. Export this as CSV beside the PDF so the client can paste it
       into their maintenance system or send it to a builder.</p>
-   <table class="rep-table"><thead><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th></tr></thead><tbody>`;
+   <table class="rep-table"><thead><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th><th>Fig.</th></tr></thead><tbody>`;
  let any=false;
  [1,2,3,4].forEach(z=>{
   const items=flags.filter(f=>zoneOf(f.pri,f.diff)===z);
   if(!items.length)return; any=true;
-  h+=`<tr class="schband"><td colspan="5">${ZONE[z].l} — ${ZONE[z].sub} (${items.length})</td></tr>`;
+  h+=`<tr class="schband"><td colspan="6">${ZONE[z].l} — ${ZONE[z].sub} (${items.length})</td></tr>`;
   items.forEach(f=>{
    h+=`<tr><td>${esc(f.item.t)}</td><td>${esc(f.page?f.page.title:"")}</td>
      <td>${f.action?esc(f.action):`<span style="color:var(--muted)">— not yet written —</span>`}</td>
      <td style="font-size:12px;color:var(--muted)">${esc(f.item.c||"")}</td>
-     <td>${f.diff?esc(DIFF_LABEL[f.diff]):`<span style="color:var(--muted)">—</span>`}</td></tr>`;
+     <td>${f.diff?esc(DIFF_LABEL[f.diff]):`<span style="color:var(--muted)">—</span>`}</td>
+     <td style="font-size:12px">${esc(figText(FIG,f.key))||`<span style="color:var(--muted)">—</span>`}</td></tr>`;
   });
  });
- if(!any) h+=`<tr><td colspan="5" style="color:var(--muted)">No flagged items.</td></tr>`;
+ if(!any) h+=`<tr><td colspan="6" style="color:var(--muted)">No flagged items.</td></tr>`;
  h+=`</tbody></table></div>`;
 
  /* ---- Monitor list (unchanged behaviour) ---- */
@@ -2114,9 +2159,26 @@ function reportHTML(){
   h+=`<div class="flagitem med"><span class="badge md">Comment</span> &nbsp; ${esc(x.item.t)}
    <div class="fp">${esc(x.page?x.page.title:"")}${x.item.c?" — "+esc(x.item.c):""}</div>
    ${S[x.key+"|n"]?`<div class="rf-note"><b>Comment:</b> ${esc(S[x.key+"|n"])}</div>`:""}
-   ${reportPhotos(x.key)}</div>`;
+   ${figRefs(x.key)}</div>`;
  });
- return h+`</div></div>`;
+ h+=`</div>`;                          // close the "other items" card
+ /* ---- Photographic record (plates) ---- */
+ if(FIG.list.length){
+  h+=`<div class="card flow newpage"><h3>Photographic record <span class="cnt">${FIG.list.length}</span></h3>`;
+  FIG.list.forEach(f=>{
+   const ck=f.key+"|cap:"+f.p.id, cap=S[ck]||"";
+   h+=`<figure class="plate" id="fig-${f.n}">
+     <img src="${f.p.data}" alt="Figure ${f.n}: ${esc(f.title)}">
+     <figcaption><b>Figure ${f.n}</b> — ${esc(f.title)}<span class="fp"> · ${esc(f.page)} · ${esc(f.label)}</span>
+      ${EXPORTING
+        ? (cap.trim()?`<div class="rf-v cap">${esc(cap)}</div>`:"")
+        : `<input class="rf-i cap" data-rf="${esc(f.key)}" data-rfk="cap:${esc(f.p.id)}" value="${esc(cap)}"
+            aria-label="Caption for Figure ${f.n}" placeholder="Add a caption, e.g. Tape across doorway reads 790mm">`}
+     </figcaption></figure>`;
+  });
+  h+=`</div>`;
+ }
+ return h+`</div>`;
 }
 
 /* --- 6. CSV export of the works schedule ---------------------------- */
@@ -2125,10 +2187,11 @@ function exportScheduleCSV(){
    .sort((a,b)=>zoneOf(a.pri,a.diff)-zoneOf(b.pri,b.diff)||a.pri-b.pri);
  const q=s=>'"'+String(s==null?"":s).replace(/"/g,'""')+'"';
  const rows=[["When","Priority","Journey section","Element","Location","Clause",
-              "Classification","Effort","Impact","Works","Fix by (months)"]];
+              "Classification","Effort","Impact","Works","Fix by (months)","Figures"]];
+ const FIG=buildFigures(collectFindings());
  flags.forEach(f=>rows.push([ZONE[zoneOf(f.pri,f.diff)].l,f.pri,f.section,f.item.t,
    f.page?f.page.title:"",f.item.c||"",f.gl,DIFF_LABEL[f.diff]||"",f.impact,f.action,
-   S[f.key+"|tf"]||""]));
+   S[f.key+"|tf"]||"",figText(FIG,f.key)]));
  const csv="﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n");
  const a=document.createElement("a");
  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
