@@ -109,7 +109,7 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .qphoto a.view{position:absolute;inset:0}
 .qphoto button{position:absolute;top:2px;right:2px;width:20px;height:20px;line-height:1;border:none;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
 .qphoto button:hover{background:var(--red)}
-.qnote{width:100%;margin-top:3px;border:1px dashed var(--line);border-radius:7px;padding:7px 9px;font-size:12.5px;display:block;min-height:40px;background:#fff}
+.qnote{width:100%;margin-top:3px;border:1px dashed var(--line);border-radius:7px;padding:10px 12px;font-size:14.5px;line-height:1.45;display:block;min-height:112px;max-height:480px;resize:vertical;background:#fff}
 .qnote.show{display:block}
 .addl input{width:100%;border:none;border-bottom:1px dashed var(--line);padding:4px 2px;font-size:13.5px;font-style:italic;background:transparent}
 /* repeat sections */
@@ -433,13 +433,13 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
    answer as a different priority.
 ===================================================================== */
 const PHML=[
- {l:"Pass",cls:"g",score:1},
- {l:"High Priority",cls:"r",score:0,flag:true},
- {l:"Medium Priority",cls:"o",flag:true},
- {l:"Low Priority",cls:"o",flag:true},
- {l:"Breach of Code",cls:"b",flag:true,breach:true}
+ {l:"Pass",code:"pass",cls:"g",score:1},
+ {l:"High Priority",code:"high",cls:"r",score:0,flag:true},
+ {l:"Medium Priority",code:"med",cls:"o",flag:true},
+ {l:"Low Priority",code:"low",cls:"o",flag:true},
+ {l:"Breach of Code",code:"breach",cls:"b",flag:true,breach:true}
 ];
-const FNN=[{l:"Found",cls:"r",flag:true},{l:"Not Found",cls:"g"},{l:"N/A",cls:"n"}];
+const FNN=[{l:"Found",code:"found",cls:"r",flag:true},{l:"Not Found",code:"notfound",cls:"g"},{l:"N/A",code:"na",cls:"n"}];
 
 /* item helpers */
 const q=(t,c)=>({k:"q",t,c});           // scored Pass/High/Med/Low question (c = AS clause ref)
@@ -1486,11 +1486,12 @@ function seedDefault(){
         fnn:{name:"Found / Not Found / N/A", opts:FNN} },
    pages };
 }
+let RAW_ANS=null, RAW_TPL=null;
 function loadAll(){
- try{const t=JSON.parse(localStorage.getItem(TKEY)); if(t&&t.pages) T=t;}catch(e){}
+ try{RAW_TPL=localStorage.getItem(TKEY); const t=JSON.parse(RAW_TPL); if(t&&t.pages) T=t;}catch(e){}
  if(!T) T=seedDefault();
  if(!T.meta) T.meta={title:"Premises Access Audit",nextId:9999};
- try{const a=JSON.parse(localStorage.getItem(AKEY)); if(a){S=a.s||{};REPS=a.r||{};cur=a.cur||0;}}catch(e){}
+ try{RAW_ANS=localStorage.getItem(AKEY); const a=JSON.parse(RAW_ANS); if(a){S=a.s||{};REPS=a.r||{};cur=a.cur||0;S_FORMAT=a.v||1;}}catch(e){}
  if(cur>=T.pages.length) cur=0;
 }
 /* ---------------------------------------------------------------------
@@ -1544,11 +1545,55 @@ function showSaveFail(){
    ${full?"Then free space, for example by removing photos you no longer need.":""}`,"err");
 }
 const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T));saveOK("template")}catch(e){saveFailed("template",e)}};
-const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur}));saveOK("answers")}catch(e){saveFailed("answers",e)}};
+const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur,v:S_FORMAT}));saveOK("answers")}catch(e){saveFailed("answers",e)}};
 const genId=()=>"d"+(T.meta.nextId++);
 const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const RS=k=>(T.rs[k]||T.rs.phml);
 const isScored=opts=>opts.some(o=>typeof o.score==="number");
+
+/* =====================================================================
+   ANSWER CODES (schema version 2)
+   An answer used to be the POSITION of the chosen option ("0", "1" ...), so reordering or inserting an
+   option silently changed the meaning of every saved audit. It is now the option's stable text `code`
+   ("pass", "high", "med", "low", "breach"). Existing audits are converted once, on load, after a JSON
+   backup has been written (see runMigrations). Never change an existing option's code.
+===================================================================== */
+const ANS_VERSION=2;
+let S_FORMAT=ANS_VERSION;        // format of the answers currently in memory (1 only while a legacy audit is being converted)
+const optOf=(set,v)=>(v===undefined||v===null||v==="")?null:(set.find(o=>o.code===v)||null);
+const CODE_BY_LABEL={"pass":"pass","high priority":"high","medium priority":"med","low priority":"low","breach of code":"breach","found":"found","not found":"notfound","n/a":"na"};
+const slugCode=l=>{ const c=String(l||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"opt"; return /^\d+$/.test(c)?"o-"+c:c; };
+/* Give every option in every response set a code. Idempotent; codes are unique within a set and never all digits. */
+function ensureCodes(tpl){
+ let changed=false;
+ Object.values((tpl&&tpl.rs)||{}).forEach(set=>{
+  const used=new Set((set.opts||[]).map(o=>o.code).filter(Boolean));
+  (set.opts||[]).forEach(o=>{
+   if(o.code) return;
+   let c=CODE_BY_LABEL[String(o.l||"").trim().toLowerCase()]||slugCode(o.l), base=c, i=2;
+   while(used.has(c)) c=base+"-"+(i++);
+   o.code=c; used.add(c); changed=true; });
+ });
+ return changed;
+}
+/* Convert index answers to codes, in place. Needs ensureCodes(tpl) to have run. Returns counts. An index that
+   points at no option is kept as S[key+"|legacy"] rather than discarded. */
+function convertAnswers(ans,tpl){
+ const find=(id)=>{ let hit=null; const walk=a=>a.some(it=>{ if(it.id===id){hit=it;return true;} return it.items?walk(it.items):false; }); (tpl.pages||[]).some(p=>walk(p.items||[])); return hit; };
+ const setFor=rs=>(tpl.rs[rs]||tpl.rs.phml||Object.values(tpl.rs)[0]).opts;
+ const cache={}; let converted=0, kept=0;
+ Object.keys(ans).forEach(key=>{
+  if(!/^[^|]+(\|addl\d+)?$/.test(key)) return;               // answer keys only: no other "|suffix"
+  const v=ans[key]; if(v===""||v===undefined||v===null) return;
+  const id=key.split(/[~|]/)[0]; let opts;
+  if(key.includes("|addl")) opts=setFor("phml");
+  else{ const it=cache[id]||(cache[id]=find(id)||{}); if(it.k!=="q") return; opts=setFor(it.rs||"phml"); }
+  const str=String(v); if(!/^\d+$/.test(str)) return;           // already a code
+  const o=opts[+str];
+  if(o){ ans[key]=o.code; converted++; } else { ans[key+"|legacy"]=str; ans[key]=""; kept++; }
+ });
+ return {converted,kept};
+}
 
 /* ---- tree helpers ---- */
 function itemsArrayOf(id){
@@ -1627,7 +1672,7 @@ function allPageScores(){
   if(!String(x.key).includes("|addl")){ bucket.n++; const a=S[x.key]; if(a!==undefined&&a!=="") bucket.ans++; }
   const set=RS(x.item.rs).opts; if(!isScored(set)) return;
   bucket.max++; const v=S[x.key];
-  if(v!==undefined&&v!==""){const o=set[+v]; if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
+  if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
  });
  return map;
 }
@@ -1678,7 +1723,7 @@ function pageScore(pg){
  allQs().filter(x=>x.page===pg).forEach(x=>{
    const set=RS(x.item.rs).opts; if(!isScored(set))return;
    max++; const v=S[x.key];
-   if(v!==undefined&&v!==""){const o=set[+v]; if(o){ if(o.score===1)got++; if(o.flag){ if(o.breach)brc++; else if(o.score===0)hi++; else med++; } }}
+   if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)got++; if(o.flag){ if(o.breach)brc++; else if(o.score===0)hi++; else med++; } }}
  });
  return {got,max,hi,med,brc};
 }
@@ -1686,8 +1731,8 @@ function totals(){
  let got=0,max=0,flag=0,ans=0,n=0;
  allQs().forEach(x=>{const set=RS(x.item.rs).opts;const v=S[x.key];n++;
    if(v!==undefined&&v!=="")ans++;
-   if(isScored(set)){max++; if(v!==undefined&&v!==""){const o=set[+v];if(o){if(o.score===1)got++;}}}
-   if(v!==undefined&&v!==""){const o=set[+v];if(o&&o.flag)flag++;}
+   if(isScored(set)){max++; if(v!==undefined&&v!==""){const o=optOf(set,v);if(o){if(o.score===1)got++;}}}
+   if(v!==undefined&&v!==""){const o=optOf(set,v);if(o&&o.flag)flag++;}
  });
  return {got,max,flag,ans,n};
 }
@@ -1990,9 +2035,9 @@ function jumpToNextUnanswered(){
      that question, and the report states how many answers came from sweeps;
    - Undo sweep puts those questions back to unanswered.
 ===================================================================== */
-const passIdx=()=>String(RS("phml").opts.findIndex(o=>o.score===1));
+const passCode=()=>{ const o=RS("phml").opts.find(o=>o.score===1); return o?o.code:""; };
 const sweepKeys=card=>[...card.querySelectorAll('[role="radiogroup"][aria-labelledby]')].map(g=>g.querySelector("[data-q]").dataset.q);
-const isSwept=k=>S[k+"|sw"]==="1"&&S[k]===passIdx();
+const isSwept=k=>S[k+"|sw"]==="1"&&S[k]===passCode();
 function sweepHTML(it,suf){
  if(!/legislative/i.test(it.t)) return "";
  const qs=[]; walkQs(it.items,suf,qs,null);
@@ -2014,7 +2059,7 @@ function refreshSweep(card,msg){
  if(msg!==undefined) ctl.querySelector("[data-sweepmsg]").textContent=msg;
 }
 function sweepGroup(card,undo){
- const keys=sweepKeys(card), pass=passIdx(); let n=0;
+ const keys=sweepKeys(card), pass=passCode(); let n=0;
  keys.forEach(k=>{
   if(undo){ if(isSwept(k)){ delete S[k]; delete S[k+"|sw"]; n++; } }
   else if(S[k]===undefined||S[k]===""){ S[k]=pass; S[k+"|sw"]="1"; n++; }
@@ -2030,10 +2075,10 @@ function sweepGroup(card,undo){
 const fieldId=key=>"f-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
 const qlId=key=>"ql-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
 function radioGroup(key,set,v,nameAttr){
- const sel=v!==undefined&&v!==""&&set[+v]?String(v):null;
+ const sel=optOf(set,v)?String(v):null;
  return `<div class="opts" role="radiogroup" ${nameAttr}>`+set.map((o,j)=>{
-  const on=sel===String(j), tab=sel===null?j===0:on;
-  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${j}">${esc(o.l)}</button>`;
+  const on=sel===o.code, tab=sel===null?j===0:on;
+  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${esc(o.code)}">${esc(o.l)}</button>`;
  }).join("")+`</div>`;
 }
 function syncRadioGroup(group,v){
@@ -2111,7 +2156,11 @@ function render(){
    <button class="btn primary" ${cur===T.pages.length-1?"disabled":""} data-nav="1">Next &rarr;</button></div></div>`;
  c.innerHTML=h; c.scrollTop=keepScroll;
  if(EDIT) nameEditControls(c);
+ growNotes(c);
 }
+/* Comment boxes start four lines tall and grow with what is typed (up to a limit, then they scroll). */
+function growNote(el){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight+2,480)+"px"; }
+function growNotes(root){ (root||document).querySelectorAll("textarea.qnote").forEach(el=>{ if(el.value) growNote(el); }); }
 /* Template-editor controls have no visible labels; give each a name a screen reader can announce. */
 function nameEditControls(c){
  const nm=(sel,t)=>c.querySelectorAll(sel).forEach(e=>{ if(!e.getAttribute("aria-label")&&!e.closest("label")) e.setAttribute("aria-label",t); });
@@ -2246,8 +2295,7 @@ function collectFindings(){
  const secOrder=[]; map.forEach(v=>{ if(!secOrder.includes(v.section)) secOrder.push(v.section); });
  return allQs().map(x=>{
   const v=S[x.key], set=RS(x.item.rs).opts;
-  if(v===undefined||v===""||!set[+v]) return null;
-  const o=set[+v];
+  const o=optOf(set,v); if(!o) return null;
   const meta=map.get(x.page&&x.page.id)||{section:"General",pri:2};
   const gc = o.breach?"br"
            : o.score===0?"hi"
@@ -2314,7 +2362,7 @@ const figText=(FIG,key)=>(PHOTOS[key]||[]).map(p=>FIG.no.get(p.id)).filter(Boole
 function scopeHTML(all){
  const gv=l=>getFieldVal("Access Audit Details",l).trim();
  const lab=(l,v)=>v?`<div class="rf"><span class="rf-l">${esc(l)}</span><div class="rf-v">${esc(v)}</div></div>`:"";
- const by=new Map(), pass=passIdx();
+ const by=new Map(), pass=passCode();
  allQs().forEach(x=>{ const id=x.page.id;
   if(x.page.title==="Summary") return;          // the auditor's own summary page is not an assessed area
   if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0,sw:0}); by.get(id).total++; });
@@ -2848,7 +2896,7 @@ function rsModal(){
      if(r.querySelector("[data-sc]").checked)o.score=+r.querySelector("[data-sv]").value||0;
      if(r.querySelector("[data-fl]").checked)o.flag=true;return o;}).filter(o=>o.l);
    if(!opts.length){alert("Add at least one option");return;}
-   const key="rs"+genId();T.rs[key]={name,opts};saveT();box.remove();render();
+   const key="rs"+genId();T.rs[key]={name,opts};ensureCodes(T);saveT();box.remove();render();
  };
 }
 
@@ -2877,7 +2925,7 @@ function rsModal(){
  bImp.onclick=()=>fileIn.click();
  fileIn.onchange=()=>{const f=fileIn.files[0];if(!f)return;const r=new FileReader();
    r.onload=()=>{try{const t=JSON.parse(r.result);if(!t.pages)throw 0;
-     if(confirm("Replace the current template with the imported one? (Answers are kept but only match if IDs are the same.)")){T=t;if(!T.meta)T.meta={title:"Premises Access Audit",nextId:99999};cur=0;saveT();saveA();render();}}
+     if(confirm("Replace the current template with the imported one? (Answers are kept but only match if IDs are the same.)")){T=t;if(!T.meta)T.meta={title:"Premises Access Audit",nextId:99999};ensureCodes(T);cur=0;saveT();saveA();render();}}
      catch(e){alert("That file isn't a valid template export.");}};
    r.readAsText(f);fileIn.value="";};
 })();
@@ -2961,6 +3009,7 @@ content.addEventListener("input",e=>{
    if(el.type==="checkbox")S[id]=el.checked?1:"";
    else S[id]=el.value;
    saveA(); if(el.type==="checkbox")renderTop();
+   if(el.classList.contains("qnote")) growNote(el);
    if(el.hasAttribute("data-instlbl")){ const rep=el.closest(".rep"), h=rep&&rep.querySelector(".rh h4");
      if(h){ const v=el.value.trim(), num=+h.dataset.num, nm=rep.querySelector(".needname");
        h.innerHTML=esc(h.dataset.base)+(v?` — <span class="rhname">${esc(v)}</span>`:(num?" #"+num:"")); if(nm) nm.hidden=!!v; } }
@@ -3076,7 +3125,7 @@ document.getElementById("btnReset").addEventListener("click",()=>resetModal());
    Format: {format:"iac-audit-backup", schemaVersion, createdAt, site,
             complete, answers:{s,r,cur}, photos:[...], template}
 ===================================================================== */
-const BKEY="iac_backup_v1", BACKUP_SCHEMA=1;
+const BKEY="iac_backup_v1", BACKUP_SCHEMA=2;
 let BK={sig:"",at:0,complete:false};   // sig = fingerprint of the audit at last backup
 try{const b=JSON.parse(localStorage.getItem(BKEY)); if(b&&typeof b==="object") BK={...BK,...b};}catch(e){}
 const saveBK=()=>{try{localStorage.setItem(BKEY,JSON.stringify(BK))}catch(e){}};
@@ -3107,7 +3156,7 @@ async function downloadBackup(){
  Object.values(PHOTOS).flat().forEach(p=>byId.set(p.id,p));
  const site=getFieldVal("Title Page","Site conducted")||"";
  const data={format:"iac-audit-backup",schemaVersion:BACKUP_SCHEMA,createdAt:new Date().toISOString(),
-   site,complete:!!BK.complete,answers:{s:S,r:REPS,cur},
+   site,complete:!!BK.complete,answers:{v:S_FORMAT,s:S,r:REPS,cur},
    photos:[...byId.values()],template:T};
  const name="audit-backup-"+(site.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase()||"untitled")+
    "-"+new Date().toISOString().slice(0,10)+".json";
@@ -3150,7 +3199,12 @@ async function restoreFromFile(file){
  if(!confirm(msg)) return;
  if(dirty) await downloadBackup();
  S=a.s; REPS=(a.r&&typeof a.r==="object")?a.r:{}; cur=Number.isInteger(a.cur)?a.cur:0;
- if(hasT){ T=b.template; if(!T.meta) T.meta={title:"Premises Access Audit",nextId:99999}; saveT(); }
+ if(hasT){ T=b.template; if(!T.meta) T.meta={title:"Premises Access Audit",nextId:99999}; }
+ /* an older backup stores answers as option positions: convert them with the template that came with them */
+ ensureCodes(T);
+ if((a.v||1)<2) convertAnswers(S,T);
+ S_FORMAT=ANS_VERSION;
+ saveT();
  if(cur>=T.pages.length||cur<0) cur=0;
  saveA();
  try{ await IDB.clear(); for(const p of photos){ const er=await IDB.put(p); if(er){ saveFailed("photos",er); break; } } }catch(e){}
@@ -3348,16 +3402,41 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
  top.addEventListener("keydown",e=>{ if(e.key==="Escape"&&top.classList.contains("open")){ set(false); more.focus(); } });
 })();
 
-/* ---- go ---- */
-syncDrawerInert();
-loadAll();
-render();
-checkPersistence();
-offerLeave();
-offerJourney();
-offerScope();
-updateReviewBtn();
-loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
+/* Convert a legacy audit (answers stored as option positions) to answer codes. Order matters: copy the raw
+   data and write a JSON backup file FIRST, then convert, then save. The converted copy replaces the old one
+   only once both have been attempted. Nothing runs when there are no answers or they are already codes. */
+async function runMigrations(){
+ const legacy=S_FORMAT<2;
+ const has=Object.keys(S).length>0||Object.keys(REPS).length>0;
+ let name="";
+ if(legacy&&has){
+  await loadPhotos();                       // so the backup (and its change fingerprint) include the photos
+  try{ if(RAW_ANS) localStorage.setItem("iac_answers_v2_pre_codes",RAW_ANS); if(RAW_TPL) localStorage.setItem("iac_template_v2_pre_codes",RAW_TPL); }catch(e){}
+  try{ name=await downloadBackup(); }catch(e){}
+ }
+ const tchanged=ensureCodes(T);
+ let res={converted:0,kept:0};
+ if(legacy){ res=convertAnswers(S,T); S_FORMAT=ANS_VERSION; saveA(); }
+ if(tchanged||legacy) saveT();
+ if(legacy&&has){
+  BK.sig=auditSig(); saveBK(); clearNotice("backup");
+  notice("migrated",`<b>Your answers were converted to a safer format.</b> ${pl(res.converted,"answer")} converted${res.kept?`, ${pl(res.kept,"unreadable answer")} kept aside`:""}.
+    A backup file${name?` (${esc(name)})`:""} was downloaded first and a copy of the old data is kept in this browser.`,"ok");
+ }
+}
+async function boot(){
+ syncDrawerInert();
+ loadAll();
+ await runMigrations();
+ render();
+ checkPersistence();
+ offerLeave();
+ offerJourney();
+ offerScope();
+ updateReviewBtn();
+ loadPhotos().then(()=>{render();checkBackupStale();});   // re-render once photos are read from IndexedDB
+}
+boot();
 </script>
 </body>
 </html>

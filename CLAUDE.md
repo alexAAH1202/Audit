@@ -14,9 +14,11 @@ architectural changes.
 
 ## Hard constraints — do not violate
 
-1. **Never reorder or insert into the `PHML` array.** Answers are stored as array
-   indices. Changing the order silently reinterprets every saved audit. If the
-   response set must change, migrate to string codes first (brief, Data model).
+1. **Never change an existing response option's `code`.** Since answer schema version 2,
+   answers are stored as text codes (`"pass"`, `"high"`, `"med"`, `"low"`, `"breach"`;
+   `"found"`, `"notfound"`, `"na"`), not array positions, so reordering or inserting options in
+   `PHML`/`FNN` no longer changes what a saved answer means. A code, once released, is
+   permanent. Never remove an option that audits may already use; add a new one with a new code.
 
 2. **Never break single-file / no-build.** No bundler, no framework, no npm install
    step. Libraries load as ES modules from a CDN or not at all.
@@ -24,8 +26,10 @@ architectural changes.
 3. **Never break offline.** The tool must open and run fully with no network.
 
 4. **Never break a saved audit.** Stored answers are real client work. Any change to
-   storage shape needs a migration keyed on `schemaVersion` and a JSON backup written
-   before it runs.
+   storage shape needs a migration keyed on the stored version (`v` in the answers record,
+   `schemaVersion` in backup files) and a JSON backup written before it runs. See
+   `runMigrations()`, which is the pattern: copy the raw data, write a backup file, convert,
+   save, and keep the old copy.
 
 5. **Never regress accessibility.** This is an access consultancy's own tool. Target
    is WCAG 2.2 AA. Check any UI change against the criteria listed in the brief.
@@ -34,7 +38,7 @@ architectural changes.
 
 | What | Where | Key |
 | --- | --- | --- |
-| Answers | localStorage | `S[key]` — index into the response set |
+| Answers | localStorage | `S[key]` — the option's text `code` (schema v2; v1 stored its array index). Saved as `{s, r, cur, v:2}`. |
 | Note | localStorage | `S[key + "\|n"]` |
 | Timeframe | localStorage | `S[key + "\|tf"]` |
 | Effort | localStorage | `S[key + "\|diff"]` |
