@@ -1493,7 +1493,14 @@ function render(){
     <button class="ebtn d" data-act="pdel">Delete page</button>
     <label class="emeta"><input type="checkbox" data-pdiv ${p.divider?"checked":""}> section divider</label></div>
     <input class="ein" data-ptitle value="${esc(p.title)}" placeholder="Page title" style="margin-bottom:6px">
-    ${p.divider?`<input class="ein" data-pblurb value="${esc(p.blurb||"")}" placeholder="Divider description">`:""}</div>`;
+   ${p.divider?`<input class="ein" data-pblurb value="${esc(p.blurb||"")}" placeholder="Divider description" style="margin-bottom:6px">`:""}
+    <label class="emeta">Journey priority
+      <select class="ein" data-ppri style="width:auto;display:inline-block">
+        ${p.divider?"":`<option value=""${!validPri(p.pri)?" selected":""}>Inherit from section</option>`}
+        ${PRI_OPTIONS.map(([v,l])=>`<option value="${v}"${validPri(p.pri)===v?" selected":""}>${l}</option>`).join("")}
+      </select></label>
+    ${p.divider&&!validPri(p.pri)?`<span class="emeta" style="margin-left:8px;color:var(--orange)">not set — falling back to "${PRI_LABEL[fallbackPri(p.title)]}"</span>`:""}
+   </div>`;
  }
  if(p.divider && !EDIT){
   h+=`<div class="divpage"><h2>${esc(p.title)}</h2><p>${esc(p.blurb||"")}</p></div>`;
@@ -2132,6 +2139,8 @@ content.addEventListener("change",e=>{
  const pt=e.target.closest("[data-ptitle]"); if(pt){T.pages[cur].title=pt.value;saveT();renderNav();return;}
  const pb=e.target.closest("[data-pblurb]"); if(pb){T.pages[cur].blurb=pb.value;saveT();return;}
  const pd=e.target.closest("[data-pdiv]"); if(pd){T.pages[cur].divider=pd.checked;saveT();render();return;}
+ const pr=e.target.closest("[data-ppri]");
+ if(pr){ T.pages[cur].pri=pr.value?+pr.value:0; saveT(); render(); return; }
  renderNav();renderTop();
 });
 document.getElementById("content").addEventListener("blur",e=>{
