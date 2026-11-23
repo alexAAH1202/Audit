@@ -34,6 +34,13 @@ architectural changes.
 5. **Never regress accessibility.** This is an access consultancy's own tool. Target
    is WCAG 2.2 AA. Check any UI change against the criteria listed in the brief.
 
+## Tests
+
+`tests/` holds developer-only regression tests (Playwright and axe-core, 29 suites, about 1.5 minutes). Run
+`node tests/run.js` before committing a change to the tool, and `node tests/run.js --update` only after reading
+the snapshot diff. They are not part of the tool: constraint 2 (no build, no install) is about
+`access-audit.html`, which loads nothing from this folder. See `tests/README.md`.
+
 ## Storage model
 
 | What | Where | Key |

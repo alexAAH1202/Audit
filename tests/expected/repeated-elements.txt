@@ -1,0 +1,15 @@
+1 single instance: name field visible: true | required tag: 0 | heading: Disability Accessible Parking Bay
+2 after Add another: instances: 2 | focus on NEW name field: f-d37_1-p-lbl | required tags: 2 | unnamed notes: 2
+3 typed: heading live: Disability Accessible Parking Bay #1 | Disability Accessible Parking Bay — Bay 2 near the door | stored: Bay 2 near the door
+4 first named: Disability Accessible Parking Bay — Bay 1 nearest entry | Disability Accessible Parking Bay — Bay 2 near the door | unnamed notes: 0
+5 report locations: Accessible Car Parking — Bay 2 near the door — Premises Stan || Accessible Car Parking — Bay 1 nearest entry — Premises Stan
+  schedule Location: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door | plate: Figure 1 — The required number of accessible parking bays is provided for the building classification and tota
+  CSV Location col: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door
+6 unnamed fallback in report:  | draft box mentions unnamed: true
+  export: draft box gone: true | names present: true
+7 removed #3: instances 2 | stale name keys: 0
+8 persists: Disability Accessible Parking Bay — Bay 1 nearest entry | Disability Accessible Parking Bay — Bay 2 near the door
+9 backup holds names: 2
+  restored: Disability Accessible Parking Bay — Bay 1 nearest entry | Disability Accessible Parking Bay — Bay 2 near the door
+10 Entrances: name fields: 1 (fixed PPE section has none: 2 instances)
+errors: []

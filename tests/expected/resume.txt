@@ -1,0 +1,12 @@
+1 fresh audit offers nothing: null
+2 saved as the audit goes: Carpet pile height does not exceed 11mm
+3 after reload: Pick up where you left off? Floor / Ground Surfaces, question 3 of 7. Continue ✕
+4 Continue: page: Floor / Ground Surfaces | focus on its answer group: radio / true | notice gone: true
+5 Next unanswered continues after the resume point: question 4 of 7
+6 after reload, Next unanswered starts from where you were: Floor / Ground Surfaces
+7 stale key: no offer: true
+8 everything answered: no offer: true
+9 backup records it: true
+   after restore, saved: true
+10 reset clears it: null
+errors: []

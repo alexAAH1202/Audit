@@ -1,0 +1,35 @@
+1 fresh, no data: [
+  'Storage not protected. This browser refused persistent storage, so it '
+]
+2 edited, unbacked: [
+  'Storage not protected. This browser refused persistent storage, so it ',
+  'Not backed up. This audit has changes that are not in a backup file (n'
+]
+3 file: audit-backup-untitled-DATE.json iac-audit-backup 2 2 answers 1 photos 36 pages
+  notice: [
+  'Storage not protected. This browser refused persistent storage, so it ',
+  'Backup downloaded: audit-backup-untitled-DATE.json — 1 answer, 1'
+]
+4 reload, in sync: [
+  'Storage not protected. This browser refused persistent storage, so it '
+]
+5 edited after backup: [
+  'Storage not protected. This browser refused persistent storage, so it ',
+  'Not backed up. This audit has changes that are not in a backup file (l'
+]
+6 wiped: [ 0, 0 ]
+7 restored: [ 2, 1, '{"x":1}', 36 ] [
+  'Storage not protected. This browser refused persistent storage, so it ',
+  'Backup restored: 1 answer, 1 photo. ✕'
+] [ 'Restore this backup?' ]
+8 reload after restore: [ 2, 1 ] [
+  'Storage not protected. This browser refused persistent storage, so it '
+]
+bad notjson -> That file is not a readable backup (it is not valid JSON). N | unchanged: true
+bad wrongfmt -> That file is not an audit backup. Nothing was changed. | unchanged: true
+bad newer -> This backup was made by a newer version of the tool (format  | unchanged: true
+bad damaged -> This backup file is damaged (answers or photos are missing). | unchanged: true
+9 report view auto-backup: audit-backup-untitled-DATE.json
+10 complete: Reopen audit true
+11 reopen: Mark audit complete
+errors: []

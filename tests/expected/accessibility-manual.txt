@@ -1,0 +1,13 @@
+1 reflow 320 | audit page   {"docScrollX":false,"contentScrollX":false,"wide":[]}
+1 reflow 320 | Entrances    {"docScrollX":false,"contentScrollX":false,"wide":[]}
+1 reflow 320 | site scope   {"docScrollX":false,"contentScrollX":false,"wide":[]}
+1 reflow 320 | report       {"docScrollX":false,"contentScrollX":false,"wide":[]}
+1 reflow 320 | edit mode    {"docScrollX":false,"contentScrollX":false,"wide":[]}
+1 reflow 320 | title page   {"docScrollX":false,"contentScrollX":false,"wide":[]}
+2 text spacing: clipped controls: []
+3 keyboard: tab stops 127 | without visible focus indicator: 0 [] | focused but under the Next-unanswered button: 1 [ 'btnNextUn' ]
+4 targets (phone, Entrances): {"under44":5,"under24":0,"sample":["INPUT.||24x24","INPUT.||24x24","INPUT.||24x24","INPUT.||24x24","INPUT.||24x24"]}
+5 structure: {"lang":"en","title":"Premises Access Audit — Inclusive Access Co.","landmarks":"main:1 nav:1 aside:1 header:0 footer:0","h1":["Accessible Car Parking"],"h2":0,"skip":true,"current":1,"liveRegions":3}
+  first Tab stop is the skip link: skip | visible when focused: true
+  skip link moves focus into the audit: content
+6 reduced motion: drawer transition: 0s

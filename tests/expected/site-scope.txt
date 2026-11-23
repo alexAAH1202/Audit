@@ -1,0 +1,21 @@
+1 order: Title Page > Site Scope > Access Audit Introduction > Access Audit Details | assessable q: 504
+2 banner: DRAFT RULES. Set from best-practice defaults, not yet reviewed with the access consultant. | groups: 6 | follow-up shown: false
+3 answers stored: {"cls":"","storeys":"1","lift":"","parking":"no","sanitary":"no","built":"","use":""} | aria-checked after render: 3 | focus on selected: true
+4 skipped: Accessible Car Parking | Accessible Toilets — Prior 1 May 2011 | Accessible Toilets — On/After 1 May 2011 | Ambulant Toilets | Accessible Adult Change Facilities | Refuge & Assisted Evacuation | assessable q now: 319 (was 500)
+5 nav N/A: Accessible Car Parking, not applicable: No on-site parking || Accessible Toilets — Prior 1 May 2011, not applicable: No sanitary facilities for the public || Accessible Toilets — On/After 1 May 2011, not applicable: No sanitary facilities for the public || Ambulant Toilets, not applicable: No sanitary facilities for the public || Accessible Adult Change Facilities, not applicable: No sanitary facilities for the public || Refuge & Assisted Evacuation, not applicable: Single-storey building, no levels above or below
+6 skipped page: Not applicable: No sanitary facilities for the public. Draft rule: review with the access consultant This page is left out of the audit, its progress and its score. Assess this page anyway | questions rendered: 0
+7 assess anyway: true | q count: 339
+8 answered page stays: Site Scope would leave this page out (No sanitary facilities for the public), but you are
+  still not skipped with answers: true
+9 follow-up appears: true
+  skipped now: Accessible Car Parking | Accessible Toilets — On/After 1 May 2011 | Refuge & Assisted Evacuation
+10 arrow key moved+saved: {"cls":"","storeys":"2","lift":"","parking":"no","sanitary":"yes","built":"before","use":""} | focus kept: true
+11 staff-only skips Customer Service Areas? false
+12 persists: {"cls":"","storeys":"2","lift":"","parking":"no","sanitary":"yes","built":"before","use":"staff"}
+13 report draft box: Draft content: review before this goes to a client. 17 items still need review with the access consultant. Open the Revi | declared scope rows: true
+14 export: draft box 0 | not applicable text: true
+15 review btn: Review list (17)
+  items: 17
+  after tick: Review list (16) | saved in template: {"leave-tbc":true}
+16 TBC chips on page: 7
+errors: []

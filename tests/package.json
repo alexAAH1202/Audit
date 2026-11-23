@@ -1,0 +1,13 @@
+{
+  "name": "access-audit-tests",
+  "private": true,
+  "description": "Developer-only regression tests for access-audit.html. The tool itself needs no install and no build.",
+  "scripts": {
+    "test": "node run.js",
+    "test:update": "node run.js --update"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2",
+    "playwright": "1.63.0"
+  }
+}

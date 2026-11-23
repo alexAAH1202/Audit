@@ -1,0 +1,22 @@
+1 legacy fixture: {"numericAnswers":66,"hasFnn":true,"hasAddl":false}
+  legacy labels recorded: 64
+2 migration notice: Your answers were converted to a safer format. 64 answers converted, 1 unreadable answer kept aside. A backup file (audit-backup-migration-test-centre-DATE.json) was downloaded first and a copy of the old
+  backup file downloaded first: [
+  'audit-backup-migration-test-centre-DATE.json',
+  'audit-backup-migration-test-centre-DATE.json'
+]
+  pre-copy kept in browser: [ true, true ]
+  stored version: [ 2, 2 ]
+3 answer labels identical: true (64 compared) []
+  findings identical: true (64) | totals identical: false {"got":13,"max":519,"flag":51,"ans":64,"n":520} | page scores identical: false | top bar identical: false 13/519 (3%) / 51 / 12% | nav identical: false
+   nav old: ,1/6,,,✓ 1/1,23/46 ⛔4 ⚑5,✓ 5/5 ⛔1 ⚑1,✓ 13/13 ⛔3 ⚑2,19/25 ⛔4 ⚑4,1/20,2/34 ⚑1,1/27,0/72,0/21,0/7,0/14,0/14,0/13,0/12,0/55,
+   nav new: ,1/6,,,✓ 1/1,23/46 ⛔4 ⚑5,✓ 5/5 ⛔1 ⚑1,✓ 13/13 ⛔3 ⚑2,19/25 ⛔4 ⚑4,1/20,2/34 ⚑1,0/27,0/72,0/21,0/7,0/14,0/14,0/13,0/12,0/55,
+4 stored values: pass,high,med,low,breach | custom set codes: yes,no,unsure | unreadable one kept aside: [null,null]
+5 untouched data: Position text / Migration Test Centre / 1 / 1 / low | swept still recognised: true
+6 second load: no second backup or notice: true
+7 a click stores a code: high
+  sweep writes the pass code: pass
+8 legacy backup file: schemaVersion 1 answers.v undefined
+  restored legacy backup equals the migrated data: true true | stored version 2
+9 new backup: schemaVersion 2 answers.v 2 | sample answer value: pass
+errors: []

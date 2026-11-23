@@ -1,0 +1,77 @@
+sweep groups on page: [
+  'Legislative Requirements 31 items',
+  'Legislative Requirements 31 items'
+]
+1 initial: {
+  btn: 'Mark 31 remaining as Pass',
+  aria: 'false',
+  undoVisible: false,
+  chip: null,
+  msg: '',
+  n: 31,
+  ans: '-------------------------------',
+  sw: '...............................',
+  checked: 0,
+  score: '0/503 (0%)',
+  flag: '0'
+}
+2 two hand answers: {
+  btn: 'Mark 29 remaining as Pass',
+  aria: 'false',
+  undoVisible: false,
+  chip: null,
+  msg: '',
+  n: 31,
+  ans: '-high-breach---------------------------',
+  sw: '...............................',
+  checked: 2,
+  score: '0/503 (0%)',
+  flag: '2'
+}
+3 swept via keyboard: {
+  btn: 'Nothing left to sweep',
+  aria: 'true',
+  undoVisible: true,
+  chip: 'Swept · 29 of 31',
+  msg: '29 items marked Pass by sweep.',
+  n: 31,
+  ans: 'passhighpassbreachpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass',
+  sw: 's.s.sssssssssssssssssssssssssss',
+  checked: 31,
+  score: '29/503 (6%)',
+  flag: '2'
+} | focus kept: true
+  second sweep no-op: s.s.sssssssssssssssssssssssssss
+4 hand-changed Q1: {
+  btn: 'Nothing left to sweep',
+  aria: 'true',
+  undoVisible: true,
+  chip: 'Swept · 28 of 31',
+  msg: '29 items marked Pass by sweep.',
+  n: 31,
+  ans: 'medhighpassbreachpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass',
+  sw: '..s.sssssssssssssssssssssssssss',
+  checked: 31,
+  score: '28/503 (6%)',
+  flag: '3'
+}
+5 undo: {
+  btn: 'Mark 28 remaining as Pass',
+  aria: 'false',
+  undoVisible: false,
+  chip: null,
+  msg: 'Sweep undone: 28 items cleared.',
+  n: 31,
+  ans: 'medhigh-breach---------------------------',
+  sw: '...............................',
+  checked: 3,
+  score: '0/503 (0%)',
+  flag: '3'
+}
+6 report disclosure: [ 'Area/Answered/Flagged/Passed by sweep', 'Entrances 31 of 72 3 28' ] 28 Pass answers were recorded by sweeping a whole group of requirements,
+     not by assessing each item indiv
+7 backup keeps sweep marks: 28
+  restored sweep marks: 28
+8 after restore: Swept · 28 of 31 | undo visible true
+9 sweep controls in report: 0
+errors: []

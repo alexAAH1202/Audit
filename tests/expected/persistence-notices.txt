@@ -1,0 +1,10 @@
+granted [ 'granted', '' ] []
+refused [
+  'refused',
+  'Storage not protected. This browser refused persistent stora'
+] []
+after dismiss: 0
+unsupported [
+  'unsupported',
+  'Storage not protected. This browser does not support persist'
+] []

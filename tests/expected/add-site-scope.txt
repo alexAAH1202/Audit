@@ -1,0 +1,11 @@
+offers: backupok,migrated,leave,journey,scope
+{
+  order: 'Title Page > Site Scope > Access Audit Introduction',
+  uniq: true,
+  oldKept: true,
+  answer: 'high',
+  picks: true,
+  second: false
+}
+rule applies on migrated template: [ 'Accessible Car Parking' ]
+errors: []

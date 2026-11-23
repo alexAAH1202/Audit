@@ -1,0 +1,11 @@
+1 nav labels: 1. Title Page | 2. Site Scope 0/6 | 3. Access Audit Introduction | 4. Access Audit Details | 5. Summary 0/1 | ARRIVE answered 0/147 | Section divider | 7. Accessible Car Parking 0/23 | 8. Landscaping 0/5 | 9. Kerb Ramps 0/13 | 10. External Accessways 0/25 | 11. Tactile Ground Surface Indicators 0/20
+  aria sample: Site Scope, 0 of 6 answered | score text in nav: false
+2 fab: [ 'Next unanswered · 504', false, 'false' ] | totals-based unanswered: 504
+3 first jump -> page: Summary | focus is radio: radio | flash: 1
+4 after answering, next is a different question on the same page: true Accessible Car Parking | count: Next unanswered · 503
+5 from a late page: Emergency Information & Alarms
+6 all answered: [ '✓ All answered', 'true' ] | nav: Section divider | 7. Accessible Car Parking ✓ 23/23 | 8. Landscaping ✓ 5/5 | sections: ARRIVE answered ✓ 147/147 | ENTER answered ✓ 72/72 | MOVE AROUND answered ✓ 28/28
+  click when done is a no-op: Emergency Information & Alarms
+7 hidden in report: true
+  hidden in edit: true
+errors: []

@@ -1,0 +1,16 @@
+1 groups on page: Relevant Australian Standards || Legislative Requirements 17 items || ▸ Best Practice Recommendations 6 items 0 of 6 answered
+  Best Practice folded: false | its questions hidden: true | legislative group still open: true
+2 hidden controls are not tab stops: true
+3 click opens: true true
+   survives a re-render: true
+   click closes: false
+4 Enter opens: true
+   Space closes: false
+5 a group with an answer opens itself: true | header: ▸ Best Practice Recommendations 6 items 1 of 6 answered · 1 flagged
+6 header updates as you answer: ▸ Best Practice Recommendations 6 items 2 of 6 answered · 2 flagged
+7 before jump, BP folded: false
+   Next unanswered opened it and focused inside: true | radio
+8 goToQuestion (Resume) opens it: true
+9 template editor not folded: true
+10 page height folded vs all open: 7290 vs 9539 ( 24% shorter )
+errors: []

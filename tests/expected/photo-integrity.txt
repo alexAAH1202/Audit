@@ -1,0 +1,11 @@
+1 first run, manifest seeded: {} | notice: null
+2 manifest tracks adds: ph0,ph1,ph2
+3 reload, all present: no notice: true | photos in memory: 3
+4 deliberate delete: no notice: true | manifest: ph0,ph1
+5 photos vanished: notice: 2 photos missing. This audit recorded photos that this browser no longer holds, for: Accessible Car Parking. The browser may have cleared its storage, or photo storage may be unavailable (for example in private browsing). Use Restore audit with your latest backup file to get them back. Forget missing photos ✕
+6 backup made earlier holds 2 photos
+7 after Restore audit: notice gone: true | photos back: 2 | manifest: ph0,ph1
+8 reload after restore: no notice: true
+9 lost again: true
+10 Forget is remembered across reload: true
+errors: []

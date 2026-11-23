@@ -1,0 +1,17 @@
+1 options per question: 6 | last is: Not applicable
+2 mark N/A: stored: na | unanswered 504 -> 503 | score 0/503 (0%) -> 0/502 (0%) | aria-checked: true
+3 page progress counts it as resolved: 8. Landscaping1/5
+4 score excludes N/A from the denominator: [1,4] (5 questions, 1 N/A, 1 pass -> 1/4)
+5 tap again clears: ""
+6 End key selects N/A: na
+7 Next-unanswered ignores N/A: true
+8 not a finding: 0
+9 lift = No: auto N/A set on: na* , high , na* , na* (* = set by scope; the hand-answered one untouched)
+   shown as selected N/A on the page: true
+10 hand answer replaces it: pass / no scope mark
+11 lift = Yes undoes scope marks only: pass , high , - , -
+12 report coverage: 3 questions marked not applicable to this building: Plant litter (leaves, seed pods, bark) does not accumulate on the accessible path of travel (Landscaping); A warning sign against using the lift in a fire is displayed near every passenger lift call button (E
+    table cell: [ 'Landscaping 1 of 4 · 1 not applicable 0' ]
+    export mentions it: true
+13 backup keeps N/A: 3 na answers, 2 scope marks
+errors: []

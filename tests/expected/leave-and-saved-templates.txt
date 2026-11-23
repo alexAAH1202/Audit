@@ -1,0 +1,34 @@
+1 fresh: notices []
+  q per LEAVE page: Exits & Egress Routes=19, Refuge & Assisted Evacuation=7, Emergency Information & Alarms=7
+  render each LEAVE page + report: LEAVE:2
+   Exits & Egress Routes:189
+   Refuge & Assisted Evacuation:75
+   Emergency Information & Alarms:93
+   journey:LEAVE / Priorities 1, 4 · 2 assessed
+2 legacy: offer shown: [
+  'Backup downloaded: audit-backup-untitled-DATE.json — 1',
+  'Your answers were converted to a safer format. 1 answer conv',
+  'New: LEAVE section. This template has no emergency-egress pa',
+  'Journey sections missing: ENTER, MOVE AROUND, AMENITIES, BE ',
+  'New: Site Scope page. Six questions at the start that leave '
+] | pages: 27
+  after add: {
+  pages: 31,
+  uniq: true,
+  oldKept: true,
+  order: 'Accessible Adult Change Facilities > Signage > LEAVE > Exits & Egress Routes > Refuge & Assisted Evacuation > Emergency Information & Alarms > Access Consultant Declaration > Glossary of Terms',
+  answer: 'high',
+  nextId: 688,
+  notice: 0
+}
+  second call no-op: [ false, 31 ]
+  persists after reload: [ true, 31, 'high' ] [
+  'Journey sections missing: ENTER, MOVE AROUND, AMENITIES, BE ',
+  'New: Site Scope page. Six questions at the start that leave '
+]
+3 dismissed stays dismissed: [
+  'Journey sections missing: ENTER, MOVE AROUND, AMENITIES, BE ',
+  'New: Site Scope page. Six questions at the start that leave '
+]
+  editor button visible: true
+errors: []

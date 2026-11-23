@@ -1,0 +1,2 @@
+in-app swapped: selects 0 textareas 0
+restored live editable: true | errors: []

@@ -1,0 +1,55 @@
+■ ARRIVE (pri 1)
+■ ENTER (pri 1)
+   Entrances
+■ MOVE AROUND (pri 1)
+   Internal Accessways
+   Floor / Ground Surfaces
+■ JOIN IN (pri 2)
+   Customer Service Areas
+   Meeting Spaces
+■ AMENITIES (pri 3)
+   Accessible Toilets — Prior 1 May 2011
+   Accessible Toilets — On/After 1 May 2011
+   Ambulant Toilets
+   Accessible Adult Change Facilities
+■ BE INFORMED (pri 4)
+   Signage
+■ LEAVE (pri 1)
+   Exits & Egress Routes
+1 existing pages (incl LEAVE) identical ids: 28 / 31 bad: [
+  'Exits & Egress Routes',
+  'Refuge & Assisted Evacuation',
+  'Emergency Information & Alarms'
+]
+  all ids unique: true | journey notice on fresh: 0
+2 legacy addjourney→addleave offers: backupok,migrated,leave,journey,scope {
+  uniq: true,
+  oldKept: true,
+  answer: 'high',
+  blurbs: [
+    'ARRIVE:1',
+    'ENTER:1',
+    'MOVE AROUND:1',
+    'JOIN IN:2',
+    'AMENITIES:3',
+    'BE INFORMED:4',
+    'LEAVE:1'
+  ]
+} | same order as seed: false
+2 legacy addleave→addjourney offers: backupok,migrated,leave,journey,scope {
+  uniq: true,
+  oldKept: true,
+  answer: 'high',
+  blurbs: [
+    'ARRIVE:1',
+    'ENTER:1',
+    'MOVE AROUND:1',
+    'JOIN IN:2',
+    'AMENITIES:3',
+    'BE INFORMED:4',
+    'LEAVE:1'
+  ]
+} | same order as seed: false
+3 journey stages: ARRIVE → ENTER → MOVE AROUND → JOIN IN → AMENITIES → BE INFORMED → LEAVE
+  meta: Priority 1 · Path of travel | Priority 1 · Path of travel | Priority 1 · Path of travel | Priority 2 · Services & participation | Priority 3 · Amenities | Priority 4 · Information & other | Priorities 1, 4 · 3 assessed
+errors: []

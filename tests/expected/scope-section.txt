@@ -1,0 +1,7 @@
+screen card: Scope and limitations | SCOPE OF THE AUDIT | Publicly accessible areas of the ground floor, car park and external path of travel. | Staff-only areas excluded. | BENCHMARK | Disability (Access to Premises — Buildings) Standards 2010; NCC 2022; AS 1428.1-2009. | ENGAGEMENT | Agreement dated 3 Nov 2026, ref KSC-114. | Client approval received: 05/11/2026 | COVERAGE | 3 of 22 assessable pages have answers recorded. | No items recorded for: Landscaping; Kerb Ramps; External Accessways; Tactile Ground Surface Indicators; Ramps; External Stairs; Internal Accessways; Floor / Ground Surfaces; Customer Service Areas; Meeting Spaces; Hearing Augmentation; Kitchen / Dining / Canteen Areas; Accessible To
+textareas in scope card: 1
+export: textareas 0 | hint paras 0
+export limits: "Roof terrace locked: not assessed.\n\"Plant room\" excluded <by agreement>."
+benchmark once: 1
+empty audit card: Scope and limitations | COVERAGE | 0 of 22 assessable pages have answers recorded. | No items recorded for: Accessible Car Parking; Landscaping; Kerb Ramps; External Accessways; Tactile Ground Surface Indicators; Ramps; External Stairs; Entrances; Internal Acc
+errors: []

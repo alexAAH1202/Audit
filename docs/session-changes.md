@@ -159,11 +159,13 @@ the WHS emergency-plan clause, and AS 1428.1 clause 11.1(f) and (g).
 
 ## 13. How it was tested
 
-A set of headless-browser scripts (kept outside the repo, in the session scratchpad) was run after each change:
-radio groups, sweep, top bar, navigation, LEAVE and journey migration, backup and restore, scope, print and export
-PDFs, photo plates, text-code migration against a legacy audit, Not applicable, resume, photo integrity, comment
-toggle, folded groups, search, and axe-core. They are not part of the repository, so a future session has no
-regression suite to run. Worth adding if the tool is to be maintained.
+A set of headless-browser scripts was run after each change and is now in the repository as **`tests/`**:
+29 suites covering answering, navigation, template migrations, backup and restore, the text-code migration against
+an audit saved by the previous build, printing and export, and axe-core accessibility checks on 10 screens plus the
+export. `node tests/run.js` runs them in about 1.5 minutes; each suite's output is compared with a saved snapshot and
+a page error fails the run. I confirmed the suite is stable over repeated runs and that it catches a deliberately
+introduced fault (removing `aria-checked` from the answer buttons). See `tests/README.md` for how to read a result and
+what is not covered.
 
 ## 14. Left undone
 

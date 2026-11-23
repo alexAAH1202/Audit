@@ -1,0 +1,20 @@
+1 'handrail': 21 results | status: 21 results for handrail | nav hidden: true | marks: true | clear button: true
+   first result: Clear width between handrails is not less than 1000mm Ramps · AS 1428.1 Cl 10.2 Unanswered
+2 two words (AND): 8 | Kerb ramp gradient does not exceed 1:8
+3 by clause: 26 | the exact phrase ranks first: true
+4 nothing: Nothing matches "zzzqqq". Try fewer or shorter words, or part of a cla | No results for zzzqqq
+5 by repeated-element name: 23 | shows the name: true
+6 by your own comment: 5 | Unanswered
+7 skipped page still found + marked: true
+   (searching for a question inside a folded group)
+8 choosing a result goes there: {"page":"Signage","focus":"radio","inFolded":false,"open":null} | search stays: signage
+9 result inside a folded group opens it: true
+10 ArrowDown moves into results: true
+    ArrowUp back to the box: qSearch
+    Enter opens the first result: radio
+11 Escape clears and restores the section list: true true
+12 '/' focuses search: qSearch
+13 axe with results showing: no violations
+14 phone: choosing a result closes the drawer and lands on the question: { drawerOpen: false, focus: 'radio', page: 'Ramps' }
+    no sideways scroll: true
+errors: []

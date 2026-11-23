@@ -1,0 +1,10 @@
+1100 empty box height: 96 | font: 15px
+  after 12 lines: [ 296, 'fits' ]
+  after short note: 96
+  reload with saved 6-line note: [ 161, 'fits' ]
+  errors: []
+390 empty box height: 96 | font: 15px
+  after 12 lines: [ 296, 'fits' ]
+  after short note: 96
+  reload with saved 6-line note: [ 161, 'fits' ]
+  errors: []

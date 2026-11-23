@@ -1,0 +1,20 @@
+
+## audit page (desktop) | violations: 0 | needs review: color-contrast(2)
+
+## audit page (phone 390) | violations: 0 | needs review: color-contrast(3)
+
+## site scope | violations: 0 | needs review: color-contrast(1)
+
+## report view | violations: 0 | needs review: color-contrast(2)
+
+## edit mode | violations: 0 | needs review: color-contrast(18)
+
+## drawer open (phone) | violations: 0 | needs review: color-contrast(1), skip-link(1)
+
+## More menu open (phone) | violations: 0 | needs review: color-contrast(1)
+
+## reset dialog | violations: 0 | needs review: none
+
+## review dialog | violations: 0 | needs review: none
+
+## title page | violations: 0 | needs review: color-contrast(1)

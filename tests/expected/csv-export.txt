@@ -1,0 +1,5 @@
+☰ Sections | Edit template | Report view | More ▾ | Print / PDF | Export report | Export schedule (CSV) | Back up audit | Restore audit | Review list (17) | Mark audit complete | Add LEAVE section | Add journey sections | Add Site Scope | Reset audit | Response sets | Export template | Import template
+works-schedule-DATE.csv
+﻿"When","Priority","Journey section","Element","Location","Clause","Classification","Effort","Impact","Works","Fix by (months)","Figures"
+"Do first","1","ARRIVE","The required number of accessible parking bays is provided for the building classification and total bay count","Accessible Car Parking","Premises Standards Sch.1 / BCA D3.5","High Priority","Low effort","","Fix ""it"", now","",""
+errors: []
