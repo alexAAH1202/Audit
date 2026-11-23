@@ -16,7 +16,7 @@ architectural changes.
 
 1. **Never change an existing response option's `code`.** Since answer schema version 2,
    answers are stored as text codes (`"pass"`, `"high"`, `"med"`, `"low"`, `"breach"`;
-   `"found"`, `"notfound"`, `"na"`), not array positions, so reordering or inserting options in
+   `"found"`, `"notfound"`, `"na"`; `"tbc"` To be confirmed, appended in schema v2), not array positions, so reordering or inserting options in
    `PHML`/`FNN` no longer changes what a saved answer means. A code, once released, is
    permanent. Never remove an option that audits may already use; add a new one with a new code.
 

@@ -193,3 +193,10 @@ what is not covered.
 - **Known rough edges:** Next unanswered's first jump from a fresh audit lands on the Summary page; open Best
   Practice groups and comment boxes are not remembered across reloads; old saved templates need three one-click
   "add" offers (LEAVE, journey sections, Site Scope).
+
+## Severity wording, To be confirmed, action-plan reference
+
+- "About this report" now says High, Medium and Low **severity**, and refers to "the action plan in section 4" instead of the works schedule. Saved templates still holding the first wording are updated on load; edited text is left alone.
+- New answer **To be confirmed** (code `tbc`), appended to the Pass/High/Medium/Low/Breach set. It is not a finding and is not scored (like Not applicable). Saved templates get the option added on load.
+- Report section 5 is now "Open items and items to monitor", listing To be confirmed items first; Appendix B defines the term.
+- On a phone the extra button adds one row (about 65px) to each question.

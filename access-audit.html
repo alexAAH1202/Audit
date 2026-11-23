@@ -541,12 +541,15 @@ const PHML=[
  {l:"High Priority",code:"high",cls:"r",score:0,flag:true},
  {l:"Medium Priority",code:"med",cls:"o",flag:true},
  {l:"Low Priority",code:"low",cls:"o",flag:true},
- {l:"Breach of Code",code:"breach",cls:"b",flag:true,breach:true}
+ {l:"Breach of Code",code:"breach",cls:"b",flag:true,breach:true},
+ /* Could not be determined on site; stays open. Not a finding, not scored. Appended: codes never change. */
+ {l:"To be confirmed",code:"tbc",cls:"n",open:true}
 ];
 const FNN=[{l:"Found",code:"found",cls:"r",flag:true},{l:"Not Found",code:"notfound",cls:"g"},{l:"N/A",code:"na",cls:"n"}];
 
 /* Standard "About this report" wording: the starting text of the Access Audit Overview box (editable per audit). */
-const ABOUT_REPORT="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low Priority describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe works schedule at the end groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
+const ABOUT_REPORT="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low severity describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe action plan in section 4 groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
+const ABOUT_REPORT_V1="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low Priority describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe works schedule at the end groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
 /* item helpers */
 const q=(t,c)=>({k:"q",t,c});           // scored Pass/High/Med/Low question (c = AS clause ref)
 const txt=(t,req,multi)=>({k:"txt",t,req,multi});
@@ -1690,9 +1693,9 @@ const isScored=opts=>opts.some(o=>typeof o.score==="number");
 const ANS_VERSION=2;
 /* What a severity is CALLED. The stored codes never change; only the words shown do. "Priority" is kept for
    the journey (1-4), so severities are not called "High Priority" any more (CLAUDE.md: never conflate them). */
-const BTN_LABEL={pass:"Pass",high:"High",med:"Medium",low:"Low",breach:"Breach of Code"};
+const BTN_LABEL={pass:"Pass",high:"High",med:"Medium",low:"Low",breach:"Breach of Code",tbc:"To be confirmed"};
 const REPORT_SEV={high:"High severity",med:"Medium severity",low:"Low severity",breach:"Breach of Code"};
-const optLabel=o=>(BTN_LABEL[o.code]&&/priority|^pass$|breach/i.test(o.l))?BTN_LABEL[o.code]:o.l;
+const optLabel=o=>(BTN_LABEL[o.code]&&/priority|^pass$|breach|confirmed/i.test(o.l))?BTN_LABEL[o.code]:o.l;
 let S_FORMAT=ANS_VERSION;        // format of the answers currently in memory (1 only while a legacy audit is being converted)
 const optOf=(set,v)=>(v===undefined||v===null||v==="")?null:(set.find(o=>o.code===v)||null);
 const CODE_BY_LABEL={"pass":"pass","high priority":"high","medium priority":"med","low priority":"low","breach of code":"breach","found":"found","not found":"notfound","n/a":"na"};
@@ -1805,7 +1808,7 @@ function allPageScores(){
   /* progress counts every question except the optional blank "additional" rows */
   if(!String(x.key).includes("|addl")){ bucket.n++; const a=S[x.key]; if(a!==undefined&&a!=="") bucket.ans++; }
   const set=RS(x.item.rs).opts; if(!isScored(set)) return;
-  if(S[x.key]!=="na") bucket.max++; const v=S[x.key];
+  if(S[x.key]!=="na"&&S[x.key]!=="tbc") bucket.max++; const v=S[x.key];
   if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
  });
  return map;
@@ -1856,7 +1859,7 @@ function pageScore(pg){
  let got=0,max=0,hi=0,med=0,brc=0;
  allQs().filter(x=>x.page===pg).forEach(x=>{
    const set=RS(x.item.rs).opts; if(!isScored(set))return;
-   if(S[x.key]!=="na") max++; const v=S[x.key];
+   if(S[x.key]!=="na"&&S[x.key]!=="tbc") max++; const v=S[x.key];
    if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)got++; if(o.flag){ if(o.breach)brc++; else if(o.score===0)hi++; else med++; } }}
  });
  return {got,max,hi,med,brc};
@@ -1865,7 +1868,7 @@ function totals(){
  let got=0,max=0,flag=0,ans=0,n=0;
  allQs().forEach(x=>{const set=RS(x.item.rs).opts;const v=S[x.key];n++;
    if(v!==undefined&&v!=="")ans++;
-   if(isScored(set)){if(v!=="na")max++; if(v!==undefined&&v!==""){const o=optOf(set,v);if(o){if(o.score===1)got++;}}}
+   if(isScored(set)){if(v!=="na"&&v!=="tbc")max++; if(v!==undefined&&v!==""){const o=optOf(set,v);if(o){if(o.score===1)got++;}}}
    if(v!==undefined&&v!==""){const o=optOf(set,v);if(o&&o.flag)flag++;}
  });
  return {got,max,flag,ans,n};
@@ -2768,6 +2771,7 @@ function appendixRatingsHTML(){
    <dt>Journey priority 1–4</dt><dd>Where the item sits in a visitor's journey: ${[1,2,3,4].map(p=>p+" "+esc(PRI_LABEL[p])).join(", ")}. It is position, not severity.</dd>
    <dt>Effort</dt><dd>${DIFFS.map(d=>esc(d[1])).join(" / ")}: a rough order of magnitude for time and funding, not a dollar figure.</dd>
    <dt>When</dt><dd>${ZONE.slice(1).map(z=>esc(z.l)+" ("+esc(z.sub.toLowerCase())+")").join("; ")}.</dd>
+   <dt>To be confirmed</dt><dd>Could not be determined on site; listed in section 5 and left out of the counts until resolved.</dd>
    <dt>F1, F2 …</dt><dd>Finding references. The same number is used in the findings, the action plan and the spreadsheet export.</dd></dl>
  </div>`;
 }
@@ -2838,7 +2842,7 @@ function reportHTML(){
   </section>
   <h1>${esc(T.meta.title)}: report</h1>
   <div class="crumb">${firm} · ${site} · generated ${today}</div>
-  <nav class="toc" aria-label="Report contents"><a href="#sec-summary">1 Summary</a><a href="#sec-about">About this report</a><a href="#sec-scope">2 Scope and method</a><a href="#sec-findings">3 Findings</a><a href="#sec-plan">4 Action plan</a><a href="#sec-monitor">5 Items to monitor</a><a href="#app-a">Appendices</a></nav>`;
+  <nav class="toc" aria-label="Report contents"><a href="#sec-summary">1 Summary</a><a href="#sec-about">About this report</a><a href="#sec-scope">2 Scope and method</a><a href="#sec-findings">3 Findings</a><a href="#sec-plan">4 Action plan</a><a href="#sec-monitor">5 Open items</a><a href="#app-a">Appendices</a></nav>`;
 
  /* ===== 1 SUMMARY: position, numbers, the most serious findings, where to start, the journey ===== */
  const posKey="report|position", pos=S[posKey]||"";
@@ -2980,7 +2984,13 @@ function reportHTML(){
  /* ===== 5 ITEMS TO MONITOR ===== */
  const flagKeys=new Set(flags.map(f=>f.key));
  const monitored=allQs().filter(x=>(S[x.key+"|n"]||(PHOTOS[x.key]&&PHOTOS[x.key].length))&&!flagKeys.has(x.key));
- h+=`<div class="card flow" id="sec-monitor"><h3 aria-level="2"><span class="secno">5</span> Items to monitor <span class="cnt">${monitored.length}</span></h3>`;
+ const open=allQs().filter(x=>S[x.key]==="tbc");
+ h+=`<div class="card flow" id="sec-monitor"><h3 aria-level="2"><span class="secno">5</span> Open items and items to monitor <span class="cnt">${open.length+monitored.length}</span></h3>`;
+ if(open.length){ h+=`<h4 aria-level="3" class="subhead">To be confirmed (${open.length})</h4><p class="mxnote" style="margin:0 0 10px">Could not be determined on site. These remain open until confirmed.</p>`;
+  open.forEach(x=>{ h+=`<div class="flagitem med"><span class="badge md">To be confirmed</span> &nbsp; ${esc(x.item.t)}
+   <div class="fp">${esc(whereOf(x))}${x.item.c?" — "+esc(x.item.c):""}</div>
+   ${S[x.key+"|n"]?`<div class="rf-note"><b>Comment:</b> ${esc(S[x.key+"|n"])}</div>`:""}${figRefs(x.key)}</div>`; });
+  if(monitored.length) h+=`<h4 aria-level="3" class="subhead">To monitor (${monitored.length})</h4>`; }
  if(!monitored.length) h+=`<p style="color:var(--muted)">No other comments or photos were recorded.</p>`;
  else h+=`<p class="mxnote" style="margin:0 0 10px">Not findings: items that met the requirement but carry a note or photo worth keeping an eye on.</p>`;
  monitored.forEach(x=>{
@@ -3918,7 +3928,8 @@ async function runMigrations(){
   try{ if(RAW_ANS) localStorage.setItem("iac_answers_v2_pre_codes",RAW_ANS); if(RAW_TPL) localStorage.setItem("iac_template_v2_pre_codes",RAW_TPL); }catch(e){}
   try{ name=await downloadBackup(); }catch(e){}
  }
- const tchanged=ensureCodes(T);
+ let tchanged=ensureCodes(T);
+ { const ph=T.rs&&T.rs.phml; if(ph&&!ph.opts.some(o=>o.code==="tbc")){ ph.opts.push({l:"To be confirmed",code:"tbc",cls:"n",open:true}); tchanged=true; } }
  let res={converted:0,kept:0};
  if(legacy){ res=convertAnswers(S,T); S_FORMAT=ANS_VERSION; saveA(); }
  if(tchanged||legacy) saveT();
@@ -3931,7 +3942,7 @@ async function runMigrations(){
 async function boot(){
  syncDrawerInert();
  loadAll();
- { const pg=T.pages.find(p=>p.title==="Access Audit Introduction"); const walk=a=>a.forEach(it=>{ if(it.k==="txt"&&it.t==="Access Audit Overview"&&!it.prefill){ it.prefill=ABOUT_REPORT; saveT(); } if(it.items) walk(it.items); }); if(pg) walk(pg.items); }
+ { const pg=T.pages.find(p=>p.title==="Access Audit Introduction"); const walk=a=>a.forEach(it=>{ if(it.k==="txt"&&it.t==="Access Audit Overview"&&(!it.prefill||it.prefill===ABOUT_REPORT_V1)){ it.prefill=ABOUT_REPORT; saveT(); } if(it.items) walk(it.items); }); if(pg) walk(pg.items); }
  loadLastQ();
  await runMigrations();
  render();

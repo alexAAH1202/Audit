@@ -1,9 +1,9 @@
 1 fresh: notices []
   q per LEAVE page: Exits & Egress Routes=19, Refuge & Assisted Evacuation=7, Emergency Information & Alarms=7
   render each LEAVE page + report: LEAVE:2
-   Exits & Egress Routes:189
-   Refuge & Assisted Evacuation:75
-   Emergency Information & Alarms:93
+   Exits & Egress Routes:212
+   Refuge & Assisted Evacuation:84
+   Emergency Information & Alarms:104
    journey:LEAVE / Priorities 1, 4 · 2 assessed
 2 legacy: offer shown: [
   'Backup downloaded: audit-backup-untitled-DATE.json — 1',

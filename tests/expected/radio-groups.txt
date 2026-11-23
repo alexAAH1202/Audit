@@ -5,20 +5,21 @@
   - radio "Medium"
   - radio "Low"
   - radio "Breach of Code"
+  - radio "To be confirmed"
   - radio "Not applicable"
 2 label resolves: The required number of accessible parking bays is
-3 initial (none chosen): ○0 ○-1 ○-1 ○-1 ○-1 ○-1
-4 ArrowRight: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 | focus: High
-5 End: ○-1 ○-1 ○-1 ○-1 ○-1 ●0 | answer saved: na
-6 wrap: ●0 ○-1 ○-1 ○-1 ○-1 ○-1
-7 left: ○-1 ○-1 ○-1 ○-1 ○-1 ●0
-8 Home: ●0 ○-1 ○-1 ○-1 ○-1 ○-1
+3 initial (none chosen): ○0 ○-1 ○-1 ○-1 ○-1 ○-1 ○-1
+4 ArrowRight: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 ○-1 | focus: High
+5 End: ○-1 ○-1 ○-1 ○-1 ○-1 ○-1 ●0 | answer saved: na
+6 wrap: ●0 ○-1 ○-1 ○-1 ○-1 ○-1 ○-1
+7 left: ○-1 ○-1 ○-1 ○-1 ○-1 ○-1 ●0
+8 Home: ●0 ○-1 ○-1 ○-1 ○-1 ○-1 ○-1
 9 one Tab leaves the group: true
-10 click: ○-1 ○-1 ●0 ○-1 ○-1 ○-1
-11 click again clears: ○0 ○-1 ○-1 ○-1 ○-1 ○-1
-12 Space selects: ○-1 ●0 ○-1 ○-1 ○-1 ○-1
+10 click: ○-1 ○-1 ●0 ○-1 ○-1 ○-1 ○-1
+11 click again clears: ○0 ○-1 ○-1 ○-1 ○-1 ○-1 ○-1
+12 Space selects: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 ○-1
 13 focus still in group after answer: true
-14 after reload: ○-1 ●0 ○-1 ○-1 ○-1 ○-1
+14 after reload: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 ○-1
 15 groups: 27 | buttons without role: 0 | groups without a name: 0
 16 addl name: Rating for this additional item
 17 ids ok: true
