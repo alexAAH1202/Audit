@@ -1874,6 +1874,27 @@ function exportScheduleCSV(){
    "Save edited copy" button, so whoever receives the file can correct
    wording or add a note directly in the report and re-save it, without
    needing this tool at all. Both controls are hidden from print/PDF. */
+/* Turn the live report into finished client copy: auditor guidance
+   (.rf-hint) is removed, and every <select> becomes plain text of its
+   chosen option. A select with nothing chosen is removed, together with
+   its "Fix by:" label when it has one. */
+function flattenForExport(html){
+ const t=document.createElement("template"); t.innerHTML=html;
+ t.content.querySelectorAll(".rf-hint").forEach(n=>n.remove());
+ t.content.querySelectorAll("select").forEach(sel=>{
+  const opt=sel.querySelector("option[selected]");
+  const host=sel.closest("label")||sel;
+  if(!opt||!opt.value){ host.remove(); return; }
+  const span=document.createElement("span");
+  span.className="tag";
+  if(sel.hasAttribute("data-diff")) span.innerHTML="Effort <b></b>";
+  else if(sel.hasAttribute("data-tf")) span.innerHTML="Fix by <b></b>";
+  else span.innerHTML="<b></b>";
+  span.querySelector("b").textContent=opt.textContent;
+  host.replaceWith(span);
+ });
+ return t.innerHTML;
+}
 function exportReport(){
  const site=esc(getFieldVal("Title Page","Site conducted")||"Access audit");
  const date=new Date().toLocaleDateString("en-AU");
@@ -1974,7 +1995,7 @@ function exportReport(){
  const v2Css=mark<0?"":appCss.slice(appCss.lastIndexOf("/*",mark));
  const fullCss=rootVars+"*,*::before,*::after{box-sizing:border-box}"+css+v2Css;
  let reportBody;
- EXPORTING=true; try{ reportBody=reportHTML(); } finally { EXPORTING=false; }
+ EXPORTING=true; try{ reportBody=flattenForExport(reportHTML()); } finally { EXPORTING=false; }
  const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">`+
    `<meta name="viewport" content="width=device-width, initial-scale=1">`+
    `<title>${site} — Access Audit Report (${date})</title><style>${fullCss}</style></head>`+
