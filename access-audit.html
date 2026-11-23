@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premises Access Audit — Inclusive Access Co.</title>
+<style>
+:root{
+  --ink:#1B1E2B; --muted:#4A4E5C; --line:#D3D6E0; --bg:#F9FAFC; --card:#fff;
+  --brand:#283593; --brand-lt:#E7E6F5;
+  --green:#1E6B3C; --green-bg:#E9F5EC;
+  --red:#B3261E; --red-bg:#FCEBEA;
+  --orange:#8A5A00; --orange-bg:#FDF6E7;
+  --breach:#6B0F1A; --breach-bg:#F4DFE1;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:Arial,Helvetica,"Helvetica Neue",sans-serif;color:var(--ink);background:var(--bg);font-size:14.5px;line-height:1.45}
+.side .logo h1,.pg h2,.card h3,.divpage h2,.rep .rh h4,.top .stat b{font-family:Verdana,Geneva,sans-serif}
+button{font:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink)}
+.app{display:flex;height:100vh;overflow:hidden}
+/* ---------- sidebar ---------- */
+.side{width:290px;min-width:290px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column}
+.side .logo{padding:16px 18px;border-bottom:1px solid var(--line)}
+.side .logo h1{font-size:15px;color:var(--brand)}
+.side .logo small{color:var(--muted)}
+.nav{flex:1;overflow-y:auto;padding:6px 0}
+.nav .div{padding:12px 18px 4px;font-size:11px;letter-spacing:.12em;color:var(--brand);font-weight:700}
+.nav a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 18px;color:var(--ink);text-decoration:none;font-size:13.5px;border-left:3px solid transparent}
+.nav a:hover{background:var(--bg)}
+.nav a.on{background:var(--brand-lt);border-left-color:var(--brand);font-weight:600}
+.nav a .sc{font-size:11px;color:var(--muted);white-space:nowrap}
+.nav a .sc.bad{color:var(--red);font-weight:700}
+.side .foot{border-top:1px solid var(--line);padding:12px 18px;font-size:12px;color:var(--muted)}
+/* ---------- main ---------- */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.top{background:var(--card);border-bottom:1px solid var(--line);padding:10px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top .stat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:13px}
+.top .stat b{font-size:15px}
+.top .stat.flag b{color:var(--red)}
+.top .grow{flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 14px;font-size:13.5px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.danger{color:var(--red)}
+.content{flex:1;overflow-y:auto;padding:26px 30px 80px}
+.pg{max-width:880px;margin:0 auto}
+.pg h2{font-size:21px;margin-bottom:2px}
+.pg .crumb{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:12px;color:var(--brand)}
+.card h3 .cnt{color:var(--muted);font-weight:400;font-size:12.5px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-weight:600;font-size:13.5px;margin-bottom:5px}
+.field label .req{color:var(--red)}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=datetime-local],.field textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:#fff}
+.field textarea{min-height:72px;resize:vertical}
+.chk{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:13.5px}
+.chk input{margin-top:3px}
+/* question rows */
+.qrow{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+.qrow:first-of-type{border-top:none}
+.qrow .qt{flex:1;font-size:13.5px}
+.qrow .qt .cl{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.opts{display:flex;gap:5px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 9px;font-size:12px;color:var(--muted);white-space:nowrap}
+.opt.g.on{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:700}
+.opt.r.on{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:700}
+.opt.o.on{background:var(--orange-bg);border-color:var(--orange);color:var(--orange);font-weight:700}
+.opt.n.on{background:var(--brand-lt);border-color:var(--brand);color:var(--brand);font-weight:700}
+.opt.b.on{background:var(--breach-bg);border-color:var(--breach);color:var(--breach);font-weight:700}
+.qnote-lbl{display:block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--brand);text-transform:uppercase}
+/* per-item photos */
+.addphoto{display:inline-flex;align-items:center;gap:5px;margin-top:7px;border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:6px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:36px}
+.addphoto:hover{background:var(--brand-lt)}
+.qphotos{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.qphoto{position:relative;width:74px;height:74px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#eef}
+.qphoto img{width:100%;height:100%;object-fit:cover;display:block}
+.qphoto a.view{position:absolute;inset:0}
+.qphoto button{position:absolute;top:2px;right:2px;width:20px;height:20px;line-height:1;border:none;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.qphoto button:hover{background:var(--red)}
+.qnote{width:100%;margin-top:3px;border:1px dashed var(--line);border-radius:7px;padding:7px 9px;font-size:12.5px;display:block;min-height:40px;background:#fff}
+.qnote.show{display:block}
+.addl input{width:100%;border:none;border-bottom:1px dashed var(--line);padding:4px 2px;font-size:13.5px;font-style:italic;background:transparent}
+/* repeat sections */
+.rep{border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px;margin-bottom:14px;background:var(--card)}
+.rep .rh{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--brand-lt);border-radius:8px 8px 0 0}
+.rep .rh h4{font-size:14px;color:var(--brand)}
+.rep .rb{padding:14px 18px}
+.addrep{margin:4px 0 18px}
+.inst{background:var(--bg);border-left:4px solid var(--brand);border-radius:8px;padding:14px 16px;font-size:13px;color:#3a4453;white-space:pre-wrap;margin-bottom:14px}
+.stub{border:1px dashed var(--orange);background:var(--orange-bg);border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:14px}
+.pgnav{display:flex;justify-content:space-between;margin-top:26px}
+.divpage{text-align:center;padding:70px 20px}
+.divpage h2{font-size:34px;letter-spacing:.2em;color:var(--brand)}
+.divpage p{color:var(--muted);max-width:520px;margin:14px auto 0}
+.sig{border:1px solid var(--line);border-radius:8px;background:#fff}
+/* report */
+.rep-table{width:100%;border-collapse:collapse;font-size:13px}
+.rep-table th,.rep-table td{border:1px solid var(--line);padding:7px 10px;text-align:left}
+.rep-table th{background:var(--bg)}
+.flagitem{border:1px solid var(--line);border-left:4px solid var(--red);border-radius:8px;padding:11px 14px;margin-bottom:9px;font-size:13px}
+.flagitem.med{border-left-color:var(--orange)}
+.flagitem.breach{border-left-color:var(--breach)}
+.flagitem .fp{color:var(--muted);font-size:11.5px}
+.badge{display:inline-block;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700}
+.badge.hi{background:var(--red-bg);color:var(--red)}
+.badge.md,.badge.lo{background:var(--orange-bg);color:var(--orange)}
+.badge.br{background:var(--breach-bg);color:var(--breach)}
+/* report: flagged items grouped under a priority heading */
+.flag-group{margin-bottom:16px}
+.flag-group:last-child{margin-bottom:0}
+.flag-group h4{font-size:14px;margin-bottom:8px}
+.flag-group h4 .cnt{font-weight:400}
+.flag-group h4.br{color:var(--breach)}
+.flag-group h4.hi{color:var(--red)}
+.flag-group h4.md,.flag-group h4.lo{color:var(--orange)}
+/* report: per-item remediation timeframe */
+.tf-row{margin-top:8px}
+.tf-label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.tf-select{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;font-size:12.5px;color:var(--ink);background:#fff;min-height:36px}
+.tf-select:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+/* hamburger — hidden on desktop, shown on mobile */
+.btn.menu{display:none;align-items:center;gap:6px}
+.backdrop{display:none}
+@media print{
+  .side,.top,.pgnav,.noprint,.btn.menu,.backdrop{display:none!important}
+  .app{display:block;height:auto}
+  .content{overflow:visible;padding:0}
+  body{background:#fff}
+}
+/* ---------- responsive / mobile ---------- */
+@media (max-width:820px){
+  .app{flex-direction:column}
+  .btn.menu{display:inline-flex}
+  /* sidebar becomes an off-canvas drawer */
+  .side{position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;z-index:60;
+        transform:translateX(-100%);transition:transform .22s ease;box-shadow:0 0 30px rgba(0,0,0,.28)}
+  .side.open{transform:translateX(0)}
+  .backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:55;
+            opacity:0;visibility:hidden;transition:opacity .22s ease}
+  .backdrop.show{opacity:1;visibility:visible}
+  .main{flex:1;min-height:0}
+  .top{padding:8px 14px;gap:8px}
+  .top .stat{padding:5px 9px;font-size:12px}
+  .top .stat b{font-size:13px}
+  .content{padding:18px 15px 90px}
+  .pg h2{font-size:19px}
+  .qrow{flex-direction:column;gap:8px}
+  .qrow .opts{width:100%}
+  .opt{flex:1;text-align:center}
+}
+@media (max-width:480px){
+  .top .grow{display:none}
+  .top{justify-content:flex-start}
+  .side{width:88%}
+}
+@media (prefers-reduced-motion:reduce){
+  .side,.backdrop{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <h1>Inclusive Access Co.</h1>
+      <small>Premises Access Audit — DDA / Premises Standards 2010 &amp; AS 1428</small>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">Inclusive Access Co</div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <button class="btn menu" id="btnMenu" aria-label="Show sections" aria-expanded="false" aria-controls="nav">&#9776; Sections</button>
+      <div class="stat">Score <b id="tScore">0/0 (0%)</b></div>
+      <div class="stat flag">Flagged <b id="tFlag">0</b></div>
+      <div class="stat">Answered <b id="tAns">0%</b></div>
+      <div class="grow"></div>
+      <button class="btn" id="btnReport">Report view</button>
+      <button class="btn" onclick="window.print()">Print / PDF</button>
+      <button class="btn" id="btnExport">Export report</button>
+      <button class="btn danger" id="btnReset">Reset audit</button>
+    </div>
+    <div class="content" id="content"></div>
+  </main>
+  <div class="backdrop" id="backdrop"></div>
+</div>
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" aria-hidden="true">
+
+<script>
+/* =====================================================================
+   RESPONSE SETS
+   Pass=1 (green) | High Priority=0, flagged (red) | Medium/Low = unscored
+   (orange) | Breach of Code = unscored, flagged, breach:true (dark red) —
+   a mandatory-code violation, the most severe classification. Appended
+   at the END of the array rather than inserted among the others: answers
+   are stored as the option's array INDEX, so inserting a new option in
+   the middle would silently reinterpret every already-saved "1"/"2"/"3"
+   answer as a different priority.
+===================================================================== */
+const PHML=[
+ {l:"Pass",cls:"g",score:1},
+ {l:"High Priority",cls:"r",score:0,flag:true},
+ {l:"Medium Priority",cls:"o",flag:true},
+ {l:"Low Priority",cls:"o",flag:true},
+ {l:"Breach of Code",cls:"b",flag:true,breach:true}
+];
+const FNN=[{l:"Found",cls:"r",flag:true},{l:"Not Found",cls:"g"},{l:"N/A",cls:"n"}];
+
+/* item helpers */
+const q=(t,c)=>({k:"q",t,c});           // scored Pass/High/Med/Low question (c = AS clause ref)
+const txt=(t,req,multi)=>({k:"txt",t,req,multi});
+const dt=(t,req)=>({k:"dt",t,req});
+const media=t=>({k:"media",t});
+const std=opts=>({k:"std",opts});       // relevant standards checkboxes
+const grp=(t,items,addl=2)=>({k:"grp",t,items,addl});
+const sec=(t,items,rep=true)=>({k:"sec",t,items,rep});
+const inst=(t,body)=>({k:"inst",t,body});
+const hdr=t=>({k:"hdr",t});
+const sig=t=>({k:"sig",t});
+const stub=body=>({k:"stub",body});
+
+/* =====================================================================
+   Shared item lists (Entrances — used for PPE and each Additional Entrance)
+===================================================================== */
+const ENTRANCE_LEG=[
+ q("Not less than 50% of pedestrian entrances, including the principal pedestrian entrance, are accessible","BCA D3.2"),
+ q("An accessible entrance is located as close as practicable to the principal pedestrian entrance where that entrance is not accessible","BCA D3.2"),
+ q("The accessible entrance is connected to the accessible path of travel from the site boundary and accessible parking","BCA D3.2"),
+ q("Doorway provides a minimum clear opening width of 850mm","AS 1428.1 Cl 13.2"),
+ q("Where multiple door leaves are provided, at least one leaf achieves the required clear opening","AS 1428.1 Cl 13.2"),
+ q("Required circulation space is provided on both sides of the door for the direction of approach","AS 1428.1 Cl 13.3"),
+ q("Circulation space at the door is level (max 1:40) and clear of obstructions","AS 1428.1 Cl 13.3"),
+ q("Door threshold is level, or provided with a compliant threshold ramp","AS 1428.1 Cl 13.2 / Cl 10.5"),
+ q("Door hardware is operable with one hand without tight grasping or twisting of the wrist","AS 1428.1 Cl 13.5"),
+ q("Door hardware is located 900–1100mm above floor level","AS 1428.1 Cl 13.5"),
+ q("Force required to open the door does not exceed 20N (or door is power-assisted/automatic)","AS 1428.1 Cl 13.5"),
+ q("Automatic / power-assisted doors provide adequate activation time and sensor coverage","AS 1428.1 Cl 13"),
+ q("Automatic door does not create a hazard in its opening arc across the path of travel","AS 1428.1 Cl 13"),
+ q("Airlock / lobby provides required circulation space between door sets","AS 1428.1 Cl 13.3"),
+ q("Fully glazed doors and sidelights are marked with a solid contrasting line not less than 75mm wide, at 900–1000mm above floor","AS 1428.1 Cl 6.6"),
+ q("Glazing marking achieves minimum 30% luminance contrast against surfaces beyond","AS 1428.1 Cl 6.6"),
+ q("Door leaf or frame achieves minimum 30% luminance contrast with the surrounding wall","AS 1428.1 Cl 13.1"),
+ q("Vision panels, where provided, allow sighting by both standing and seated users","AS 1428.1 Cl 13"),
+ q("Entry mat is recessed or securely fixed, level with the surrounding surface","AS 1428.1 Cl 7.2"),
+ q("Abutment of external and internal floor surfaces at the entrance does not exceed 3mm (5mm rounded)","AS 1428.1 Cl 7.2"),
+ q("Drainage grates at the entrance comply with opening size and orientation requirements","AS 1428.1 Cl 7.5"),
+ q("Entrance is identified with the International Symbol of Access where required","BCA D3.6 / AS 1428.1 Cl 8"),
+ q("Directional signage is provided at inaccessible entrances directing to the nearest accessible entrance","BCA D3.6"),
+ q("Security intercom / entry controls are located 900–1100mm above floor and on an accessible path","AS 1428.1"),
+ q("Intercom or entry system is usable by people with hearing impairment (visual indicator / hearing augmentation)","AS 1428.5"),
+ q("Landing at the entrance door is clear of the door swing where required","AS 1428.1 Cl 13.3"),
+ q("Weather protection does not reduce required clear widths or heights at the entrance","AS 1428.1 Cl 6.5"),
+ q("Illumination at the entrance is adequate for identifying the doorway and hardware","AS/NZS 1680.0 / 1680.1"),
+ q("Warning TGSIs are provided at the entrance where a hazard exists","AS/NZS 1428.4.1"),
+ q("Revolving doors / turnstiles, where provided, are supplemented by an adjacent accessible door","AS 1428.1"),
+ q("Door closer delay and closing speed allow safe passage by people with mobility aids","AS 1428.1 Cl 13.5")
+];
+const ENTRANCE_BP=[
+ q("Entrance is clearly identifiable from the street and arrival points"),
+ q("Seating is provided near the entrance for people waiting"),
+ q("Entrance doors are automated even where manual doors would comply"),
+ q("Luminance contrast of entrance elements is verified under night lighting"),
+ q("A canopy or weather protection is provided over the entrance landing")
+];
+
+/* =====================================================================
+   TEMPLATE DATA — 27 pages
+===================================================================== */
+const PAGES=[
+
+/* ---- 1. Title Page ---- */
+{title:"Title Page",items:[
+ {k:"card",t:"Site & Inspection",items:[
+   txt("Site conducted",true), dt("Conducted on",true), txt("Location",true), media("Site photo / media")
+ ]},
+ {k:"card",t:"Client Details",items:[
+   txt("Name",true), txt("Company",true), txt("Email Address",true), txt("Phone Number",true)
+ ]},
+ {k:"card",t:"Consultant",items:[
+   txt("Consultant Name",true), txt("Email Address",true), txt("Company Name",true), txt("Company Address",true), txt("Company Phone Number",true)
+ ]}
+]},
+
+/* ---- 2. Access Audit Introduction ---- */
+{title:"Access Audit Introduction",items:[
+ {k:"card",t:"Introduction",items:[
+   txt("Access Audit Overview",false,true)
+ ]}
+]},
+
+/* ---- 3. Access Audit Details ---- */
+{title:"Access Audit Details",items:[
+ {k:"card",t:"Engagement Details",items:[
+   txt("Access Audit Agreement",true,true),
+   txt("Access Audit Agreement Supplied",true),
+   dt("Client approval received on",true),
+   txt("Scope",true,true),
+   txt("Benchmark",true,true),
+   txt("Priority Rating System",true,true),
+   txt("Disclaimer",true,true)
+ ]}
+]},
+
+/* ---- 4. Summary ---- */
+{title:"Summary",items:[
+ {k:"card",t:"Summary of Findings",items:[
+   {k:"fnn",t:"Evidence of elements that do not meet the minimum legislative requirements for access",req:true},
+   txt("Snapshot of key access issues:",true,true)
+ ]}
+]},
+
+/* ---- 5. ARRIVE (divider) ---- */
+{title:"ARRIVE",divider:true,blurb:"Getting to and into the building — car parking, landscaping, kerb ramps, external accessways, TGSIs, ramps, external stairs and entrances."},
+
+/* ---- 6. Accessible Car Parking ---- */
+{title:"Accessible Car Parking",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1","AS2890.5","AS/NZS1158","AS/NZS2890.6"]),
+ txt("Details:",false,true),
+ sec("Disability Accessible Parking Bay",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("The required number of accessible parking bays is provided for the building classification and total bay count","Premises Standards Sch.1 / BCA D3.5"),
+   q("Bay is identified by signage incorporating the International Symbol of Access","AS/NZS 2890.6 Cl 3.1"),
+   q("Bay identification signage displays a bay number that correlates with the designated bay","AS/NZS 2890.6 Cl 3.1"),
+   q("Bay signage is mounted with its underside not less than 1500mm above ground level","AS/NZS 2890.6 Cl 3.1"),
+   q("Minimum headroom clearance of 2500mm is provided over the parking bay","AS/NZS 2890.6 Cl 2.4"),
+   q("Minimum headroom clearance of 2200mm is provided over the shared area and path of travel from the bay","AS/NZS 2890.6 Cl 2.4"),
+   q("International Symbol of Access pavement marking is 800–1000mm high, white on a blue background","AS/NZS 2890.6 Cl 3.2"),
+   q("Angle bay dimensions are not less than 2400mm wide x 5400mm long","AS/NZS 2890.6 Cl 2.2"),
+   q("A dedicated shared area not less than 2400mm wide x 5400mm long is provided adjacent to the angle bay","AS/NZS 2890.6 Cl 2.2"),
+   q("Shared area is line-marked with diagonal stripes 150–200mm wide, at 45 degrees, in a contrasting colour","AS/NZS 2890.6 Cl 3.2"),
+   q("Parallel bay dimensions are not less than 3200mm wide x 7800mm long, inclusive of shared area","AS/NZS 2890.6 Cl 2.3"),
+   q("Gradient and cross-fall of the bay and shared area surface do not exceed 1:40","AS/NZS 2890.6 Cl 2.4"),
+   q("A bollard is provided in the shared area located per the standard, minimum 1300mm high","AS/NZS 2890.6 Cl 2.2.1(e)"),
+   q("The bollard does not encroach upon the required circulation space of the shared area","AS/NZS 2890.6 Cl 2.2"),
+   q("Kerb ramp connecting the bay/shared area to the accessible path of travel complies","AS 1428.1 Cl 10.3"),
+   q("Tactile ground surface indicators are installed where required to warn of hazards on the path from the bay","AS/NZS 1428.4.1"),
+   q("A continuous accessible path of travel is provided from the bay to the principal pedestrian entrance","AS 1428.1")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("Directional signage to accessible parking is visible from the car park entry"),
+   q("Accessible bays are located closest to the accessible entrance of the building"),
+   q("Car park and path of travel are illuminated to appropriate levels","AS/NZS 1158"),
+   q("Directional TGSIs guide from the bay to the principal entrance where wayfinding is complex"),
+   q("An accessible passenger drop-off / pick-up zone is provided near the principal entrance"),
+   q("Bay and shared area surfaces are firm, slip resistant and evenly graded")
+  ])
+ ])
+]},
+
+/* ---- 7. Landscaping ---- */
+{title:"Landscaping",items:[
+ std(["AS1428.1","AS1428.2","AS/NZS1158"]),
+ txt("Details:",false,true),
+ sec("Landscaping Area",[
+  txt("Details:",false,true),
+  grp("Best Practice Recommendations",[
+   q("Plant litter (leaves, seed pods, bark) does not accumulate on the accessible path of travel"),
+   q("Foliage is trimmed clear of the path of travel to a height of at least 2000mm and does not overhang walkways"),
+   q("Landscaping elements provide orientation and wayfinding cues along the path of travel"),
+   q("Planter boxes and garden beds are located clear of the path of travel and are detectable by cane users"),
+   q("Landscaping does not obstruct sightlines to entrances, signage or hazards")
+  ])
+ ])
+]},
+
+/* ---- 8. Kerb Ramps ---- */
+{title:"Kerb Ramps",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1","AS/NZS1158"]),
+ txt("Details:",false,true),
+ sec("Kerb Ramp",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Kerb ramp gradient does not exceed 1:8","AS 1428.1 Cl 10.3"),
+   q("Kerb ramp length does not exceed 1520mm","AS 1428.1 Cl 10.3"),
+   q("Kerb ramp clear width is not less than 1000mm","AS 1428.1 Cl 10.3"),
+   q("A level landing not less than 1200mm long is provided at the top of the kerb ramp","AS 1428.1 Cl 10.3"),
+   q("Landing area is clear of obstructions and door swings","AS 1428.1 Cl 10.3"),
+   q("Flared sides, where provided, do not exceed the maximum permitted gradient","AS 1428.1 Cl 10.3"),
+   q("Transition at the base of the kerb ramp is smooth with no lip or vertical edge exceeding 3mm","AS 1428.1 Cl 10.3"),
+   q("Kerb ramp is aligned with the direction of travel of the crossing it serves","AS 1428.1 Cl 10.3"),
+   q("Kerb ramp is located within a continuous accessible path of travel","AS 1428.1 Cl 6"),
+   q("Surface is slip resistant and firm","AS 1428.1 / AS/NZS 4586"),
+   q("Cross-fall of the kerb ramp and landing does not exceed 1:40","AS 1428.1 Cl 10.3"),
+   q("Water does not pond at the base of the kerb ramp; drainage grates comply where present","AS 1428.1")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("Warning TGSIs are provided at the kerb ramp where it leads onto a vehicular carriageway","AS/NZS 1428.4.1")
+  ])
+ ])
+]},
+
+/* ---- 9. External Accessways ---- */
+{title:"External Accessways",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1","AS1744","AS/NZS1158","AS/NZS4586"]),
+ txt("Details:",false,true),
+ sec("External Accessway",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Accessway provides a minimum clear width of 1000mm","AS 1428.1 Cl 6.4"),
+   q("A minimum vertical clearance of 2000mm is provided over the full width of the accessway","AS 1428.1 Cl 6.5"),
+   q("Gradient along the accessway does not exceed 1:20 (otherwise it must comply as a ramp)","AS 1428.1 Cl 10.1"),
+   q("Cross-fall does not exceed 1:40","AS 1428.1 Cl 7"),
+   q("Passing spaces 1800mm x 2000mm are provided at maximum 20m intervals where the accessway is less than 1800mm wide","AS 1428.1 Cl 6.4"),
+   q("Turning spaces (1540mm x 2070mm) are provided within 2m of the end of the accessway and at changes of direction","AS 1428.1 Cl 6.5.3"),
+   q("Surface is firm, stable and slip resistant for the location","AS/NZS 4586"),
+   q("Abutment of surfaces has no vertical change exceeding 3mm (or 5mm if rounded/bevelled)","AS 1428.1 Cl 7.2"),
+   q("Grates on the accessway have openings not exceeding 13mm, with elongated openings transverse to travel","AS 1428.1 Cl 7.5"),
+   q("Warning TGSIs are installed before hazards on the accessway","AS/NZS 1428.4.1"),
+   q("Accessway is free of obstructions including bins, signs, seats and street furniture"),
+   q("Objects projecting into the accessway above 300mm are detectable by cane users","AS 1428.1 Cl 6.5"),
+   q("Doorways on the accessway provide the required clear opening width of 850mm","AS 1428.1 Cl 13.2"),
+   q("Gate hardware is operable with one hand and located 900–1100mm above ground","AS 1428.1 Cl 13.5"),
+   q("Transitions at changes of gradient comply and do not create a scraping hazard","AS 1428.1 Cl 10"),
+   q("Edge protection or kerbing is provided where the accessway is adjacent to a drop or hazard","AS 1428.1"),
+   q("Signage along the accessway is legible and complies with legibility requirements","AS 1744"),
+   q("Accessway connects the site boundary, accessible parking and the principal pedestrian entrance","BCA D3.2")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("Edges of the accessway are luminance contrasted with the surrounding surfaces"),
+   q("Luminance contrast of key elements is maintained under both daylight and artificial lighting"),
+   q("Rest seating is provided at regular intervals along long accessways"),
+   q("Accessway is illuminated to appropriate levels","AS/NZS 1158"),
+   q("Intercoms / entry controls along the accessway are mounted 900–1100mm above ground"),
+   q("Weather protection is provided along key sections of the accessway"),
+   q("Directional TGSIs are provided where the path of travel is complex or open-plan","AS/NZS 1428.4.1")
+  ])
+ ])
+]},
+
+/* ---- 10. TGSI ---- */
+{title:"Tactile Ground Surface Indicators",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Warning TGSIs are installed at the top and bottom of stairways","AS/NZS 1428.4.1 Cl 2"),
+  q("Warning TGSIs are installed at the top and bottom of ramps (other than step and threshold ramps as exempted)","AS/NZS 1428.4.1 Cl 2"),
+  q("Warning TGSIs are installed before hazards within a continuous accessible path of travel","AS/NZS 1428.4.1 Cl 2"),
+  q("Warning TGSIs are installed at pedestrian crossings and kerb ramps to a carriageway","AS/NZS 1428.4.1 Cl 2"),
+  q("TGSIs are set back 300mm (±10mm) from the hazard or change in level","AS/NZS 1428.4.1 Cl 3"),
+  q("TGSIs extend the full width of the hazard or path element","AS/NZS 1428.4.1 Cl 3"),
+  q("TGSI depth in the direction of travel is 600–800mm","AS/NZS 1428.4.1 Cl 3"),
+  q("TGSIs achieve minimum 45% luminance contrast (30% composite / 60% discrete individual as applicable) with the surrounding surface","AS/NZS 1428.4.1 Cl 4"),
+  q("TGSIs are securely fixed with no lifting edges or trip hazards","AS/NZS 1428.4.1"),
+  q("Integrated / discrete TGSI types used comply with dimensional requirements","AS/NZS 1428.4.1 Cl 3"),
+  q("TGSIs are provided at intermediate landings where required","AS/NZS 1428.4.1 Cl 2"),
+  q("TGSIs are provided at escalators and moving walkways","AS/NZS 1428.4.1 Cl 2")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Directional TGSIs are provided to guide travel across large open spaces to the entrance"),
+  q("TGSI type, colour and layout are consistent across the whole site"),
+  q("Damaged or missing TGSI studs/strips are scheduled for prompt replacement"),
+  q("Luminance contrast of TGSIs is verified under artificial lighting conditions"),
+  q("TGSIs are not over-used in locations where no hazard exists"),
+  q("Directional TGSIs connect key facilities (parking, entrance, information point)"),
+  q("TGSI surfaces are included in the cleaning and maintenance schedule"),
+  q("TGSIs abut surfaces evenly with no ponding of water around indicators")
+ ])
+]},
+
+/* ---- 11. Ramps ---- */
+{title:"Ramps",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1"]),
+ txt("Details:",false,true),
+ sec("Ramp",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Ramp gradient does not exceed 1:14","AS 1428.1 Cl 10.2"),
+   q("Ramp gradient is constant between landings","AS 1428.1 Cl 10.2"),
+   q("Maximum length between landings does not exceed 9m at 1:14 (15m at 1:20)","AS 1428.1 Cl 10.2"),
+   q("Level landings not less than 1200mm long are provided at maximum intervals","AS 1428.1 Cl 10.2"),
+   q("Level landings are provided at the top and bottom of the ramp","AS 1428.1 Cl 10.2"),
+   q("Landings at changes of direction provide required circulation dimensions","AS 1428.1 Cl 10.2"),
+   q("Clear width between handrails is not less than 1000mm","AS 1428.1 Cl 10.2"),
+   q("Kerbs or kerb rails 65–75mm high are provided on both sides of the ramp","AS 1428.1 Cl 10.2"),
+   q("Handrails are provided on both sides of the ramp","AS 1428.1 Cl 12"),
+   q("Handrail height is 865–1000mm above the ramp surface","AS 1428.1 Cl 12"),
+   q("Handrail circular cross-section is 30–50mm diameter","AS 1428.1 Cl 12"),
+   q("Clearance between handrail and adjacent wall is 50–60mm","AS 1428.1 Cl 12"),
+   q("Handrails are continuous for the full length of the ramp including landings (as required)","AS 1428.1 Cl 12"),
+   q("Handrails extend horizontally 300mm beyond the top and bottom of the ramp","AS 1428.1 Cl 12"),
+   q("Handrail ends are turned down or returned to the wall/post","AS 1428.1 Cl 12"),
+   q("Handrails have no obstruction to the passage of the hand along the rail","AS 1428.1 Cl 12"),
+   q("Cross-fall of the ramp surface does not exceed 1:40","AS 1428.1 Cl 10.2"),
+   q("Ramp surface is slip resistant","AS/NZS 4586"),
+   q("Warning TGSIs are installed at the top and bottom of the ramp","AS/NZS 1428.4.1"),
+   q("Landings are clear of door swings and obstructions","AS 1428.1 Cl 10.2"),
+   q("Doorways at ramp landings provide required circulation space","AS 1428.1 Cl 13.3"),
+   q("Edge protection is provided where the ramp is not bounded by a wall","AS 1428.1 Cl 10.2"),
+   q("Vertical rise served by ramps does not exceed limits without alternative means (e.g. lift)","AS 1428.1 / BCA D3"),
+   q("Ramp and landing surfaces drain without ponding","AS 1428.1")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("Ramp edges and kerb rails are luminance contrasted with the ramp surface"),
+   q("Ramp is illuminated evenly along its full length","AS/NZS 1158"),
+   q("Handrails are luminance contrasted with the background")
+  ])
+ ]),
+ sec("Step Ramp",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Step ramp gradient does not exceed 1:10","AS 1428.1 Cl 10.4"),
+   q("Step ramp rise does not exceed 190mm","AS 1428.1 Cl 10.4"),
+   q("Step ramp length does not exceed 1900mm","AS 1428.1 Cl 10.4"),
+   q("Step ramp clear width is not less than 1000mm","AS 1428.1 Cl 10.4"),
+   q("Level landings are provided at the top and bottom of the step ramp","AS 1428.1 Cl 10.4")
+  ])
+ ]),
+ sec("Threshold Ramp",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Threshold ramp gradient does not exceed 1:8","AS 1428.1 Cl 10.5"),
+   q("Threshold ramp rise does not exceed 35mm and length does not exceed 280mm","AS 1428.1 Cl 10.5")
+  ])
+ ])
+]},
+
+/* ---- 12. External Stairs ---- */
+{title:"External Stairs",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1"]),
+ txt("Details:",false,true),
+ sec("Stairs",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("An alternative accessible path of travel (ramp or lift) is provided in addition to the stairs","BCA D3.2 / AS 1428.1"),
+   q("Risers are of uniform height throughout the flight","AS 1428.1 Cl 11"),
+   q("Goings are of uniform depth throughout the flight","AS 1428.1 Cl 11"),
+   q("Riser and going dimensions are within permitted ranges","AS 1428.1 Cl 11 / BCA D2.13"),
+   q("Risers are opaque (no open risers)","AS 1428.1 Cl 11"),
+   q("Stair nosings do not project beyond the riser face","AS 1428.1 Cl 11"),
+   q("Nosing strip 50–75mm deep with minimum 30% luminance contrast is provided across the full width of each tread","AS 1428.1 Cl 11"),
+   q("Nosing strip is located consistently on every step in the flight","AS 1428.1 Cl 11"),
+   q("Warning TGSIs are installed at the top and bottom of the stairs","AS/NZS 1428.4.1"),
+   q("TGSIs are set back correctly from the first nosing","AS/NZS 1428.4.1 Cl 3"),
+   q("Handrails are provided on both sides of the stairs","AS 1428.1 Cl 12"),
+   q("Handrail height is 865–1000mm measured above the nosing line","AS 1428.1 Cl 12"),
+   q("Handrail circular cross-section is 30–50mm diameter","AS 1428.1 Cl 12"),
+   q("Handrails are continuous throughout the flight and landings","AS 1428.1 Cl 12"),
+   q("Handrails extend one tread depth plus 300mm horizontally past the bottom riser and 300mm past the top riser","AS 1428.1 Cl 12"),
+   q("Handrail ends are turned down or returned","AS 1428.1 Cl 12"),
+   q("Clearance between handrail and wall is 50–60mm","AS 1428.1 Cl 12"),
+   q("No obstruction interrupts the passage of the hand along the handrail","AS 1428.1 Cl 12"),
+   q("Stair treads are slip resistant","AS/NZS 4586"),
+   q("Landings are provided at required intervals and are clear of obstructions","AS 1428.1 Cl 11"),
+   q("The area under the stairs below 2000mm headroom is enclosed or protected by a cane-detectable barrier","AS 1428.1 Cl 6.5"),
+   q("Isolated single steps are avoided or clearly identified within the path of travel","AS 1428.1"),
+   q("Stairs are not the sole means of access to any required facility","BCA D3")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("Tread and riser dimensions are within preferred ergonomic ranges"),
+   q("Stairs are evenly illuminated, particularly at top and bottom landings","AS/NZS 1158"),
+   q("Handrails are luminance contrasted with their background"),
+   q("Nosing contrast is verified under wet and artificial lighting conditions")
+  ])
+ ])
+]},
+
+/* ---- 13. Entrances ---- */
+{title:"Entrances",items:[
+ std(["AS1428.1","AS1428.2","AS1428.5","AS/NZS1680.0","AS/NZS1680.1"]),
+ txt("Details:",false,true),
+ sec("Principal Pedestrian Entrance (PPE)",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",ENTRANCE_LEG),
+  grp("Best Practice Recommendations",ENTRANCE_BP)
+ ],false),
+ sec("Additional Entrance",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",ENTRANCE_LEG),
+  grp("Best Practice Recommendations",ENTRANCE_BP)
+ ])
+]},
+
+/*__PAGES_A__*/
+/* ---- 14. JOIN IN (divider) ---- */
+{title:"JOIN IN",divider:true,blurb:"Using and participating in the building — service areas, internal paths of travel, meeting spaces, hearing augmentation, amenities and signage."},
+
+/* ---- 15. Customer Service Areas ---- */
+{title:"Customer Service Areas",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1","AS1428.5"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("A continuous accessible path of travel is provided to the customer service counter","AS 1428.1 Cl 6 / BCA D3.3"),
+  q("Hearing augmentation is provided where the counter is fitted with a screen or intercom","BCA D3.7 / AS 1428.5"),
+  q("Hearing augmentation at the counter is identified with appropriate signage","BCA D3.6 / AS 1428.5"),
+  q("Floor surface in the service area is level and slip resistant","AS 1428.1 Cl 7 / AS/NZS 4586"),
+  q("Walkways within the service area provide minimum 1000mm clear width","AS 1428.1 Cl 6.4"),
+  q("Queuing barriers and stanchions are detectable and do not obstruct the accessible path","AS 1428.1 Cl 6.5"),
+  q("Circulation space (1540mm x 2070mm) is available at the service point","AS 1428.1 Cl 6.5.3")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("A lowered counter section 830–870mm high with knee clearance under is provided"),
+  q("Lowered counter section is not less than 900mm wide"),
+  q("Seating is provided within the waiting area, including space for a wheelchair user beside seating"),
+  q("Lighting illuminates the face of staff to assist lip reading"),
+  q("EFTPOS / payment terminals are untethered or reachable from a seated position"),
+  q("Directional signage identifies the accessible service point"),
+  q("Pen and paper (or alternative communication method) is available at the counter")
+ ])
+]},
+
+/* ---- 16. Internal Accessways ---- */
+{title:"Internal Accessways",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Internal accessways provide a minimum clear width of 1000mm","AS 1428.1 Cl 6.4"),
+  q("Passing spaces 1800mm x 2000mm are provided at maximum 20m intervals where required","AS 1428.1 Cl 6.4"),
+  q("Turning spaces (1540mm x 2070mm) are provided within 2m of accessway ends and at changes of direction","AS 1428.1 Cl 6.5.3"),
+  q("Minimum vertical clearance of 2000mm is maintained along the accessway","AS 1428.1 Cl 6.5"),
+  q("Objects projecting into the accessway are cane detectable or above 2000mm","AS 1428.1 Cl 6.5"),
+  q("Doorways along the accessway provide minimum 850mm clear opening","AS 1428.1 Cl 13.2"),
+  q("Required circulation space is provided at each door for the direction of approach","AS 1428.1 Cl 13.3"),
+  q("Door hardware is operable with one hand and located 900–1100mm above floor","AS 1428.1 Cl 13.5"),
+  q("Door opening force does not exceed 20N (or doors are power-assisted)","AS 1428.1 Cl 13.5"),
+  q("Thresholds along the accessway are level or served by compliant threshold ramps","AS 1428.1 Cl 13.2"),
+  q("Floor surface abutments do not exceed 3mm (5mm rounded)","AS 1428.1 Cl 7.2"),
+  q("Gradient of internal walkways does not exceed 1:20; cross-fall does not exceed 1:40","AS 1428.1 Cl 10.1 / Cl 7"),
+  q("Fully glazed walls and doors on the accessway have compliant contrast marking","AS 1428.1 Cl 6.6"),
+  q("Internal stairs on the accessway comply (nosings, handrails, TGSIs)","AS 1428.1 Cl 11 / AS/NZS 1428.4.1"),
+  q("Warning TGSIs are provided at internal hazards where required","AS/NZS 1428.4.1"),
+  q("Accessway is clear of furniture, displays and temporary obstructions"),
+  q("Corridor intersections provide adequate circulation space","AS 1428.1 Cl 6.5.3"),
+  q("Lift landings and lobbies provide required circulation dimensions","AS 1428.1 / AS 1735.12"),
+  q("Switches and controls along the accessway are located 900–1100mm above floor","AS 1428.1 Cl 14"),
+  q("Accessway connects all areas required to be accessible on the storey","BCA D3.3"),
+  q("Floor finishes along the accessway are slip resistant and firmly fixed","AS/NZS 4586")
+ ])
+]},
+
+/* ---- 17. Floor / Ground Surfaces ---- */
+{title:"Floor / Ground Surfaces",items:[
+ std(["AS1428.1","AS1428.2","AS/NZS4586"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Floor surfaces on the accessible path of travel are level (gradient max 1:40 unless designed as a ramp/walkway)","AS 1428.1 Cl 7"),
+  q("Floor surfaces achieve slip resistance appropriate to the location (wet/dry)","AS/NZS 4586 / HB 198"),
+  q("Carpet pile height does not exceed 11mm and total height (pile + backing) does not exceed permitted limits, with firm underlay","AS 1428.1 Cl 7.4"),
+  q("Abutment of different floor surfaces does not exceed 3mm vertical (5mm rounded)","AS 1428.1 Cl 7.2"),
+  q("Timber decking gaps do not exceed 13mm and are oriented transverse to the direction of travel","AS 1428.1 Cl 7.5"),
+  q("Mats are recessed or securely fixed and level with the surrounding surface","AS 1428.1 Cl 7.2")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Floor surfaces provide luminance contrast with walls and skirtings to assist orientation")
+ ])
+]},
+
+/* ---- 18. Meeting Spaces ---- */
+{title:"Meeting Spaces",items:[
+ std(["AS1428.1","AS1428.2","AS1428.5"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Stage / podium is accessible via a compliant ramp or platform lift","AS 1428.1 / BCA D3.3"),
+  q("Hearing augmentation is provided where an inbuilt amplification system exists","BCA D3.7"),
+  q("Hearing augmentation covers the required proportion of the room area","BCA D3.7 / AS 1428.5"),
+  q("Hearing augmentation signage is provided at the room entry","BCA D3.6"),
+  q("Floor surface within the meeting space complies","AS 1428.1 Cl 7"),
+  q("Circulation paths between furniture provide minimum 1000mm clear width","AS 1428.1 Cl 6.4"),
+  q("Doorways to the meeting space comply (clear width, circulation, hardware)","AS 1428.1 Cl 13")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Stage edge is luminance contrasted with the surrounding floor"),
+  q("Room controls (AV, lighting, blinds) are operable from a seated position at 900–1100mm"),
+  q("Portable hearing augmentation is available for rooms without inbuilt systems"),
+  q("A variety of seating types is provided, including spaces for wheelchair users within the seating layout"),
+  q("Lighting is adjustable to support lip reading and Auslan interpretation"),
+  q("Room identification signage includes tactile and braille elements"),
+  q("Accessible power outlets are provided for assistive devices")
+ ])
+]},
+
+/* ---- 19. Hearing Augmentation ---- */
+{title:"Hearing Augmentation",items:[
+ std(["AS1428.1","AS1428.2","AS1428.5"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Hearing augmentation is provided in rooms with inbuilt amplification and at screened counters","BCA D3.7"),
+  q("Induction loop systems cover not less than 80% of the floor area served","BCA D3.7"),
+  q("Receiver-based systems cover not less than 95% of the floor area served, with required receiver numbers","BCA D3.7"),
+  q("Signage identifies the type and coverage area of the hearing augmentation system","BCA D3.6 / AS 1428.5"),
+  q("Signage identifies where receivers can be obtained","BCA D3.6"),
+  q("The hearing augmentation system supplements the PA system where one is provided","BCA D3.7 / AS 1428.5")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Hearing augmentation is provided in meeting rooms beyond minimum requirements"),
+  q("Lifts are equipped with audible and visual indicators / hearing augmentation"),
+  q("Seating within coverage areas provides clear sightlines to presenters and interpreters"),
+  q("Room acoustics (reverberation, background noise) support speech intelligibility"),
+  q("Visible alarm signals supplement audible alarms in key areas"),
+  q("Lighting supports lip reading at counters and presentation areas"),
+  q("Systems are tested and maintained on a documented schedule")
+ ])
+]},
+
+/* ---- 20. Kitchen / Dining / Canteen Areas ---- */
+{title:"Kitchen / Dining / Canteen Areas",items:[
+ std(["AS1428.1","AS1428.2"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("A continuous accessible path of travel is provided to the kitchen / dining / canteen area","AS 1428.1 Cl 6 / BCA D3.3"),
+  q("Circulation space (1540mm x 2070mm) is provided within the kitchen / servery area","AS 1428.1 Cl 6.5.3"),
+  q("Paths between fixed benches, tables and equipment provide minimum 1000mm clear width","AS 1428.1 Cl 6.4"),
+  q("Floor surfaces are slip resistant and comply with abutment requirements","AS 1428.1 Cl 7 / AS/NZS 4586")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("A section of bench / counter is 830–870mm high with clear leg space beneath"),
+  q("Sink is mounted 830–870mm high with a shallow bowl and clearance for a seated user"),
+  q("Taps are lever or sensor operated"),
+  q("Servery window / food service counter height allows service to seated customers"),
+  q("Vending machine controls and coin slots are located 900–1100mm above floor"),
+  q("A range of seating is provided, including tables with knee clearance for wheelchair users"),
+  q("Tea / coffee making facilities are within 900–1100mm reach range"),
+  q("Frequently used items and storage are within accessible reach ranges")
+ ])
+]},
+
+/* ---- 21. Signage ---- */
+{title:"Signage",items:[
+ std(["AS1428.1","AS1428.2","AS1428.4.1","AS1428.5"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Directional signage is provided to accessible facilities (entrances, toilets, lifts)","BCA D3.6"),
+  q("The International Symbol of Access is used to identify accessible facilities and complies in form","BCA D3.6 / AS 1428.1 Cl 8"),
+  q("The International Symbol for Deafness identifies hearing augmentation","BCA D3.6 / AS 1428.5"),
+  q("Braille and tactile signage is provided to sanitary facilities and required exits","BCA D3.6 / Spec D3.6"),
+  q("Braille and tactile signage characters are located 1200–1600mm above floor","BCA Spec D3.6"),
+  q("Signage is located on the door, or on the wall on the latch side, per requirements","BCA Spec D3.6"),
+  q("Tactile characters are raised, sans-serif, and within required letter heights","BCA Spec D3.6"),
+  q("Sign text uses title case (not all capitals) where required","BCA Spec D3.6"),
+  q("Signage achieves minimum 30% luminance contrast with its background","BCA Spec D3.6"),
+  q("Signage is illuminated or located to be legible under available lighting","BCA Spec D3.6"),
+  q("Accessible toilet signage identifies left-hand or right-hand transfer layout","BCA D3.6"),
+  q("Ambulant toilet signage is provided at ambulant cubicles","BCA D3.6"),
+  q("Signage at inaccessible entrances / facilities directs to the nearest accessible alternative","BCA D3.6"),
+  q("Exit and emergency egress signage complies with legibility requirements","AS 1744 / BCA E4")
+ ]),
+ grp("Best Practice Recommendations",[
+  q("Entry signage identifies the accessible entrance from all arrival points")
+ ])
+]},
+
+/*__PAGES_B__*/
+/* ---- 22. Designated Accessible Toilets — Building Permit PRIOR 1 May 2011 ---- */
+{title:"Accessible Toilets — Prior 1 May 2011",items:[
+ std(["AS1428.1-2001","AS1428.2","AS/NZS1680.0","AS/NZS1680.1"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("A unisex accessible toilet (USAT) is provided where required for the building classification","BCA F2.4 (as applicable at permit date)"),
+  q("Where two or more USATs are provided, left-hand and right-hand transfer layouts are provided","BCA F2.4")
+ ],0),
+ sec("Unisex Accessible Toilet",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("USAT is located on an accessible path of travel","AS 1428.1-2001 Cl 6"),
+   q("Doorway provides minimum 800mm clear opening width","AS 1428.1-2001 Cl 12"),
+   q("Door is sliding or opens outward, or the compartment provides additional area for an inward-opening door","AS 1428.1-2001 Cl 15"),
+   q("Door hardware is operable with one hand and located within required height range","AS 1428.1-2001 Cl 12"),
+   q("Privacy snib is operable with a closed fist and openable from outside in an emergency","AS 1428.1-2001 Cl 15"),
+   q("Required clear circulation space is provided within the compartment","AS 1428.1-2001 Cl 15"),
+   q("Circulation space is clear of the door swing and all fixtures","AS 1428.1-2001 Cl 15"),
+   q("Pan centreline is 450–460mm from the adjacent side wall","AS 1428.1-2001 Cl 15"),
+   q("Pan seat height is 460–480mm above floor level","AS 1428.1-2001 Cl 15"),
+   q("Pan is positioned with required clearance from the rear wall","AS 1428.1-2001 Cl 15"),
+   q("Pan seat is of full-round type, load rated, and colour contrasted with its background","AS 1428.1-2001 Cl 15"),
+   q("Grab rails are 30–40mm in diameter","AS 1428.1-2001 Cl 15"),
+   q("Grab rail height is 800–810mm above floor level","AS 1428.1-2001 Cl 15"),
+   q("Grab rail configuration (side and rear) complies with the required layout","AS 1428.1-2001 Cl 15"),
+   q("Grab rails have 50–60mm knuckle clearance from walls","AS 1428.1-2001 Cl 15"),
+   q("Grab rails and fixings withstand the required 1100N load","AS 1428.1-2001 Cl 15"),
+   q("Grab rail surfaces are slip resistant and free of sharp edges","AS 1428.1-2001 Cl 15"),
+   q("Flushing control is located within required reach and operable with one hand","AS 1428.1-2001 Cl 15"),
+   q("Flushing control operation force complies","AS 1428.1-2001 Cl 15"),
+   q("Toilet paper dispenser is located within 300mm forward of the pan front and within reach range","AS 1428.1-2001 Cl 15"),
+   q("Toilet paper dispenser does not obstruct grab rail use","AS 1428.1-2001 Cl 15"),
+   q("Washbasin rim height is 800–830mm above floor level","AS 1428.1-2001 Cl 15"),
+   q("Washbasin provides required clearance below for a seated user","AS 1428.1-2001 Cl 15"),
+   q("Washbasin is located clear of the pan circulation space","AS 1428.1-2001 Cl 15"),
+   q("Taps are lever, capstan or sensor type operable with one hand","AS 1428.1-2001 Cl 15"),
+   q("Hot water delivery is tempered to a safe temperature","AS 3500 / NCC"),
+   q("Mirror, where provided, has its lower edge not higher than 900mm above floor (or is full length)","AS 1428.1-2001 Cl 15"),
+   q("Soap dispenser is located 900–1100mm above floor and within reach of the basin","AS 1428.1-2001 Cl 15"),
+   q("Hand dryer / paper towel dispenser is located 900–1100mm above floor","AS 1428.1-2001 Cl 15"),
+   q("Shelf, where provided, is within required height range and does not obstruct circulation","AS 1428.1-2001 Cl 15"),
+   q("Clothes hooks are provided at 1200–1350mm above floor","AS 1428.1-2001 Cl 15"),
+   q("Light switches are located 900–1100mm above floor, aligned with door handle side","AS 1428.1-2001 Cl 11"),
+   q("Power points, where provided, are within accessible reach range","AS 1428.1-2001"),
+   q("Floor surface is slip resistant and graded to floor waste without exceeding permitted falls","AS 1428.1-2001 Cl 7 / AS/NZS 4586"),
+   q("Sanitary disposal unit does not encroach on required circulation space","AS 1428.1-2001 Cl 15"),
+   q("Bins and consumables do not obstruct circulation or transfer space","AS 1428.1-2001 Cl 15"),
+   q("Door signage identifies the facility with the International Symbol of Access","BCA D3.6"),
+   q("Signage identifies left-hand or right-hand transfer layout","BCA D3.6"),
+   q("Compartment dimensions comply with the required minimum internal size","AS 1428.1-2001 Cl 15"),
+   q("Fixtures do not encroach into the required transfer space beside the pan","AS 1428.1-2001 Cl 15"),
+   q("Door can achieve required clear opening while all fittings are installed","AS 1428.1-2001 Cl 12"),
+   q("Emergency release privacy lock is identifiable and operable from outside","AS 1428.1-2001 Cl 15"),
+   q("Internal surfaces and fittings achieve luminance contrast to be identifiable","AS 1428.1-2001"),
+   q("Lighting within the compartment achieves adequate illumination levels","AS/NZS 1680.0 / 1680.1"),
+   q("Ventilation and fixtures do not create protruding hazards within circulation space","AS 1428.1-2001"),
+   q("Backflow / plumbing beneath basin is insulated or configured to prevent contact injury","AS 1428.1-2001 Cl 15"),
+   q("Toilet is available for use and not used for storage"),
+   q("Travel distance to the USAT complies with requirements applicable at the permit date","BCA F2.4")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("An audible / visual emergency alarm call system is provided within the compartment"),
+   q("Fittings and rails achieve 30% luminance contrast with wall surfaces"),
+   q("Lighting is even and glare-free within the compartment"),
+   q("Tap hot and cold indicators are tactile and colour contrasted"),
+   q("A full-length mirror is provided clear of circulation space")
+  ])
+ ])
+]},
+
+/* ---- 23. Designated Accessible Toilets — Building Permit ON OR AFTER 1 May 2011 ---- */
+{title:"Accessible Toilets — On/After 1 May 2011",items:[
+ std(["AS1428.1-2001 & 2021","AS1428.2","AS/NZS1680.0","AS/NZS1680.1"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("A unisex accessible toilet (USAT) is provided at each bank of toilets where required","BCA F2.4 / Premises Standards"),
+  q("Where two or more USATs are provided, left-hand and right-hand transfer layouts are provided in required proportions","BCA F2.4"),
+  q("The USAT is located on a continuous accessible path of travel","BCA D3.3 / AS 1428.1 Cl 6")
+ ],0),
+ sec("Unisex Accessible Toilet",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Compartment provides minimum clear internal circulation space of 1900mm x 2300mm","AS 1428.1 Cl 15.2.1"),
+   q("Circulation space is clear of the pan, fixtures and door swing as required","AS 1428.1 Cl 15.2.3"),
+   q("Doorway provides minimum 850mm clear opening width","AS 1428.1 Cl 13.2"),
+   q("Door is sliding or opens outward, or compartment provides additional area for inward swing","AS 1428.1 Cl 15.2.2"),
+   q("Required door circulation space is provided on both sides of the door","AS 1428.1 Cl 13.3"),
+   q("Door hardware is operable with one hand, located 900–1100mm above floor","AS 1428.1 Cl 13.5"),
+   q("Privacy snib is operable with a closed fist and releasable from outside in an emergency","AS 1428.1 Cl 15.2.2"),
+   q("Door achieves 30% luminance contrast with the surrounding wall, or door frame contrast provided","AS 1428.1 Cl 13.1"),
+   q("Pan centreline is 450–460mm from the adjacent side wall","AS 1428.1 Cl 15.2.3"),
+   q("Front of pan is 790–810mm from the rear wall","AS 1428.1 Cl 15.2.3"),
+   q("Pan seat height is 460–480mm above floor level","AS 1428.1 Cl 15.2.3"),
+   q("Pan seat is full-round, load rated to 150kg, and contrasted with the background","AS 1428.1 Cl 15.2.3"),
+   q("A backrest is provided, positioned 120–150mm above the seat and angled per the standard","AS 1428.1 Cl 15.2.3"),
+   q("Backrest is securely fixed and load rated","AS 1428.1 Cl 15.2.3"),
+   q("Clear transfer space is provided beside the pan, free of all fixtures","AS 1428.1 Cl 15.2.3"),
+   q("Grab rails are 30–40mm in diameter","AS 1428.1 Cl 17"),
+   q("Grab rail height is 800–810mm above floor","AS 1428.1 Cl 15.2.4"),
+   q("Grab rail layout (rear rail and side rail configuration) complies","AS 1428.1 Cl 15.2.4"),
+   q("Grab rails have 50–60mm clearance between rail and wall","AS 1428.1 Cl 17"),
+   q("Grab rails and fixings withstand a 1100N load in any direction","AS 1428.1 Cl 17"),
+   q("Grab rail surfaces are slip resistant with no sharp edges or abrasive surfaces","AS 1428.1 Cl 17"),
+   q("Grab rails achieve 30% luminance contrast with the wall","AS 1428.1 Cl 15"),
+   q("Flushing control is located on the transfer side or within required zone, 600–1100mm above floor","AS 1428.1 Cl 15.2.5"),
+   q("Flushing control is operable with one hand with minimal force","AS 1428.1 Cl 15.2.5"),
+   q("Toilet paper dispenser is located within the required zone relative to the pan front","AS 1428.1 Cl 15.2.6"),
+   q("Toilet paper dispenser is a single-sheet or non-restrictive type operable with one hand","AS 1428.1 Cl 15.2.6"),
+   q("Toilet paper dispenser does not obstruct grab rail use","AS 1428.1 Cl 15.2.6"),
+   q("Washbasin is located within the compartment clear of required circulation spaces","AS 1428.1 Cl 15.2.7"),
+   q("Washbasin rim height is 800–830mm above floor","AS 1428.1 Cl 15.4"),
+   q("Clearances below the washbasin comply for a seated user (no pedestal within knee space)","AS 1428.1 Cl 15.4"),
+   q("Exposed hot water pipes beneath the basin are insulated or shielded","AS 1428.1 Cl 15.4"),
+   q("Taps are lever (minimum 50mm handle), capstan or sensor type, operable with one hand","AS 1428.1 Cl 15.4"),
+   q("Water supply is tempered to a safe delivery temperature","NCC / AS 3500"),
+   q("Mirror lower edge is not more than 900mm above floor, extending to at least 1850mm (or full length)","AS 1428.1 Cl 15.2.7"),
+   q("Shelf is provided 900–1000mm above floor, minimum dimensions, clear of circulation","AS 1428.1 Cl 15.2.7"),
+   q("Soap dispenser is located 900–1100mm above floor within reach of the basin","AS 1428.1 Cl 15.2.7"),
+   q("Hand dryer / towel dispenser is located 900–1100mm above floor, adjacent to the basin","AS 1428.1 Cl 15.2.7"),
+   q("Clothes hooks are provided 1200–1350mm above floor on a wall clear of circulation","AS 1428.1 Cl 15.2.7"),
+   q("Baby change table, where provided, folds clear of circulation space when not in use","AS 1428.1 Cl 15"),
+   q("Baby change table working height complies when deployed","AS 1428.1 Cl 15"),
+   q("Sanitary disposal unit is located clear of circulation and transfer spaces","AS 1428.1 Cl 15.2.3"),
+   q("Bins do not obstruct circulation space or door opening","AS 1428.1 Cl 15"),
+   q("Light switches are 900–1100mm above floor, on latch side of the door","AS 1428.1 Cl 14"),
+   q("General purpose outlet (GPO), where provided, is within accessible reach range","AS 1428.1 Cl 14"),
+   q("Floor surface is slip resistant (wet-area rated)","AS/NZS 4586"),
+   q("Floor grading and floor waste do not exceed permitted falls within circulation space","AS 1428.1 Cl 15"),
+   q("Door signage includes International Symbol of Access, braille and tactile elements","BCA D3.6 / Spec D3.6"),
+   q("Signage identifies left-hand or right-hand transfer layout","BCA D3.6"),
+   q("Signage is located on the door or latch-side wall at 1200–1600mm","BCA Spec D3.6"),
+   q("Emergency release of the privacy lock is identifiable and operable from outside","AS 1428.1 Cl 15.2.2"),
+   q("Internal fixtures achieve 30% luminance contrast with their background","AS 1428.1"),
+   q("Lighting within the compartment achieves adequate, even illumination","AS/NZS 1680.0 / 1680.1"),
+   q("No fixture protrudes into circulation space in a manner creating a hazard","AS 1428.1 Cl 15"),
+   q("Compartment is not used for storage and all fittings are in working order"),
+   q("Where a shower is provided in the compartment, it complies (fold-down seat, grab rails, controls, hose length)","AS 1428.1 Cl 15.5"),
+   q("Shower recess, where provided, is stepless with compliant floor grading","AS 1428.1 Cl 15.5"),
+   q("Shower fittings (seat height 460–480mm, rail layout, tap zone) comply","AS 1428.1 Cl 15.5"),
+   q("Travel distance to the USAT does not exceed the required maximum","BCA F2.4"),
+   q("USAT is provided at each bank of participant/public toilets as required","BCA F2.4"),
+   q("Airlock / lobby to the USAT, where present, provides required circulation","AS 1428.1 Cl 13.3"),
+   q("Any step or threshold at the USAT entry is eliminated or ramped","AS 1428.1 Cl 13.2"),
+   q("Ventilation grilles and services do not reduce required clearances","AS 1428.1 Cl 15"),
+   q("Fixtures are securely mounted with no movement under load","AS 1428.1 Cl 17")
+  ]),
+  grp("Best Practice Recommendations",[
+   q("An emergency alarm call button/cord reachable from the pan and floor is provided"),
+   q("Fittings, rails and door achieve verified 30% luminance contrast under artificial light"),
+   q("Lighting is even and glare-free within the compartment"),
+   q("Tap hot and cold indicators are tactile and colour contrasted")
+  ])
+ ])
+]},
+
+/* ---- 24. Ambulant Toilets ---- */
+{title:"Ambulant Toilets",items:[
+ std(["AS1428.1","AS1428.2"]),
+ txt("Details:",false,true),
+ grp("Legislative Requirements",[
+  q("Ambulant toilet cubicles are provided at each bank of male and female toilets where required","BCA F2.4"),
+  q("Ambulant cubicles are located on an accessible path of travel","AS 1428.1 Cl 6")
+ ],0),
+ sec("Ambulant Toilet",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements",[
+   q("Cubicle signage includes the ambulant symbol with braille and tactile elements","BCA D3.6 / Spec D3.6"),
+   q("Cubicle clear internal width is 900–920mm","AS 1428.1 Cl 16"),
+   q("A clear space of 900mm x 900mm is provided in front of the pan within the cubicle","AS 1428.1 Cl 16"),
+   q("Door opens outward from the cubicle (or complies where inward opening)","AS 1428.1 Cl 16"),
+   q("Doorway provides minimum 700mm clear opening","AS 1428.1 Cl 16"),
+   q("A clear circulation space is provided outside the cubicle door","AS 1428.1 Cl 16"),
+   q("Grab rails are provided on both sides of the cubicle","AS 1428.1 Cl 16"),
+   q("Grab rail height is 800–810mm above floor","AS 1428.1 Cl 16"),
+   q("Grab rails are 30–40mm diameter with 50–60mm wall clearance","AS 1428.1 Cl 17"),
+   q("Grab rails and fixings withstand the required load","AS 1428.1 Cl 17"),
+   q("Pan seat height is 460–480mm above floor","AS 1428.1 Cl 16"),
+   q("Pan projection allows required clear space in front of the pan","AS 1428.1 Cl 16"),
+   q("Toilet paper dispenser is within reach from the seated position","AS 1428.1 Cl 16"),
+   q("Privacy snib is operable with one hand / closed fist","AS 1428.1 Cl 16"),
+   q("Clothes hook is provided at 1200–1350mm above floor","AS 1428.1 Cl 16"),
+   q("Floor surface is slip resistant","AS/NZS 4586"),
+   q("Washbasin is available on the accessible path serving the ambulant cubicle","AS 1428.1 Cl 16"),
+   q("Cubicle fittings are securely fixed and in working order","AS 1428.1")
+  ])
+ ])
+]},
+
+/* ---- 25. Accessible Adult Change Facilities ---- */
+{title:"Accessible Adult Change Facilities",items:[
+ stub("This page is a placeholder in the source template. DRAFT items below are proposed from AS 1428.1 and NCC requirements for Accessible Adult Change Facilities (AACF) — review and confirm before client use, or delete this page if AACF assessment is out of scope."),
+ std(["AS1428.1","NCC Spec AACF"]),
+ txt("Details:",false,true),
+ sec("Adult Change Facility",[
+  txt("Details:",false,true),
+  grp("Legislative Requirements (DRAFT — confirm)",[
+   q("AACF is provided where required for the building class and size","NCC F2.9 / Spec"),
+   q("Room dimensions provide required clear circulation space","NCC Spec AACF"),
+   q("A height-adjustable adult change table with required load rating is provided","NCC Spec AACF"),
+   q("A ceiling hoist system with required coverage and load rating is provided","NCC Spec AACF"),
+   q("A privacy screen / curtain is provided","NCC Spec AACF"),
+   q("Peninsula toilet pan with circulation both sides is provided","NCC Spec AACF"),
+   q("Automated or compliant entry door with required clear opening is provided","NCC Spec AACF"),
+   q("Washbasin, grab rails and fittings comply with AS 1428.1 requirements","AS 1428.1"),
+   q("Emergency alarm call system is provided","NCC Spec AACF"),
+   q("Signage identifies the facility, including braille/tactile and directional signage","BCA D3.6")
+  ])
+ ])
+]},
+
+/* ---- 26. Access Consultant Declaration ---- */
+{title:"Access Consultant Declaration",items:[
+ inst("Declaration","This report has been prepared on the basis of a visual, non-intrusive inspection of the premises on the date of audit, against the Disability (Access to Premises — Buildings) Standards 2010 and the referenced Australian Standards. It reflects conditions observed at the time of inspection only.\n\nThis report is not a building certification, nor a guarantee of compliance with all statutory obligations, and does not constitute legal advice. Dimensions cited are from the referenced standards; site measurements are indicative unless otherwise stated.\n\nInclusive Access Co. remains available to advise on the implementation of recommendations, review remediation designs, and conduct follow-up inspections."),
+ {k:"card",t:"Sign-off",items:[
+   sig("Signed"),
+   dt("Date",true),
+   dt("Reaudit date (if required)",false)
+ ]}
+]},
+
+/* ---- 27. Glossary of Terms ---- */
+{title:"Glossary of Terms",items:[
+ stub("The Glossary is a stub in the source template. A DRAFT glossary is pre-filled below for review — edit as needed."),
+ {k:"card",t:"Glossary",items:[
+   {k:"txt",t:"Glossary",multi:true,prefill:"AS 1428 — Australian Standard series: Design for access and mobility.\nAACF — Accessible Adult Change Facility.\nAccessway — A continuous accessible path of travel per AS 1428.1.\nAmbulant Toilet — A cubicle designed for people with ambulant disabilities who do not require wheelchair circulation space.\nBCA / NCC — Building Code of Australia / National Construction Code.\nCAPT — Continuous Accessible Path of Travel.\nDDA — Disability Discrimination Act 1992 (Cth).\nGPO — General Purpose Outlet (power point).\nLuminance Contrast — The difference in light reflected from one surface compared with an adjacent surface, expressed as a percentage.\nPPE — Principal Pedestrian Entrance.\nPremises Standards — Disability (Access to Premises — Buildings) Standards 2010.\nStep Ramp — A short ramp (max 1:10, rise ≤190mm) in lieu of a single step.\nTGSI — Tactile Ground Surface Indicator.\nThreshold Ramp — A short ramp at a doorway threshold (max 1:8, rise ≤35mm).\nUSAT — Unisex Accessible Toilet.\nShared Area — The marked area beside an accessible parking bay for vehicle door/hoist circulation."}
+ ]}
+]}
+/*__PAGES_C__*/
+/*__PAGES_END__*/
+];
+/* =====================================================================
+   ENGINE
+===================================================================== */
+/* =====================================================================
+   ENGINE v2 — template-driven + builder
+   - Template is editable data (localStorage). Default seeded from PAGES.
+   - Every item has a stable id, so add/reorder/delete never misattributes answers.
+   - Answers keyed by item.id (+ instance suffix for repeated sections).
+===================================================================== */
+const TKEY="iac_template_v2", AKEY="iac_answers_v2";
+
+/* ---- injected builder styles ---- */
+(function(){const s=document.createElement("style");s.textContent=`
+.eb{border:1px dashed #b9cbe0;border-radius:8px;padding:8px 10px;margin:8px 0;background:#fbfdff}
+.ebar{display:flex;gap:5px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.ebtn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;font-size:12px;cursor:pointer;line-height:1.4}
+.ebtn:hover{background:var(--brand-lt)}
+.ebtn.d{color:var(--red)} .ebtn.p{background:var(--brand);color:#fff;border-color:var(--brand)}
+.ein{border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:13px;width:100%;font-family:inherit}
+.etag{font-size:10.5px;color:var(--brand);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.erow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.emeta{font-size:11px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(20,30,45,.5);display:flex;align-items:center;justify-content:center;z-index:60}
+.modal .box{background:#fff;border-radius:12px;padding:22px;max-width:600px;width:92%;max-height:86vh;overflow:auto}
+.modal h3{margin-bottom:12px;color:var(--brand)}
+.rsline{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.rsline input{padding:4px 6px;border:1px solid var(--line);border-radius:6px}
+.editing .card{outline:1px solid #eef2f7}
+body.edit-on .top .editonly{display:inline-block}
+.editonly{display:none}
+`;document.head.appendChild(s);})();
+
+/* ---- state ---- */
+let T=null, S={}, REPS={}, cur=0, mode="audit", EDIT=false;
+/* Which view was rendered last (page + mode + edit state). Used so that
+   re-rendering after an answer is saved keeps the auditor's scroll position,
+   and only a genuine change of view returns to the top. */
+let lastViewKey=null;
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function seedDefault(){
+ let c=0; const nid=()=>"d"+(c++);
+ function norm(it){
+   if(!it.id) it.id=nid();
+   if(it.k==="fnn"){it.k="q";it.rs="fnn";if(it.c===undefined)it.c=null;}
+   if(it.k==="q"&&!it.rs) it.rs="phml";
+   if(Array.isArray(it.items)) it.items.forEach(norm);
+   return it;
+ }
+ const pages=PAGES.map(p=>({
+   id:"pg"+(c++), title:p.title, divider:!!p.divider, blurb:p.blurb||"",
+   items:(p.items||[]).map(x=>norm(clone(x)))
+ }));
+ return {meta:{title:"Premises Access Audit", nextId:c},
+   rs:{ phml:{name:"Pass / High Priority / Medium Priority / Low Priority", opts:PHML},
+        fnn:{name:"Found / Not Found / N/A", opts:FNN} },
+   pages };
+}
+function loadAll(){
+ try{const t=JSON.parse(localStorage.getItem(TKEY)); if(t&&t.pages) T=t;}catch(e){}
+ if(!T) T=seedDefault();
+ if(!T.meta) T.meta={title:"Premises Access Audit",nextId:9999};
+ try{const a=JSON.parse(localStorage.getItem(AKEY)); if(a){S=a.s||{};REPS=a.r||{};cur=a.cur||0;}}catch(e){}
+ if(cur>=T.pages.length) cur=0;
+}
+const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T))}catch(e){}};
+const saveA=()=>{try{localStorage.setItem(AKEY,JSON.stringify({s:S,r:REPS,cur}))}catch(e){}};
+const genId=()=>"d"+(T.meta.nextId++);
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const RS=k=>(T.rs[k]||T.rs.phml);
+const isScored=opts=>opts.some(o=>typeof o.score==="number");
+
+/* ---- tree helpers ---- */
+function itemsArrayOf(id){
+ for(const pg of T.pages){ if(pg.id===id) return pg.items; const r=deepArr(pg.items,id); if(r) return r; }
+ return null;
+}
+function deepArr(arr,id){
+ for(const it of arr){ if(it.id===id){ if(!it.items)it.items=[]; return it.items; }
+   if(it.items){ const r=deepArr(it.items,id); if(r) return r; } }
+ return null;
+}
+function findLoc(id){
+ function search(arr){ for(let i=0;i<arr.length;i++){ if(arr[i].id===id) return {arr,i,item:arr[i]};
+   if(arr[i].items){ const r=search(arr[i].items); if(r) return r; } } return null; }
+ for(const pg of T.pages){ const r=search(pg.items); if(r) return r; }
+ return null;
+}
+function findItem(id){const l=findLoc(id);return l?l.item:null;}
+function pageOfItem(id){
+ function has(arr){for(const it of arr){if(it.id===id)return true;if(it.items&&has(it.items))return true;}return false;}
+ return T.pages.find(p=>has(p.items));
+}
+
+/* ---- collect scoreable questions (mirrors render incl. repeats) ---- */
+function walkQs(items,suf,out,page){
+ items.forEach(it=>{
+  if(it.k==="q"){out.push({key:it.id+suf, item:it, page});}
+  else if(it.k==="grp"){
+    walkQs(it.items,suf,out,page);
+    for(let a=0;a<(it.addl||0);a++){const ak=it.id+suf+"|addl"+a;
+      if(S[ak+"|t"]) out.push({key:ak,item:{t:S[ak+"|t"],c:"Additional item",rs:"phml"},page});}
+  }
+  else if(it.k==="sec"){
+    const n=it.rep===false?1:(REPS[it.id+suf]||1);
+    for(let inst=0;inst<n;inst++) walkQs(it.items,suf+"~"+inst,out,page);
+  }
+  else if(it.k==="card"){walkQs(it.items,suf,out,page);}
+ });
+}
+function allQs(){const o=[];T.pages.forEach(p=>{if(!p.divider)walkQs(p.items,"",o,p);});return o;}
+function trailOf(q){ // page + section labels for report
+ return [q.page?q.page.title:""];
+}
+/* All per-page scores in a single pass over allQs(), instead of calling
+   pageScore() (which itself calls allQs()) once per page — avoids an
+   O(pages x total items) re-walk of the whole template on every render. */
+function allPageScores(){
+ const map=new Map();
+ T.pages.forEach(p=>{ if(!p.divider) map.set(p,{got:0,max:0,hi:0,med:0,brc:0}); });
+ allQs().forEach(x=>{
+  const bucket=map.get(x.page); if(!bucket) return;
+  const set=RS(x.item.rs).opts; if(!isScored(set)) return;
+  bucket.max++; const v=S[x.key];
+  if(v!==undefined&&v!==""){const o=set[+v]; if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
+ });
+ return map;
+}
+/* ---- answer-data cleanup helpers ----
+   Answer/photo keys are built as itemId + suffix-chain (+ "|extra"), e.g.
+   "d12", "d12~0", "d12|n", "d12~0|addl1|t". Both helpers below use that
+   structure to find and remove every key that belongs to a given item or
+   a given repeated-section instance, so deleting template items or
+   removing a repeated instance actually clears their data instead of
+   leaving it orphaned (or, worse, resurfacing on a reused instance index). */
+function collectAnswerKeysDeep(items,suf,out){
+ items.forEach(it=>{
+  if(it.k==="q"){ out.push(it.id+suf,it.id+suf+"|n",it.id+suf+"|tf"); }
+  else if(it.k==="txt"||it.k==="dt"||it.k==="sig"||it.k==="media"){ out.push(it.id+suf); }
+  else if(it.k==="std"){ (it.opts||[]).forEach((o,j)=>out.push(it.id+suf+"|"+j)); }
+  else if(it.k==="grp"){
+   collectAnswerKeysDeep(it.items,suf,out);
+   for(let a=0;a<(it.addl||0);a++){const ak=it.id+suf+"|addl"+a; out.push(ak+"|t",ak+"|n",ak);}
+  }
+  else if(it.k==="sec"){
+   const n=it.rep===false?1:(REPS[it.id+suf]||1);
+   for(let inst=0;inst<n;inst++) collectAnswerKeysDeep(it.items,suf+"~"+inst,out);
+  }
+  else if(it.k==="card"){ collectAnswerKeysDeep(it.items,suf,out); }
+ });
+}
+function purgeAnswerKeys(keys){
+ keys.forEach(k=>{
+  delete S[k];
+  if(PHOTOS[k]){ PHOTOS[k].forEach(p=>IDB.del(p.id).catch(()=>{})); delete PHOTOS[k]; }
+ });
+}
+function idBoundaryRe(id){ return new RegExp("^"+id.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"($|[~|])"); }
+function collectIdsDeep(item,out){
+ out.push(item.id);
+ if(item.items) item.items.forEach(ch=>collectIdsDeep(ch,out));
+}
+/* Purge every stored answer/photo for a whole item subtree, across every
+   repeated instance — used when a template item is deleted outright, so
+   its data can't linger in localStorage/IndexedDB or resurface later. */
+function purgeAnswersForIds(ids){
+ const res=ids.map(idBoundaryRe);
+ Object.keys(S).forEach(k=>{ if(res.some(re=>re.test(k))) delete S[k]; });
+ Object.keys(PHOTOS).forEach(k=>{ if(res.some(re=>re.test(k))){ PHOTOS[k].forEach(p=>IDB.del(p.id).catch(()=>{})); delete PHOTOS[k]; } });
+}
+function pageScore(pg){
+ let got=0,max=0,hi=0,med=0,brc=0;
+ allQs().filter(x=>x.page===pg).forEach(x=>{
+   const set=RS(x.item.rs).opts; if(!isScored(set))return;
+   max++; const v=S[x.key];
+   if(v!==undefined&&v!==""){const o=set[+v]; if(o){ if(o.score===1)got++; if(o.flag){ if(o.breach)brc++; else if(o.score===0)hi++; else med++; } }}
+ });
+ return {got,max,hi,med,brc};
+}
+function totals(){
+ let got=0,max=0,flag=0,ans=0,n=0;
+ allQs().forEach(x=>{const set=RS(x.item.rs).opts;const v=S[x.key];n++;
+   if(v!==undefined&&v!=="")ans++;
+   if(isScored(set)){max++; if(v!==undefined&&v!==""){const o=set[+v];if(o){if(o.score===1)got++;}}}
+   if(v!==undefined&&v!==""){const o=set[+v];if(o&&o.flag)flag++;}
+ });
+ return {got,max,flag,ans,n};
+}
+/* Find a field's item id by page + label. Uses Array.some() so a match
+   found in a nested call short-circuits every enclosing loop too — a plain
+   recursive "return" only exits its own call, letting the search keep
+   going and a later same-labelled field silently overwrite an earlier
+   correct match. */
+function getFieldKey(pageTitle,label){
+ const pg=T.pages.find(p=>p.title===pageTitle); if(!pg)return null;
+ let foundId=null;
+ (function look(arr){
+  return arr.some(it=>{
+   if(it.t===label&&(it.k==="txt"||it.k==="q"||it.k==="media")){foundId=it.id;return true;}
+   if(it.items)return look(it.items);
+   return false;
+  });
+ })(pg.items);
+ return foundId;
+}
+function getFieldVal(pageTitle,label){
+ const id=getFieldKey(pageTitle,label);
+ return id?(S[id]||""):"";
+}
+
+/* =====================================================================
+   RENDER — audit mode
+===================================================================== */
+function rItems(items,suf){ return items.map(it=>rItem(it,suf)).join(""); }
+function rItem(it,suf){
+ const eb=EDIT?editBar(it):"";
+ switch(it.k){
+  case "std":{
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Standards</span>${moveDel(it.id)}</div>
+     <input class="ein" data-edit="${it.id}" data-field="opts" value="${esc((it.opts||[]).join(', '))}" placeholder="AS1428.1, AS1428.2, …"></div>`;
+   return `<div class="card"><h3>Relevant Australian Standards</h3>`+
+     (it.opts||[]).map((o,j)=>`<label class="chk"><input type="checkbox" data-a="${it.id}${suf}|${j}" ${S[it.id+suf+"|"+j]?"checked":""}> ${esc(o)}</label>`).join("")+`</div>`;}
+  case "txt":{
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Text field</span>${moveDel(it.id)}
+     <label class="emeta"><input type="checkbox" data-edit="${it.id}" data-field="multi" ${it.multi?"checked":""}> multi-line</label></div>
+     <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" placeholder="Field label"></div>`;
+   const v=S[it.id+suf]??it.prefill??"";
+   const inner=it.multi?`<textarea data-a="${it.id}${suf}" ${it.prefill?'style="min-height:200px"':''}>${esc(v)}</textarea>`
+                       :`<input type="text" data-a="${it.id}${suf}" value="${esc(v)}">`;
+   return `<div class="field"><label>${esc(it.t)} ${it.req?'<span class="req">*</span>':""}</label>${inner}</div>`;}
+  case "dt":
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Date/time</span>${moveDel(it.id)}</div>
+     <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
+   return `<div class="field"><label>${esc(it.t)} ${it.req?'<span class="req">*</span>':""}</label><input type="datetime-local" data-a="${it.id}${suf}" value="${esc(S[it.id+suf]||"")}"></div>`;
+  case "media":
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Media</span>${moveDel(it.id)}</div><input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
+   return `<div class="field"><label>${esc(it.t)}</label>${photoBlock(it.id+suf)}</div>`;
+  case "sig":
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Signature</span>${moveDel(it.id)}</div><input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
+   return `<div class="field"><label>${esc(it.t)}</label><input type="text" data-a="${it.id}${suf}" placeholder="Type full name to sign" value="${esc(S[it.id+suf]||"")}" style="width:100%;padding:14px;font-style:italic;font-size:17px"></div>`;
+  case "q": return qRow(it,suf);
+  case "grp":{
+   if(EDIT){
+    let h=`<div class="eb"><div class="ebar"><span class="etag">Question group</span>${moveDel(it.id)}
+      <label class="emeta">blank rows <input type="number" min="0" max="6" style="width:46px" class="ein" data-edit="${it.id}" data-field="addl" value="${it.addl??2}"></label></div>
+      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" style="margin-bottom:6px">`;
+    h+=rItems(it.items,suf);
+    h+=`<button class="ebtn p" data-act="addq" data-id="${it.id}">+ Add question</button></div>`;
+    return h;
+   }
+   let h=`<div class="card"><h3>${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
+   h+=rItems(it.items,suf);
+   for(let a=0;a<(it.addl??2);a++){const ak=it.id+suf+"|addl"+a;
+     h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" placeholder="Additional item…" value="${esc(S[ak+"|t"]||"")}">
+        <label class="qnote-lbl">Comment</label>
+        <textarea class="qnote show" data-a="${ak}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(S[ak+"|n"]||"")}</textarea>
+        ${photoBlock(ak)}</div><div class="opts">`+
+        RS("phml").opts.map((o,j)=>`<button class="opt ${o.cls} ${S[ak]==String(j)?"on":""}" data-q="${ak}" data-v="${j}">${esc(o.l)}</button>`).join("")+`</div></div>`;}
+   return h+`</div>`;}
+  case "sec":{
+   const rep=it.rep!==false;
+   if(EDIT){
+    let h=`<div class="eb"><div class="ebar"><span class="etag">Repeatable section</span>${moveDel(it.id)}
+      <label class="emeta"><input type="checkbox" data-edit="${it.id}" data-field="rep" ${rep?"checked":""}> repeatable</label></div>
+      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" style="margin-bottom:6px">`;
+    h+=rItems(it.items,suf);
+    h+=`<div class="ebar"><button class="ebtn" data-act="addgrp" data-id="${it.id}">+ Group</button>
+        <button class="ebtn" data-act="addtxt" data-id="${it.id}">+ Details field</button></div></div>`;
+    return h;
+   }
+   const n=rep?(REPS[it.id+suf]||1):1; let h="";
+   for(let inst=0;inst<n;inst++){
+     h+=`<div class="rep"><div class="rh"><h4>${esc(it.t)}${n>1?" #"+(inst+1):""}</h4>`+
+        (rep&&n>1&&inst===n-1?`<button class="btn" data-delrep="${it.id+suf}">Remove</button>`:"")+
+        `</div><div class="rb">${rItems(it.items,suf+"~"+inst)}</div></div>`;}
+   if(rep)h+=`<button class="btn addrep" data-addrep="${it.id+suf}">+ Add another ${esc(it.t)}</button>`;
+   return h;}
+  case "card":{
+   if(EDIT){
+    let h=`<div class="eb"><div class="ebar"><span class="etag">Sub-section</span>${moveDel(it.id)}</div>
+      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" style="margin-bottom:6px">`;
+    h+=rItems(it.items,suf);
+    h+=`<button class="ebtn" data-act="addfield" data-id="${it.id}">+ Field</button></div>`;
+    return h;
+   }
+   return `<div class="card"><h3>${esc(it.t)}</h3>${rItems(it.items,suf)}</div>`;}
+  case "inst":
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Instruction</span>${moveDel(it.id)}</div>
+     <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" style="margin-bottom:6px">
+     <textarea class="ein" data-edit="${it.id}" data-field="body" style="min-height:90px">${esc(it.body)}</textarea></div>`;
+   return `<div class="card"><h3>${esc(it.t)}</h3><div class="inst">${esc(it.body)}</div></div>`;
+  case "stub":
+   return EDIT?"":`<div class="stub"><b>Build note:</b> ${esc(it.body)}</div>`;
+  default:return "";
+ }
+}
+function qRow(it,suf){
+ const key=it.id+suf, set=RS(it.rs).opts;
+ if(EDIT){
+  const opts=Object.keys(T.rs).map(k=>`<option value="${k}" ${it.rs===k?"selected":""}>${esc(T.rs[k].name)}</option>`).join("");
+  return `<div class="eb"><div class="ebar"><span class="etag">Question</span>${moveDel(it.id)}</div>
+    <textarea class="ein" data-edit="${it.id}" data-field="t" style="min-height:44px;margin-bottom:5px">${esc(it.t)}</textarea>
+    <div class="erow"><input class="ein" style="flex:2" data-edit="${it.id}" data-field="c" value="${esc(it.c||"")}" placeholder="Clause reference (e.g. AS 1428.1 Cl 10.2)">
+    <select class="ein" style="flex:1" data-rs="${it.id}">${opts}</select></div></div>`;
+ }
+ const v=S[key], note=S[key+"|n"]||"";
+ return `<div class="qrow"><div class="qt">${esc(it.t)}${it.c?`<span class="cl">${esc(it.c)}</span>`:""}
+   <label class="qnote-lbl">Comment</label>
+   <textarea class="qnote show" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
+   ${photoBlock(key)}</div>
+   <div class="opts">`+set.map((o,j)=>`<button class="opt ${o.cls} ${v==String(j)?"on":""}" data-q="${key}" data-v="${j}">${esc(o.l)}</button>`).join("")+`</div></div>`;
+}
+function editBar(){return "";}
+function moveDel(id){
+ return `<span style="margin-left:auto"></span>
+   <button class="ebtn" title="Move up" data-act="up" data-id="${id}">▲</button>
+   <button class="ebtn" title="Move down" data-act="down" data-id="${id}">▼</button>
+   <button class="ebtn d" title="Delete" data-act="del" data-id="${id}">✕</button>`;
+}
+
+/* =====================================================================
+   RENDER — page + nav + report
+===================================================================== */
+/* =====================================================================
+   TARGETED UPDATES
+   Selecting an answer used to re-render the entire page, which threw away
+   scroll position and keyboard focus (losing the caret from a half-typed
+   note). These helpers update only what actually changed.
+===================================================================== */
+/* =====================================================================
+   ON-SITE PHOTOS
+   Each audit item can hold photos taken on the device camera. Photos are
+   compressed in the browser and stored in IndexedDB on this device only —
+   nothing is uploaded to a server. They stay attached to their item and
+   appear in the report. Keyed by the same answer key as comments/scores.
+===================================================================== */
+let PHOTOS={};                         // key -> [{id,key,data,ts}]
+let photoKey=null;                     // item awaiting a capture
+const IDB=(function(){
+ let dbp=null;
+ function open(){
+  if(dbp)return dbp;
+  dbp=new Promise((res,rej)=>{
+   const r=indexedDB.open("iac-audit-photos",1);
+   r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains("photos")){const os=db.createObjectStore("photos",{keyPath:"id"});os.createIndex("key","key",{unique:false});}};
+   r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+  return dbp;
+ }
+ function tx(mode){return open().then(db=>db.transaction("photos",mode).objectStore("photos"));}
+ return {
+  all:()=>tx("readonly").then(os=>new Promise(res=>{const q=os.getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([]);})),
+  put:rec=>tx("readwrite").then(os=>new Promise(res=>{const q=os.put(rec);q.onsuccess=()=>res();q.onerror=()=>res();})),
+  del:id=>tx("readwrite").then(os=>new Promise(res=>{const q=os.delete(id);q.onsuccess=()=>res();q.onerror=()=>res();})),
+  clear:()=>tx("readwrite").then(os=>new Promise(res=>{const q=os.clear();q.onsuccess=()=>res();q.onerror=()=>res();}))
+ };
+})();
+async function loadPhotos(){
+ PHOTOS={};
+ try{(await IDB.all()).forEach(r=>{(PHOTOS[r.key]=PHOTOS[r.key]||[]).push(r);});}catch(e){}
+}
+/* Shrink a captured image so many photos fit within device storage. */
+function compressImage(file,max=1400,quality=0.7){
+ return new Promise(res=>{
+  const url=URL.createObjectURL(file), img=new Image();
+  img.onload=()=>{
+   let w=img.naturalWidth,h=img.naturalHeight;
+   if(w>h&&w>max){h=Math.round(h*max/w);w=max;}
+   else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}
+   const c=document.createElement("canvas");c.width=w;c.height=h;
+   c.getContext("2d").drawImage(img,0,0,w,h);
+   URL.revokeObjectURL(url);
+   try{res(c.toDataURL("image/jpeg",quality));}catch(e){res(null);}
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
+  img.src=url;
+ });
+}
+function photoStripHTML(key){
+ const list=PHOTOS[key]||[];
+ return list.map(p=>`<span class="qphoto"><img src="${p.data}" alt="Site photo for this item">`+
+   `<button type="button" data-delphoto="${p.id}" data-key="${esc(key)}" aria-label="Remove photo">✕</button></span>`).join("");
+}
+function photoBlock(key){
+ const n=(PHOTOS[key]||[]).length;
+ return `<div class="qphotos" data-photos="${esc(key)}">${photoStripHTML(key)}</div>`+
+   `<button type="button" class="addphoto" data-addphoto="${esc(key)}">📷 ${n?"Add another photo":"Take / add photo"}</button>`;
+}
+/* Read-only photo strip for the report (no delete buttons). */
+function reportPhotos(key){
+ const list=PHOTOS[key]||[];
+ if(!list.length)return "";
+ return `<div class="qphotos">`+list.map(p=>`<span class="qphoto"><img src="${p.data}" alt="Site photo"></span>`).join("")+`</div>`;
+}
+/* Refresh only one item's photo strip + button, no full re-render. */
+function refreshPhotos(key){
+ const strip=content.querySelector('.qphotos[data-photos="'+CSS.escape(key)+'"]');
+ if(strip){strip.innerHTML=photoStripHTML(key);
+  const btn=strip.nextElementSibling;
+  if(btn&&btn.classList.contains("addphoto"))btn.textContent="📷 "+((PHOTOS[key]||[]).length?"Add another photo":"Take / add photo");
+ }else{render();}
+}
+function pageScoreHTML(sc){
+ return `<b>Page score: ${sc.got}/${sc.max} (${sc.max?Math.round(sc.got/sc.max*100):0}%)</b> &nbsp; ${sc.brc?`<span style="color:var(--breach)">Breach: ${sc.brc}</span> &nbsp; `:""}<span style="color:var(--red)">High: ${sc.hi}</span> &nbsp; <span style="color:var(--orange)">Med/Low: ${sc.med}</span>`;
+}
+/* Resolve the response set for an answer key. Keys are itemId + repeat
+   suffix ("~0"), or itemId + suffix + "|addl<n>" for the blank extra rows,
+   which always use the standard Pass/High/Medium/Low set. */
+function optsForKey(key){
+ if(key.indexOf("|addl")>=0) return RS("phml").opts;
+ const it=findItem(key.split("~")[0]);
+ return RS(it?it.rs:"phml").opts;
+}
+function updatePageScore(){
+ const el=document.getElementById("pageScore"); if(!el) return;
+ const sc=pageScore(T.pages[cur]);
+ if(!sc.max){el.style.display="none";el.innerHTML="";return;}
+ el.style.display=""; el.innerHTML=pageScoreHTML(sc);
+}
+function updateAnswerUI(key){
+ const v=S[key], sel='[data-q="'+key+'"]';
+ const btns=document.querySelectorAll(sel);
+ btns.forEach(btn=>btn.classList.toggle("on", v!==undefined && v!=="" && btn.dataset.v===v));
+ renderNav(); renderTop(); updatePageScore();
+}
+function render(){
+ renderNav(); renderTop();
+ document.body.classList.toggle("edit-on",EDIT);
+ const c=document.getElementById("content");
+ /* Selecting a priority re-renders the page. Keep the auditor's place unless
+    the view itself changed (different page, report mode, or edit mode). */
+ const viewKey=mode+"|"+cur+"|"+EDIT;
+ const keepScroll=(viewKey===lastViewKey)?c.scrollTop:0;
+ lastViewKey=viewKey;
+ if(mode==="report"){c.innerHTML=reportHTML();c.scrollTop=keepScroll;return;}
+ const p=T.pages[cur]; let h=`<div class="pg ${EDIT?"editing":""}">`;
+ if(EDIT){
+  h+=`<div class="eb"><div class="ebar"><span class="etag">Page ${cur+1}</span>
+    <button class="ebtn" data-act="pup">▲ page</button><button class="ebtn" data-act="pdown">▼ page</button>
+    <button class="ebtn d" data-act="pdel">Delete page</button>
+    <label class="emeta"><input type="checkbox" data-pdiv ${p.divider?"checked":""}> section divider</label></div>
+    <input class="ein" data-ptitle value="${esc(p.title)}" placeholder="Page title" style="margin-bottom:6px">
+    ${p.divider?`<input class="ein" data-pblurb value="${esc(p.blurb||"")}" placeholder="Divider description">`:""}</div>`;
+ }
+ if(p.divider && !EDIT){
+  h+=`<div class="divpage"><h2>${esc(p.title)}</h2><p>${esc(p.blurb||"")}</p></div>`;
+ }else if(!p.divider){
+  if(!EDIT){h+=`<h2>${esc(p.title)}</h2><div class="crumb">Page ${cur+1} of ${T.pages.length} — ${esc(T.meta.title)}</div>`;}
+  h+=rItems(p.items,"");
+  if(EDIT){
+   h+=`<div class="eb"><div class="ebar"><span class="etag">Add block to page</span></div><div class="ebar">
+     <button class="ebtn" data-act="addstd" data-id="${p.id}">+ Standards</button>
+     <button class="ebtn" data-act="addtxt" data-id="${p.id}">+ Details/text</button>
+     <button class="ebtn" data-act="addgrp" data-id="${p.id}">+ Question group</button>
+     <button class="ebtn" data-act="addsec" data-id="${p.id}">+ Repeatable section</button>
+     <button class="ebtn" data-act="addcard" data-id="${p.id}">+ Sub-section</button>
+     <button class="ebtn" data-act="addinst" data-id="${p.id}">+ Instruction</button></div></div>`;
+  }else{
+   const sc=pageScore(p);
+   h+=`<div class="card" id="pageScore"${sc.max?"":' style="display:none"'}>${sc.max?pageScoreHTML(sc):""}</div>`;
+  }
+ }
+ h+=`<div class="pgnav"><button class="btn" ${cur===0?"disabled":""} data-nav="-1">&larr; Previous</button>
+   <button class="btn primary" ${cur===T.pages.length-1?"disabled":""} data-nav="1">Next &rarr;</button></div></div>`;
+ c.innerHTML=h; c.scrollTop=keepScroll;
+}
+function renderNav(){
+ const scores=allPageScores();
+ document.getElementById("nav").innerHTML=T.pages.map((p,i)=>{
+  if(p.divider)return `<div class="div">${esc(p.title)}</div>`+(EDIT?`<a href="#" data-pg="${i}" class="${i===cur?"on":""}" style="font-style:italic">edit divider</a>`:`<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}" style="font-style:italic;color:var(--muted)">Section divider</a>`);
+  const sc=scores.get(p)||{got:0,max:0,hi:0,med:0};
+  const lab=sc.max?`${sc.got}/${sc.max}${sc.brc?" ⛔"+sc.brc:""}${sc.hi?" ⚑"+sc.hi:""}`:"";
+  return `<a href="#" data-pg="${i}" class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
+ }).join("")+(EDIT?`<div style="padding:10px 18px"><button class="ebtn p" data-act="addpage">+ Add page</button></div>`:"");
+}
+function renderTop(){
+ const t=totals();
+ document.getElementById("tScore").textContent=`${t.got}/${t.max} (${t.max?Math.round(t.got/t.max*100):0}%)`;
+ document.getElementById("tFlag").textContent=t.flag;
+ document.getElementById("tAns").textContent=(t.n?Math.round(t.ans/t.n*100):0)+"%";
+ document.getElementById("btnReport").textContent=mode==="report"?"Back to audit":"Report view";
+ const eb=document.getElementById("btnEdit"); if(eb) eb.textContent=EDIT?"✓ Editing template":"Edit template";
+}
+/* Timeframe <select> options for a flagged item, capped at maxMonths
+   (Breach of Code: 3, High: 6, Medium: 9, Low: 12 — matches the recommended
+   fix-by windows for each priority). Selection is saved under key+"|tf". */
+function tfOptions(maxMonths,selected){
+ let o=`<option value=""${!selected?" selected":""}>Select…</option>`;
+ for(let m=0;m<=maxMonths;m++){
+  const label=m===0?"Immediate":(m+" month"+(m>1?"s":""));
+  o+=`<option value="${m}"${String(selected)===String(m)?" selected":""}>${esc(label)}</option>`;
+ }
+ return o;
+}
+const TF_MAX_MONTHS={br:3,hi:6,md:9,lo:12};
+const PRIORITY_GROUPS=[["br","Breach of Code"],["hi","High Priority"],["md","Medium Priority"],["lo","Low Priority"]];
+function reportHTML(){
+ const t=totals(), flags=allQs().filter(x=>{const v=S[x.key];const set=RS(x.item.rs).opts;return v!==undefined&&v!==""&&set[+v]&&set[+v].flag;});
+ const cls=x=>{const o=RS(x.item.rs).opts[+S[x.key]];
+  if(o.breach)return["br","Breach of Code"];
+  return o.score===0?["hi","High Priority"]:o.l.toLowerCase().indexOf("med")>=0?["md","Medium Priority"]:o.l.toLowerCase().indexOf("low")>=0?["lo","Low Priority"]:["md",o.l];};
+ /* List flagged items by priority (Breach of Code, then High, then Medium,
+    then Low) across the whole audit, regardless of which page/category
+    they came from — rather than in the order the questions happen to
+    appear while walking the audit. Array.sort() is stable, so items that
+    share a priority keep their original page order relative to each other. */
+ const PRIORITY_RANK={br:0,hi:1,md:2,lo:3};
+ const sortedFlags=flags.slice().sort((a,b)=>PRIORITY_RANK[cls(a)[0]]-PRIORITY_RANK[cls(b)[0]]);
+ let h=`<div class="pg"><h2>${esc(T.meta.title)} — Report</h2>
+  <div class="crumb">Inclusive Access Co. — generated ${new Date().toLocaleDateString("en-AU")}</div>
+  <div class="card"><h3>Summary</h3>
+   <p><b>Score:</b> ${t.got}/${t.max} (${t.max?Math.round(t.got/t.max*100):0}%) &nbsp;&nbsp; <b style="color:var(--red)">Flagged:</b> ${flags.length}</p>
+   <p style="margin-top:6px"><b>Site:</b> ${esc(getFieldVal("Title Page","Site conducted")||"—")} &nbsp; <b>Client:</b> ${esc(getFieldVal("Title Page","Name")||"—")} &nbsp; <b>Consultant:</b> ${esc(getFieldVal("Title Page","Consultant Name")||"—")}</p>
+   ${reportPhotos(getFieldKey("Title Page","Site photo / media"))}</div>
+  <div class="card"><h3>Score by building element</h3><table class="rep-table"><tr><th>Page</th><th>Score</th><th>%</th><th>High</th><th>Med/Low</th></tr>`;
+ T.pages.forEach(p=>{if(p.divider)return;const s=pageScore(p);if(!s.max)return;
+  h+=`<tr><td>${esc(p.title)}</td><td>${s.got}/${s.max}</td><td>${s.max?Math.round(s.got/s.max*100):0}%</td><td>${s.hi||""}</td><td>${s.med||""}</td></tr>`;});
+ h+=`</table></div><div class="card"><h3>Flagged items &amp; recommended actions <span class="cnt">${flags.length}</span></h3>`;
+ if(!flags.length){
+  h+=`<p style="color:var(--muted)">No flagged items.</p>`;
+ }else{
+  /* One titled sub-section per priority — Breach of Code, High, Medium,
+     Low — so clients can see clearly, at a glance, what needs fixing and
+     how urgently, instead of one flat undifferentiated list. Each item
+     gets its own remediation timeframe picker, capped to that priority's
+     recommended window. */
+  PRIORITY_GROUPS.forEach(([gc,gl])=>{
+   const items=sortedFlags.filter(x=>cls(x)[0]===gc);
+   if(!items.length)return;
+   h+=`<div class="flag-group"><h4 class="${gc}">${gl} <span class="cnt">(${items.length})</span></h4>`;
+   items.forEach(x=>{
+    const pg=x.page, flagCls=gc==="br"?"breach":gc==="hi"?"":"med", tfKey=x.key+"|tf";
+    h+=`<div class="flagitem ${flagCls}"><span class="badge ${gc}">${gl}</span> &nbsp; ${esc(x.item.t)}
+      <div class="fp">${esc(pg?pg.title:"")}${x.item.c?" — "+esc(x.item.c):""}</div>
+      ${S[x.key+"|n"]?`<div style="margin-top:5px"><b>Comment:</b> ${esc(S[x.key+"|n"])}</div>`:""}
+      <div class="tf-row"><label class="tf-label">Fix by:
+        <select class="tf-select" data-tf="${esc(x.key)}">${tfOptions(TF_MAX_MONTHS[gc],S[tfKey])}</select>
+      </label></div>
+      ${reportPhotos(x.key)}</div>`;
+   });
+   h+=`</div>`;
+  });
+ }
+ h+=`</div>`;
+ /* Items to monitor: any line item with a comment OR a photo that is NOT
+    already a flagged item — so nothing noted for follow-up is lost. */
+ const flagKeys=new Set(flags.map(x=>x.key));
+ const monitored=allQs().filter(x=>(S[x.key+"|n"]||(PHOTOS[x.key]&&PHOTOS[x.key].length)) && !flagKeys.has(x.key));
+ h+=`<div class="card"><h3>Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
+ if(!monitored.length)h+=`<p style="color:var(--muted)">No additional comments or photos recorded.</p>`;
+ monitored.forEach(x=>{h+=`<div class="flagitem med"><span class="badge md">Comment</span> &nbsp; ${esc(x.item.t)}
+   <div class="fp">${esc(x.page?x.page.title:"")}${x.item.c?" — "+esc(x.item.c):""}</div>
+   ${S[x.key+"|n"]?`<div style="margin-top:5px"><b>Comment:</b> ${esc(S[x.key+"|n"])}</div>`:""}
+   ${reportPhotos(x.key)}</div>`;});
+ return h+`</div></div>`;
+}
+
+/* Build a fully self-contained HTML report (photos embedded inline) and
+   download it. Opens cleanly in any browser and prints to PDF. The report
+   also carries its own tiny "Edit this report" toggle (contentEditable) +
+   "Save edited copy" button, so whoever receives the file can correct
+   wording or add a note directly in the report and re-save it, without
+   needing this tool at all. Both controls are hidden from print/PDF. */
+function exportReport(){
+ const site=esc(getFieldVal("Title Page","Site conducted")||"Access audit");
+ const date=new Date().toLocaleDateString("en-AU");
+ const css=`
+  body{font-family:Arial,Helvetica,sans-serif;color:#1B1E2B;background:#fff;margin:0;line-height:1.5}
+  .pg{max-width:880px;margin:0 auto;padding:26px 30px}
+  h2{font-family:Verdana,Geneva,sans-serif;color:#283593;font-size:22px;margin:0 0 4px}
+  h3{font-family:Verdana,Geneva,sans-serif;color:#283593;font-size:15px;margin:0 0 12px}
+  .crumb{color:#4A4E5C;font-size:12.5px;margin-bottom:18px}
+  .card{background:#fff;border:1px solid #D3D6E0;border-radius:10px;padding:18px 20px;margin-bottom:16px}
+  .rep-table{width:100%;border-collapse:collapse;font-size:13px}
+  .rep-table th,.rep-table td{border:1px solid #D3D6E0;padding:7px 10px;text-align:left}
+  .rep-table th{background:#F9FAFC}
+  .flagitem{border:1px solid #D3D6E0;border-left:4px solid #B3261E;border-radius:8px;padding:11px 14px;margin-bottom:9px;font-size:13px}
+  .flagitem.med{border-left-color:#8A5A00}
+  .flagitem.breach{border-left-color:#6B0F1A}
+  .flagitem .fp{color:#4A4E5C;font-size:11.5px}
+  .badge{display:inline-block;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700}
+  .badge.hi{background:#FCEBEA;color:#B3261E}.badge.md,.badge.lo{background:#FDF6E7;color:#8A5A00}
+  .badge.br{background:#F4DFE1;color:#6B0F1A}
+  .cnt{color:#4A4E5C;font-weight:400;font-size:12.5px}
+  .flag-group{margin-bottom:16px}
+  .flag-group:last-child{margin-bottom:0}
+  .flag-group h4{font-size:14px;margin-bottom:8px;font-family:Verdana,Geneva,sans-serif}
+  .flag-group h4 .cnt{font-weight:400}
+  .flag-group h4.br{color:#6B0F1A}
+  .flag-group h4.hi{color:#B3261E}
+  .flag-group h4.md,.flag-group h4.lo{color:#8A5A00}
+  .tf-row{margin-top:8px}
+  .tf-label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#4A4E5C}
+  .tf-select{border:1px solid #D3D6E0;border-radius:6px;padding:6px 8px;font:inherit;font-size:12.5px;color:#1B1E2B;min-height:36px}
+  .tf-select:focus-visible{outline:3px solid #283593;outline-offset:2px}
+  @media print{.tf-label{color:#1B1E2B}}
+  .qphotos{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .qphoto{width:150px;height:150px;border:1px solid #D3D6E0;border-radius:7px;overflow:hidden}
+  .qphoto img{width:100%;height:100%;object-fit:cover;display:block}
+  @media print{.qphoto{width:130px;height:130px}}
+  .rtoolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#F9FAFC;border-bottom:1px solid #D3D6E0;padding:10px 20px}
+  .rbtn{border:1px solid #D3D6E0;background:#fff;color:#1B1E2B;border-radius:8px;padding:8px 14px;font:inherit;font-size:13.5px;cursor:pointer;min-height:44px}
+  .rbtn.primary{background:#283593;border-color:#283593;color:#fff}
+  .rbtn[aria-pressed="true"]{background:#E7E6F5;border-color:#283593;color:#283593;font-weight:700}
+  .rbtn:focus-visible{outline:3px solid #F6C500;outline-offset:2px}
+  .rhint{font-size:12px;color:#4A4E5C}
+  [contenteditable="true"]{outline:2px dashed #283593;outline-offset:4px;background:#FFFDF4}
+  [contenteditable="true"]:focus{outline:2px solid #283593}
+  @media print{.rtoolbar,.noprint{display:none!important}[contenteditable]{outline:none!important;background:none!important}}
+ `;
+ const js=`
+  (function(){
+   var editBtn=document.getElementById('rEdit'), saveBtn=document.getElementById('rSave'),
+       hint=document.getElementById('rHint'), root=document.getElementById('rContent');
+   function setEditable(on){
+    root.contentEditable=on?'true':'false';
+    editBtn.setAttribute('aria-pressed',on?'true':'false');
+    editBtn.textContent=on?'✓ Editing on — click to stop':'✏️ Edit this report';
+    saveBtn.hidden=!on;
+    hint.textContent=on?'Click any text to change it. Photos and scores stay as generated.':'Click “Edit this report” to correct wording before sending it on.';
+   }
+   editBtn.addEventListener('click',function(){ setEditable(root.contentEditable!=='true'); });
+   /* outerHTML serialises the ORIGINAL parsed "selected" attribute, not a
+      <select>'s live chosen option — without this, picking a timeframe and
+      saving would silently revert to the original selection (or blank) once
+      reopened. Write the live selection back onto the option elements first. */
+   function syncSelectsToAttributes(){
+    document.querySelectorAll('select').forEach(function(sel){
+     Array.prototype.forEach.call(sel.options,function(opt){
+      if(opt.selected){opt.setAttribute('selected','');}else{opt.removeAttribute('selected');}
+     });
+    });
+   }
+   saveBtn.addEventListener('click',function(){
+    syncSelectsToAttributes();
+    var out='<!DOCTYPE html>\\n'+document.documentElement.outerHTML;
+    var blob=new Blob([out],{type:'text/html'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(document.title||'access-audit-report').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-edited.html';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+   });
+  })();
+ `;
+ const toolbar=`<div class="rtoolbar noprint">
+   <button type="button" class="rbtn primary" id="rEdit" aria-pressed="false">✏️ Edit this report</button>
+   <button type="button" class="rbtn" id="rSave" hidden>💾 Save edited copy</button>
+   <button type="button" class="rbtn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+   <span class="rhint" id="rHint">Click "Edit this report" to correct wording before sending it on.</span>
+  </div>`;
+ const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">`+
+   `<meta name="viewport" content="width=device-width, initial-scale=1">`+
+   `<title>${site} — Access Audit Report (${date})</title><style>${css}</style></head>`+
+   `<body>${toolbar}<div id="rContent">${reportHTML()}</div><script>${js}<\/script></body></html>`;
+ const blob=new Blob([doc],{type:"text/html"});
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="access-audit-report-"+new Date().toISOString().slice(0,10)+".html";
+ document.body.appendChild(a); a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+
+/* =====================================================================
+   BUILDER OPERATIONS
+===================================================================== */
+function newQ(){return {k:"q",id:genId(),t:"New question",c:"",rs:"phml"};}
+function newBlock(kind){
+ switch(kind){
+  case "std":return {k:"std",id:genId(),opts:["AS1428.1"]};
+  case "txt":return {k:"txt",id:genId(),t:"Details:",multi:true};
+  case "field":return {k:"txt",id:genId(),t:"New field",multi:false};
+  case "grp":return {k:"grp",id:genId(),t:"Legislative Requirements",addl:2,items:[newQ()]};
+  case "sec":return {k:"sec",id:genId(),t:"Element",rep:true,items:[{k:"txt",id:genId(),t:"Details:",multi:true},{k:"grp",id:genId(),t:"Legislative Requirements",addl:2,items:[newQ()]}]};
+  case "card":return {k:"card",id:genId(),t:"Sub-section",items:[]};
+  case "inst":return {k:"inst",id:genId(),t:"Instruction",body:"Enter text…"};
+ }
+}
+function op(act,id){
+ const acts={
+  up:()=>{const l=findLoc(id);if(l&&l.i>0){[l.arr[l.i-1],l.arr[l.i]]=[l.arr[l.i],l.arr[l.i-1]];}},
+  down:()=>{const l=findLoc(id);if(l&&l.i<l.arr.length-1){[l.arr[l.i+1],l.arr[l.i]]=[l.arr[l.i],l.arr[l.i+1]];}},
+  del:()=>{if(confirm("Delete this item and its answers?")){const l=findLoc(id);if(l){const ids=[];collectIdsDeep(l.item,ids);purgeAnswersForIds(ids);l.arr.splice(l.i,1);}}},
+  addq:()=>{itemsArrayOf(id).push(newQ());},
+  addgrp:()=>{itemsArrayOf(id).push(newBlock("grp"));},
+  addtxt:()=>{itemsArrayOf(id).push(newBlock("txt"));},
+  addstd:()=>{itemsArrayOf(id).push(newBlock("std"));},
+  addsec:()=>{itemsArrayOf(id).push(newBlock("sec"));},
+  addcard:()=>{itemsArrayOf(id).push(newBlock("card"));},
+  addinst:()=>{itemsArrayOf(id).push(newBlock("inst"));},
+  addfield:()=>{itemsArrayOf(id).push(newBlock("field"));},
+ };
+ if(acts[act]){acts[act]();saveT();render();}
+}
+function pageOp(act){
+ if(act==="pup"&&cur>0){[T.pages[cur-1],T.pages[cur]]=[T.pages[cur],T.pages[cur-1]];cur--;}
+ else if(act==="pdown"&&cur<T.pages.length-1){[T.pages[cur+1],T.pages[cur]]=[T.pages[cur],T.pages[cur+1]];cur++;}
+ else if(act==="pdel"){if(T.pages.length>1&&confirm("Delete this whole page?")){T.pages.splice(cur,1);if(cur>=T.pages.length)cur=T.pages.length-1;}}
+ else if(act==="addpage"){T.pages.push({id:"pg"+genId(),title:"New Page",divider:false,blurb:"",items:[]});cur=T.pages.length-1;}
+ saveT();saveA();render();
+}
+
+/* =====================================================================
+   RESPONSE SET MANAGER
+===================================================================== */
+function rsModal(){
+ const colors=[["g","green"],["r","red"],["o","orange"],["n","blue"]];
+ let rows=Object.entries(T.rs).map(([k,set])=>
+   `<div class="card"><b>${esc(set.name)}</b> <span class="emeta">(key: ${k})</span><br>
+    ${set.opts.map(o=>`<span class="opt ${o.cls} on" style="margin:3px 3px 0 0;display:inline-block">${esc(o.l)}${typeof o.score==="number"?" · score "+o.score:""}${o.flag?" · flag":""}</span>`).join("")}</div>`).join("");
+ const box=document.createElement("div");box.className="modal";
+ box.innerHTML=`<div class="box"><h3>Response sets</h3>
+   <p class="emeta" style="margin-bottom:10px">Sets with a numeric score count toward the % score. "Flag" items appear in the report's flagged list.</p>
+   ${rows}
+   <h3 style="margin-top:14px">Add a new set</h3>
+   <input class="ein" id="rsName" placeholder="Set name" style="margin-bottom:8px">
+   <div id="rsRows"></div>
+   <button class="ebtn" id="rsAddRow">+ option</button>
+   <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+     <button class="btn" id="rsCancel">Close</button>
+     <button class="btn primary" id="rsSave">Save set</button></div></div>`;
+ document.body.appendChild(box);
+ const rowsEl=box.querySelector("#rsRows");
+ const addRow=(l="")=>{const d=document.createElement("div");d.className="rsline";
+   d.innerHTML=`<input placeholder="label" value="${esc(l)}" data-l style="flex:1">
+     <select data-c><option value="g">green</option><option value="r">red</option><option value="o">orange</option><option value="n">blue</option></select>
+     <label class="emeta"><input type="checkbox" data-sc> scored</label>
+     <input type="number" data-sv placeholder="pts" style="width:56px">
+     <label class="emeta"><input type="checkbox" data-fl> flag</label>`;
+   rowsEl.appendChild(d);};
+ addRow("Pass");addRow("Fail");
+ box.querySelector("#rsAddRow").onclick=()=>addRow();
+ box.querySelector("#rsCancel").onclick=()=>box.remove();
+ box.querySelector("#rsSave").onclick=()=>{
+   const name=box.querySelector("#rsName").value.trim();if(!name){alert("Name required");return;}
+   const opts=[...rowsEl.querySelectorAll(".rsline")].map(r=>{
+     const o={l:r.querySelector("[data-l]").value.trim(),cls:r.querySelector("[data-c]").value};
+     if(r.querySelector("[data-sc]").checked)o.score=+r.querySelector("[data-sv]").value||0;
+     if(r.querySelector("[data-fl]").checked)o.flag=true;return o;}).filter(o=>o.l);
+   if(!opts.length){alert("Add at least one option");return;}
+   const key="rs"+genId();T.rs[key]={name,opts};saveT();box.remove();render();
+ };
+}
+
+/* =====================================================================
+   TOP BAR — inject builder buttons
+===================================================================== */
+(function(){
+ const top=document.querySelector(".top"), grow=top.querySelector(".grow");
+ const mk=(id,txt,cls)=>{const b=document.createElement("button");b.className="btn "+(cls||"");b.id=id;b.textContent=txt;return b;};
+ const bEdit=mk("btnEdit","Edit template");
+ const bRs=mk("btnRs","Response sets");bRs.classList.add("editonly");
+ const bExp=mk("btnExp","Export template");bExp.classList.add("editonly");
+ const bImp=mk("btnImp","Import template");bImp.classList.add("editonly");
+ const fileIn=document.createElement("input");fileIn.type="file";fileIn.accept=".json";fileIn.style.display="none";
+ top.insertBefore(bEdit,grow.nextSibling);
+ top.appendChild(bRs);top.appendChild(bExp);top.appendChild(bImp);top.appendChild(fileIn);
+ bEdit.onclick=()=>{EDIT=!EDIT;if(EDIT)mode="audit";render();};
+ bRs.onclick=rsModal;
+ bExp.onclick=()=>{const blob=new Blob([JSON.stringify(T,null,2)],{type:"application/json"});
+   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="access-audit-template.json";a.click();};
+ bImp.onclick=()=>fileIn.click();
+ fileIn.onchange=()=>{const f=fileIn.files[0];if(!f)return;const r=new FileReader();
+   r.onload=()=>{try{const t=JSON.parse(r.result);if(!t.pages)throw 0;
+     if(confirm("Replace the current template with the imported one? (Answers are kept but only match if IDs are the same.)")){T=t;if(!T.meta)T.meta={title:"Premises Access Audit",nextId:99999};cur=0;saveT();saveA();render();}}
+     catch(e){alert("That file isn't a valid template export.");}};
+   r.readAsText(f);fileIn.value="";};
+})();
+
+/* =====================================================================
+   EVENTS
+===================================================================== */
+const content=document.getElementById("content");
+content.addEventListener("click",e=>{
+ const act=e.target.closest("[data-act]");
+ if(act){const a=act.dataset.act;
+   if(a==="pup"||a==="pdown"||a==="pdel"||a==="addpage")pageOp(a);
+   else op(a,act.dataset.id);return;}
+ const ap=e.target.closest("[data-addphoto]");
+ if(ap){photoKey=ap.dataset.addphoto;photoInput.value="";photoInput.click();return;}
+ const dp=e.target.closest("[data-delphoto]");
+ if(dp){const id=dp.dataset.delphoto,k=dp.dataset.key;
+   IDB.del(id).then(()=>{PHOTOS[k]=(PHOTOS[k]||[]).filter(p=>p.id!==id);refreshPhotos(k);});return;}
+ const b=e.target.closest("[data-q]");
+ if(b){const id=b.dataset.q;S[id]=S[id]===b.dataset.v?"":b.dataset.v;saveA();updateAnswerUI(id);return;}
+ const nav=e.target.closest("[data-nav]");
+ if(nav){cur=Math.min(T.pages.length-1,Math.max(0,cur+ +nav.dataset.nav));saveA();render();return;}
+ const ar=e.target.closest("[data-addrep]");
+ if(ar){REPS[ar.dataset.addrep]=(REPS[ar.dataset.addrep]||1)+1;saveA();render();return;}
+ const dr=e.target.closest("[data-delrep]");
+ if(dr){const k=dr.dataset.delrep,n=REPS[k]||1;
+   if(n>1){
+     const secId=k.split("~")[0],outerSuf=k.slice(secId.length),secItem=findItem(secId);
+     if(secItem){const keys=[];collectAnswerKeysDeep(secItem.items,outerSuf+"~"+(n-1),keys);purgeAnswerKeys(keys);}
+     REPS[k]=n-1;
+   }
+   saveA();render();return;}
+});
+content.addEventListener("input",e=>{
+ const ed=e.target.closest("[data-edit]");
+ if(ed){const it=findItem(ed.dataset.edit);if(it){const f=ed.dataset.field;
+   if(f==="opts")it.opts=ed.value.split(",").map(s=>s.trim()).filter(Boolean);
+   else if(f==="multi"||f==="rep")it[f]=ed.checked;
+   else if(f==="addl")it.addl=Math.max(0,+ed.value||0);
+   else it[f]=ed.value;
+   saveT(); }
+   return;}
+ const el=e.target.closest("[data-a]");
+ if(el){const id=el.dataset.a;
+   if(el.type==="checkbox")S[id]=el.checked?1:"";
+   else S[id]=el.value;
+   saveA(); if(el.type==="checkbox")renderTop(); return;}
+});
+content.addEventListener("change",e=>{
+ const tf=e.target.closest("[data-tf]");
+ if(tf){S[tf.dataset.tf+"|tf"]=tf.value;saveA();return;}
+ const rs=e.target.closest("[data-rs]");
+ if(rs){const it=findItem(rs.dataset.rs);if(it){it.rs=rs.value;saveT();render();}return;}
+ const pt=e.target.closest("[data-ptitle]"); if(pt){T.pages[cur].title=pt.value;saveT();renderNav();return;}
+ const pb=e.target.closest("[data-pblurb]"); if(pb){T.pages[cur].blurb=pb.value;saveT();return;}
+ const pd=e.target.closest("[data-pdiv]"); if(pd){T.pages[cur].divider=pd.checked;saveT();render();return;}
+ renderNav();renderTop();
+});
+document.getElementById("content").addEventListener("blur",e=>{
+ const ed=e.target.closest("[data-edit]"); if(ed&&ed.dataset.field==="t")renderNav();
+},true);
+/* ---- camera capture: compress + store, then show thumbnail ---- */
+const photoInput=document.getElementById("photoInput");
+photoInput.addEventListener("change",async()=>{
+ const files=[...(photoInput.files||[])];
+ if(!files.length||!photoKey)return;
+ const k=photoKey;
+ for(const f of files){
+  const data=await compressImage(f);
+  if(!data)continue;
+  const rec={id:k+":"+Date.now()+":"+Math.random().toString(36).slice(2,7),key:k,data,ts:Date.now()};
+  try{await IDB.put(rec);}catch(e){}
+  (PHOTOS[k]=PHOTOS[k]||[]).push(rec);
+ }
+ photoInput.value=""; refreshPhotos(k);
+});
+
+/* ---- mobile sidebar drawer ---- */
+const sideEl=document.querySelector(".side"), backdrop=document.getElementById("backdrop"), btnMenu=document.getElementById("btnMenu");
+function drawer(open){
+ sideEl.classList.toggle("open",open);
+ backdrop.classList.toggle("show",open);
+ btnMenu.setAttribute("aria-expanded",open?"true":"false");
+ /* Keep the page behind the backdrop out of the tab order while the drawer
+    is open (inert), rather than a hard focus trap — this site's own
+    accessibility bar avoids traps on principle, so this mirrors that. */
+ const mainEl=document.querySelector(".main");
+ if(open){
+  if(mainEl) mainEl.inert=true;
+  const first=sideEl.querySelector("a[href],button");
+  if(first) first.focus();
+ }else{
+  if(mainEl) mainEl.inert=false;
+  btnMenu.focus();
+ }
+}
+btnMenu.addEventListener("click",()=>drawer(!sideEl.classList.contains("open")));
+backdrop.addEventListener("click",()=>drawer(false));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sideEl.classList.contains("open"))drawer(false);});
+
+document.getElementById("nav").addEventListener("click",e=>{
+ const a=e.target.closest("[data-pg]");if(!a)return;e.preventDefault();
+ if(mode!=="audit")mode="audit";cur=+a.dataset.pg;saveA();render();
+ if(window.matchMedia("(max-width:820px)").matches)drawer(false);
+});
+document.getElementById("btnReport").addEventListener("click",()=>{if(EDIT)EDIT=false;mode=mode==="report"?"audit":"report";render();});
+document.getElementById("btnExport").addEventListener("click",exportReport);
+document.getElementById("btnReset").addEventListener("click",()=>{
+ if(confirm("Clear all AUDIT ANSWERS, including comments and photos? (Your template is kept.)")){
+   S={};REPS={};cur=0;saveA();
+   IDB.clear().then(()=>{PHOTOS={};render();}).catch(()=>{PHOTOS={};render();});
+ }
+});
+
+/* ---- go ---- */
+loadAll();
+render();
+loadPhotos().then(render);   // re-render once photos are read from IndexedDB
+</script>
+</body>
+</html>
