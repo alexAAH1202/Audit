@@ -96,7 +96,8 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .qrow .qt .cl{display:block;color:var(--muted);font-size:12.5px;font-weight:400;line-height:1.4;margin-top:6px}
 .qrow .qx{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px}
 .qx .notetoggle{order:1}.qx .addphoto{order:2;margin-top:0}.qx .qnotewrap{order:3;flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
-.qx .qnotewrap[hidden]{display:none}.qx .qphotos{order:4;flex:1 1 100%;margin-top:0}.qphotos:empty{display:none}
+.qx .qnotewrap[hidden]{display:none}.qx .qeff{order:2;display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600}.qx .qeff[hidden]{display:none}.qx .qeff select{min-height:44px}
+.effsug{margin-left:6px;font-size:.8rem;color:var(--muted,#555);font-style:italic}.qx .qphotos{order:4;flex:1 1 100%;margin-top:0}.qphotos:empty{display:none}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
 .notetoggle .notehas{color:var(--brand)}
@@ -1531,6 +1532,7 @@ const REVIEW_ITEMS=[
  {id:"scope-storeys",g:"Site Scope",t:"One storey skips Refuge & Assisted Evacuation",d:"The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift."},
  {id:"scope-lift",g:"Site Scope",t:"No lift marks four lift-only questions not applicable",d:"Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list."},
  {id:"report-wording",g:"Report",t:"Finding statements, standard impacts and actions",d:"None are written in the template yet. Until they are, each finding reads 'Not met:' followed by the requirement, and Impact and Action start empty. Write them per question in the template editor (Report wording)."},
+ {id:"effort-defaults",g:"Report",t:"Suggested effort for each question",d:"Every finding starts with a draft effort guessed from the question text: lifts, ramps, toilets, door widths, egress and similar building works are High / capital; signs, information, fittings, management and small adjustments are Low; the rest Moderate. Override per question in the template editor (Report wording, Default effort), or per finding on site and in the report."},
  {id:"capture-na",g:"Capture",t:"Not applicable on every question",d:"A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each."},
  {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
  {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
@@ -2021,6 +2023,8 @@ function qRow(it,suf){
       <textarea class="ein" data-edit="${it.id}" data-field="f" placeholder="e.g. There is no continuous accessible path from the bay to the entrance.">${esc(it.f||"")}</textarea></label>
      <label class="emeta">Standard impact: who is excluded, and from what
       <textarea class="ein" data-edit="${it.id}" data-field="imp" placeholder="e.g. A wheelchair user cannot get from the car to the entrance unassisted.">${esc(it.imp||"")}</textarea></label>
+     <label class="emeta">Default effort to fix
+      <select class="ein" data-edit="${it.id}" data-field="eff"><option value=""${it.eff?"":" selected"}>Draft guess: ${esc(DIFF_LABEL[suggestEffort({t:it.t})])}</option>${DIFFS.map(([k,l])=>`<option value="${k}"${it.eff===k?" selected":""}>${esc(l)}</option>`).join("")}</select></label>
      <label class="emeta">Standard action: the works instruction
       <textarea class="ein" data-edit="${it.id}" data-field="act" placeholder="e.g. Provide a continuous accessible path of travel complying with AS 1428.1.">${esc(it.act||"")}</textarea></label>
     </details></div>`;
@@ -2028,7 +2032,7 @@ function qRow(it,suf){
  const v=S[key], note=S[key+"|n"]||"";
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}</div>`+
    radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+
-   `<div class="qx">${noteBlock(key,note)}${photoBlock(key)}</div></div>`;
+   `<div class="qx">${noteBlock(key,note)}${effortBlock(key,it,set,v)}${photoBlock(key)}</div></div>`;
 }
 /* Best Practice groups are folded by default (design brief): they matter, but they are not what gets audited
    first. The header shows how many items, how many are answered and how many are flagged, and the group opens
@@ -2433,8 +2437,17 @@ function syncRadioGroup(group,v){
   b.tabIndex=(has?on:i===0)?0:-1;
  });
 }
+/* Effort on site: shown beside + Comment once the answer is a finding, preset to the suggestion. Saved under
+   key|diff only when the auditor changes it, so a later better default still reaches untouched findings. */
+function effortBlock(key,item,set,v){
+ const o=v?optOf(optsForKey(key),v):null, show=!!(o&&o.flag), own=S[key+"|diff"]||"", sug=suggestEffort(item);
+ return `<label class="qeff" data-effwrap="${esc(key)}"${show?"":" hidden"}><span>Effort</span>
+  <select class="tf-select" data-diff="${esc(key)}"><option value=""${own?"":" selected"}>${esc(DIFF_LABEL[sug])} (suggested)</option>`+
+  DIFFS.map(([k,l])=>`<option value="${k}"${own===k?" selected":""}>${esc(l)}</option>`).join("")+`</select></label>`;
+}
 function updateAnswerUI(key){
  const v=S[key], sel='[data-q="'+key+'"]';
+ document.querySelectorAll('[data-effwrap="'+key+'"]').forEach(w=>{ const o=v?optOf(optsForKey(key),v):null; w.hidden=!(o&&o.flag); });
  const groups=new Set([...document.querySelectorAll(sel)].map(b=>b.closest('[role="radiogroup"]')).filter(Boolean));
  groups.forEach(g=>{ syncRadioGroup(g,v); const card=g.closest(".card"); refreshSweep(card); refreshGrpStat(card); });
  renderNav(); renderTop(); updatePageScore();
@@ -2618,6 +2631,23 @@ function sectionMap(){
 /* --- 2. Effort & scheduling zone ------------------------------------ */
 const DIFFS=[["low","Low effort"],["mod","Moderate"],["high","High / capital"]];
 const DIFF_LABEL=Object.fromEntries(DIFFS);
+/* Suggested effort for a question, so the "Where to start" matrix fills in without setting every finding by hand.
+   Order: what the auditor chose for this finding (S[key|diff]), the template's own default (item.eff), then a draft
+   guess from the question text. The guess is a best-practice rule of thumb awaiting review (Review list:
+   effort-defaults): building fabric and plant are High / capital; signs, information, fittings, management and
+   small adjustments are Low; everything else is Moderate. */
+const EFF_HIGH=/\b(lifts?|platform lift|ramps?|stairs?|stairway|escalator|toilets?|sanitary|shower|changing places|accessible (car )?park|parking bay|gradients?|cross[- ]?falls?|grade|kerb ramp|path of travel|pathway width|corridor width|clear width|clear opening|door width|doorway|automatic door|entrance level|step[- ]free|threshold|level landings?|landings?|refuge|egress|exit route|evacuation lift|stage|seating platform|accessible room|counter height|lowered counter)\b/;
+const EFF_LOW=/\b(signs?|signage|braille|tactile sign|pictogram|map|information|website|brochure|menu|staff|training|policy|procedure|plan|peep|booking|clutter|obstruct\w*|kept clear|free of|furniture|bin|mat|hook|mirror|soap|dispenser|towel|hand dryer|mounting height|mounted at|located at|door closer|opening force|contrast|luminance|marking|strip|label|light switch(es)?|controls?|call buttons?|bell|intercom|reserved|monitor|maintain\w*|clean)\b/;
+const EFF_MGMT=/\b(staff|wardens?|training|trained|policy|policies|procedures?|documented|peeps?|plans? (is|are) (in place|prepared)|booking|reserved|monitored|maintained|kept clear)\b/;
+function suggestEffort(item){
+ if(item&&item.eff) return item.eff;
+ const t=((item&&item.t)||"").toLowerCase();
+ if(EFF_MGMT.test(t)) return "low";
+ if(EFF_HIGH.test(t)) return "high";
+ if(EFF_LOW.test(t)) return "low";
+ return "mod";
+}
+const effortOf=(key,item)=>S[key+"|diff"]||suggestEffort(item);
 function zoneOf(pri,diff){
  const early=pri<=2;
  if(diff==="low") return early?1:3;
@@ -2652,9 +2682,9 @@ function collectFindings(){
       must not repeat it as if it were the result. The template can hold a finding statement and a standard
       impact and action for each question; without them the finding says "Not met:" before the requirement. */
    stmt:(x.item.f||"").trim()||("Not met: "+x.item.t), stmtStd:!!(x.item.f||"").trim(),
-   diff:S[x.key+"|diff"]||"", impact:S[x.key+"|impact"]||(x.item.imp||"").trim(),
+   diff:effortOf(x.key,x.item), diffSet:!!S[x.key+"|diff"], impact:S[x.key+"|impact"]||(x.item.imp||"").trim(),
    action:S[x.key+"|action"]||(x.item.act||"").trim(), note:S[x.key+"|n"]||"",
-   zone:zoneOf(meta.pri,S[x.key+"|diff"]||"")
+   zone:zoneOf(meta.pri,effortOf(x.key,x.item))
   };
  }).filter(Boolean);
 }
@@ -2950,7 +2980,7 @@ function reportHTML(){
     <div class="screen-only">
      ${rfField(f.key,"action","Action: the works instruction (shown in section 4)","Extend the lower handrail by 160 mm with a matching return to the wall.",(f.item.act||"").trim())}
      <div class="tf-row">
-       ${diffSelect(f.key,f.diff)}
+       ${diffSelect(f.key,f.diff)}${!f.diffSet&&!EXPORTING?`<span class="effsug">suggested</span>`:""}
        <label class="tf-label">Fix by:
          <select class="tf-select" data-tf="${esc(f.key)}">${tfOptions(TF_MAX_MONTHS[f.gc]||12,S[f.key+"|tf"])}</select></label>
        <span class="tag">When <b>${z.l}</b></span>
@@ -3361,7 +3391,7 @@ content.addEventListener("click",e=>{
 });
 content.addEventListener("change",e=>{
  const d=e.target.closest("[data-diff]");
- if(d){ S[d.dataset.diff+"|diff"]=d.value; saveA(); render(); }
+ if(d){ if(d.value) S[d.dataset.diff+"|diff"]=d.value; else delete S[d.dataset.diff+"|diff"]; saveA(); if(mode==="report") render(); }
 });
 /* Report-time prose fields. Saved on every keystroke, never re-rendered,
    so the caret and scroll position survive a long Action paragraph. */

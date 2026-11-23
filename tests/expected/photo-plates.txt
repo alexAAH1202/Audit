@@ -7,6 +7,6 @@ finding photo refs: Photos: Figure 1, Figure 2 | Photo: Figure 3
 caption saved: Rear view 4
 n","Fix by (months)","Figures"
 ow effort","","Fix it.","","3"
-ch of Code","","","","","1, 2"
+de","Moderate","","","","1, 2"
 export: inputs in plates 0 | captions as text: [ 'Tape across bay: 2.1m "short" <b>', 'Rear view' ]
 errors: []

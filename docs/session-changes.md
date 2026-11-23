@@ -200,3 +200,10 @@ what is not covered.
 - New answer **To be confirmed** (code `tbc`), appended to the Pass/High/Medium/Low/Breach set. It is not a finding and is not scored (like Not applicable). Saved templates get the option added on load.
 - Report section 5 is now "Open items and items to monitor", listing To be confirmed items first; Appendix B defines the term.
 - On a phone the extra button adds one row (about 65px) to each question.
+
+## Effort: suggested defaults and setting it on site
+
+- Every finding now has an effort, so "Where to start" fills in. It comes from, in order: the effort chosen for that finding, the question's default effort in the template, then a draft guess from the question text (about 155 High / capital, 245 Moderate, 105 Low). On the Review list as `effort-defaults`.
+- On site: once an answer is a finding, an **Effort** dropdown appears beside + Comment, preset to "Moderate (suggested)" or similar. A choice is saved under `key|diff`; leaving it on the suggestion saves nothing, so a better template default still reaches it later.
+- Report view marks an untouched effort as *suggested* (not exported). Template editor: Report wording has a **Default effort** field per question (`item.eff`).
+- The To be confirmed button reads **TBC** (spoken "TBC, to be confirmed") so answers fit on one row on a phone.

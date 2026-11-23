@@ -67,6 +67,9 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
 - [ ] **Sweep to Pass only on Legislative groups** (`capture-sweep`)  
   The brief names Legislative groups only. Decide whether Best Practice groups should have it too.
 
+- [ ] **Suggested effort for each question** (`effort-defaults`)  
+  Every finding starts with a draft effort guessed from the question text: lifts, ramps, toilets, door widths, egress and similar building works are High / capital; signs, information, fittings, staff and management items and small adjustments are Low; the rest Moderate. Override per question in the template editor (Report wording, Default effort), or per finding on site and in the report.
+
 ## What is marked in the tool
 
 | Where | Marker |
