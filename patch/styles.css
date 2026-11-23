@@ -30,9 +30,11 @@
 .mx td button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .mx .n{font-family:Verdana,Geneva,sans-serif;font-size:20px;font-weight:700;display:block;line-height:1.1}
 .mx .zl{font-size:10px;letter-spacing:.04em;text-transform:uppercase;display:block;margin-top:2px;opacity:.9}
-.z1{background:var(--z1);color:#fff}.z2{background:var(--z2);color:#fff}
-.z3{background:var(--z3);color:#0b0b0b}.z4{background:var(--z4);color:#0b0b0b}
-.zempty{background:#F1F2F6;color:#9A9DA8}
+/* Zone fills. On matrix buttons they must beat `.mx td button`
+   (background:transparent;color:inherit), hence the extra selector. */
+.z1,.mx td button.z1{background:var(--z1);color:#fff}.z2,.mx td button.z2{background:var(--z2);color:#fff}
+.z3,.mx td button.z3{background:var(--z3);color:#0b0b0b}.z4,.mx td button.z4{background:var(--z4);color:#0b0b0b}
+.zempty,.mx td button.zempty{background:#F1F2F6;color:#9A9DA8}
 .mxlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .mxlegend span{display:flex;align-items:center;gap:6px}
 .sw{width:13px;height:13px;border-radius:3px;flex:none}
