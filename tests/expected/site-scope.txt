@@ -12,10 +12,10 @@
 10 arrow key moved+saved: {"cls":"","storeys":"2","lift":"","parking":"no","sanitary":"yes","built":"before","use":""} | focus kept: true
 11 staff-only skips Customer Service Areas? false
 12 persists: {"cls":"","storeys":"2","lift":"","parking":"no","sanitary":"yes","built":"before","use":"staff"}
-13 report draft box: Draft content: review before this goes to a client. 17 items still need review with the access consultant. Open the Revi | declared scope rows: true
+13 report draft box: Draft content: review before this goes to a client. 18 items still need review with the access consultant. Open the Revi | declared scope rows: true
 14 export: draft box 0 | not applicable text: true
-15 review btn: Review list (17)
-  items: 17
-  after tick: Review list (16) | saved in template: {"leave-tbc":true}
+15 review btn: Review list (18)
+  items: 18
+  after tick: Review list (17) | saved in template: {"leave-tbc":true}
 16 TBC chips on page: 7
 errors: []

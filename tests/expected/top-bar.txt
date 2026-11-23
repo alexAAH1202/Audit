@@ -1,5 +1,5 @@
 390 top: 113 | notices: 92 | visible buttons: ☰ Sections · Report view · More ▾
-  open: expanded true | visible: ☰ Sections · Edit template · Report view · Less ▴ · Print / PDF · Export report · Export schedule (CSV) · Back up audit · Restore audit · Review list (17) · Mark audit complete · Reset audit
+  open: expanded true | visible: ☰ Sections · Edit template · Report view · Less ▴ · Print / PDF · Export report · Export schedule (CSV) · Back up audit · Restore audit · Review list (18) · Mark audit complete · Reset audit
   Esc closes: false focus on More: btnMore
   choosing an item closes menu: false
   Edit template works, edit-only hidden until edit: true
@@ -7,5 +7,5 @@
   Report view still one tap: report
 360 top: 113 | notices: 92 | visible buttons: ☰ Sections · Report view · More ▾
 768 top: 61 | notices: 61 | visible buttons: ☰ Sections · Report view · More ▾
-1280 top: 110 | notices: 63 | visible buttons: Edit template · Report view · Print / PDF · Export report · Export schedule (CSV) · Back up audit · Restore audit · Review list (17) · Mark audit complete · Reset audit
+1280 top: 110 | notices: 63 | visible buttons: Edit template · Report view · Print / PDF · Export report · Export schedule (CSV) · Back up audit · Restore audit · Review list (18) · Mark audit complete · Reset audit
 errors: []

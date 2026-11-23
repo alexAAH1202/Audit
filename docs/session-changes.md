@@ -72,6 +72,23 @@ build: every label, finding, score and navigation count matched, except one deli
 
 Print header, footer and page numbers use a feature only Chrome and Edge support.
 
+## 4b. Report rewrite (after the review)
+
+- **Findings say what was found.** Each question can carry a *finding statement*, a *standard impact* and a *standard
+  action*, written once in the template editor (Report wording). Until they are written, a finding reads
+  "Not met: <requirement>" instead of repeating the requirement as if it were the result.
+- **New structure:** 1 Summary (position, numbers, the five most serious findings, where to start, the journey),
+  About this report, 2 Scope and method, 3 Findings (by journey stage, then place, each place once, numbered F1, F2 …),
+  4 Action plan (by when to act, linked by F-number), 5 Items to monitor, Appendix A coverage, B ratings, C photographs.
+  The same 150-finding test audit prints in 28 pages instead of 39.
+- **Severity wording:** answer buttons read Pass / High / Medium / Low / Breach of Code; the report says "High severity"
+  and so on. "Priority" now means journey position only. Stored codes are unchanged.
+- **Firm name** on the cover, header and footer comes from the Title Page (Consultant > Company Name).
+- **Insert a draft** writes a position paragraph from the answers for the auditor to rewrite.
+- **About this report**: your standard text is the starting content of the Access Audit Overview box (editable per
+  audit) and prints as its own section.
+- CSV gains Ref, Finding and Requirement columns.
+
 ## 5. Capture on site
 
 | Commit | Change |

@@ -1,6 +1,2 @@
-live selects/hints [ 4, 7 ] export: [
-  0,
-  0,
-  'Effort Low effort Fix by 2 months When Do first || When Programme'
-]
+live selects/hints [ 4, 6 ] export: [ 0, 0, '' ]
 errors: []

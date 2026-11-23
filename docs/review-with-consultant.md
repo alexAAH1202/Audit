@@ -9,9 +9,10 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
 
 
 
+
 ## LEAVE section
 
-- [ ] **Questions whose clause is still "TBC"** (`leave-tbc`)  
+- [ ] **Questions whose clause is still \"TBC\"** (`leave-tbc`)  
   AS 1670.1 visual alarms, AS 3745 emergency plans and PEEPs, ABCB lift-evacuation guidance and the refuge items have no confirmed clause. The text 'clause TBC' prints in the report until each is resolved.
 - [ ] **Refuge space of 800 x 1300mm** (`leave-refuge-size`)  
   A placeholder figure, not confirmed. Give the dimension actually applied, or delete the number.
@@ -28,6 +29,11 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
   The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift.
 - [ ] **No lift marks four lift-only questions not applicable** (`scope-lift`)  
   Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list.
+
+## Report
+
+- [ ] **Finding statements, standard impacts and actions** (`report-wording`)  
+  None are written in the template yet. Until they are, each finding reads 'Not met:' followed by the requirement, and Impact and Action start empty. Write them per question in the template editor (Report wording).
 
 ## Capture
 

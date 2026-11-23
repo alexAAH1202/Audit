@@ -33,10 +33,10 @@ await p.evaluate(()=>{});await pick("Who uses","staff");console.log("11 staff-on
 // persistence + report
 await p.reload();await p.waitForTimeout(300);console.log("12 persists:",await p.evaluate(()=>JSON.stringify(scopeAnswers())));
 await p.evaluate(()=>{mode="report";render()});
-console.log("13 report draft box:",await p.$eval('.draftbox',e=>e.innerText.replace(/\s+/g,' ').slice(0,120)),"| declared scope rows:",await p.$$eval('h3',hs=>{const c=hs.find(h=>h.textContent.startsWith("Scope and"));return c.parentElement.innerText.includes("Not applicable by scope")}));
+console.log("13 report draft box:",await p.$eval('.draftbox',e=>e.innerText.replace(/\s+/g,' ').slice(0,120)),"| declared scope rows:",await p.$$eval('h3',hs=>{const c=hs.find(h=>/Scope and method/.test(h.textContent));return c.parentElement.innerText.includes("Not applicable to this building")}));
 const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#btnExport')]);fs.copyFileSync(await dl.path(),D+'ss-export.html');
 const q=await ctx.newPage();await q.goto('file://'+D+'ss-export.html');
-console.log("14 export: draft box",await q.$$eval('.draftbox,.draftchip',n=>n.length),"| not applicable text:",(await q.content()).includes("Not applicable by scope"));
+console.log("14 export: draft box",await q.$$eval('.draftbox,.draftchip',n=>n.length),"| not applicable text:",(await q.content()).includes("Not applicable to this building"));
 // review list
 await p.evaluate(()=>{mode="audit";render()});
 console.log("15 review btn:",await p.$eval('#btnReview',b=>b.textContent));

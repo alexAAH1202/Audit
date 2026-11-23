@@ -100,6 +100,7 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
 .notetoggle .notehas{color:var(--brand)}
+
 .annotdlg{max-width:min(96vw,760px);max-height:94vh;overflow:auto}
 .annotdlg h3{margin-bottom:6px}
 .annwrap{display:flex;justify-content:center;background:#1b1e2b;border-radius:8px;margin:10px 0}
@@ -445,6 +446,44 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
   .mx .zl{display:none}
   .tf-row{gap:7px}
 }
+/* report v3 */
+.report2 .secno{display:inline-block;min-width:1.6em;margin-right:6px;padding:0 6px;border-radius:5px;background:var(--brand);color:#fff;text-align:center;font-size:.85em}
+.report2 .toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 18px;font-size:13.5px}
+.report2 .toc a{color:var(--brand);display:inline-block;min-height:24px;padding:3px 2px}
+.report2 .about p{max-width:72ch;line-height:1.55;margin:0 0 10px}
+.report2 .subhead{font-size:14px;margin:18px 0 8px;color:var(--ink)}
+.toprisks{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.toprisks li{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;font-size:14px;line-height:1.4}
+.toprisks .tr-s{flex:1 1 18em}.toprisks .tr-w{color:var(--muted);font-size:12.5px}
+.fno{display:inline-block;font:700 12px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--ink);background:var(--bg);text-decoration:none}
+a.fno:hover{border-color:var(--brand)}
+.report2 .wherehead{font-size:13.5px;margin:14px 0 8px;color:var(--muted);font-weight:700}
+.finding .fhead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.finding .fstmt{font-weight:700;font-size:14.5px;line-height:1.4;flex:1 1 20em}
+.finding .freq{margin-top:6px;font-size:12.5px;color:var(--muted);line-height:1.4}
+.finding .freq .cl{color:var(--muted)}
+.stdtag{font-size:10.5px;letter-spacing:0;text-transform:none;font-weight:600;color:var(--green);background:var(--green-bg);border-radius:4px;padding:0 6px;margin-left:6px}
+.posdraft{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.posdraft .btn{min-height:44px}
+.mxnote{color:var(--muted);font-size:12.5px;max-width:72ch;margin-top:10px}
+.scope-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.scope-meta b{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+.plan td:first-child{white-space:nowrap}
+details.ewording{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+details.ewording summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--brand);min-height:32px;display:flex;align-items:center}
+details.ewording label{display:block;margin-top:8px}
+details.ewording textarea{margin-top:4px;min-height:56px}
+@media print{.report2 .toc,.screen-only{display:none!important}.finding{break-inside:avoid}.report2 .wherehead{break-after:avoid}
+  /* findings print dense: they are read as a list, and most carry one or two lines */
+  .report2 .finding{padding:6px 10px;margin-bottom:5px;border-left-width:3px;border-radius:5px}
+  .report2 .finding .fstmt{font-size:12.5px}
+  .report2 .finding .freq,.report2 .finding .rf-note{font-size:11px;margin-top:3px}
+  .report2 .finding .rf{margin-top:4px}.report2 .finding .rf-l{display:inline;margin-right:6px}.report2 .finding .rf-v{display:inline;font-size:11.5px}
+  .report2 .finding .figrefs{margin-top:3px;font-size:11px}
+  .report2 .wherehead{margin:8px 0 4px;font-size:11.5px}
+  .report2 .secbreak{margin-top:10px}
+  .report2 .plan{font-size:11px}.report2 .plan td,.report2 .plan th{padding:4px 6px}
+  .report2 .cov{font-size:11px}.report2 .cov td,.report2 .cov th{padding:3px 6px}}
 </style>
 </head>
 <body>
@@ -506,6 +545,8 @@ const PHML=[
 ];
 const FNN=[{l:"Found",code:"found",cls:"r",flag:true},{l:"Not Found",code:"notfound",cls:"g"},{l:"N/A",code:"na",cls:"n"}];
 
+/* Standard "About this report" wording: the starting text of the Access Audit Overview box (editable per audit). */
+const ABOUT_REPORT="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low Priority describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe works schedule at the end groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
 /* item helpers */
 const q=(t,c)=>({k:"q",t,c});           // scored Pass/High/Med/Low question (c = AS clause ref)
 const txt=(t,req,multi)=>({k:"txt",t,req,multi});
@@ -584,7 +625,7 @@ const PAGES=[
 /* ---- 2. Access Audit Introduction ---- */
 {title:"Access Audit Introduction",items:[
  {k:"card",t:"Introduction",items:[
-   txt("Access Audit Overview",false,true)
+   {k:"txt",t:"Access Audit Overview",multi:true,prefill:ABOUT_REPORT}
  ]}
 ]},
 
@@ -1486,6 +1527,7 @@ const REVIEW_ITEMS=[
  {id:"scope-class",g:"Site Scope",t:"Building class only records, skips nothing",d:"NCC D4D2 sets the extent of access by class, but the pages are organised by element, so no page is skipped by class. Confirm, or say which classes drop which pages."},
  {id:"scope-storeys",g:"Site Scope",t:"One storey skips Refuge & Assisted Evacuation",d:"The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift."},
  {id:"scope-lift",g:"Site Scope",t:"No lift marks four lift-only questions not applicable",d:"Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list."},
+ {id:"report-wording",g:"Report",t:"Finding statements, standard impacts and actions",d:"None are written in the template yet. Until they are, each finding reads 'Not met:' followed by the requirement, and Impact and Action start empty. Write them per question in the template editor (Report wording)."},
  {id:"capture-na",g:"Capture",t:"Not applicable on every question",d:"A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each."},
  {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
  {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
@@ -1646,6 +1688,11 @@ const isScored=opts=>opts.some(o=>typeof o.score==="number");
    backup has been written (see runMigrations). Never change an existing option's code.
 ===================================================================== */
 const ANS_VERSION=2;
+/* What a severity is CALLED. The stored codes never change; only the words shown do. "Priority" is kept for
+   the journey (1-4), so severities are not called "High Priority" any more (CLAUDE.md: never conflate them). */
+const BTN_LABEL={pass:"Pass",high:"High",med:"Medium",low:"Low",breach:"Breach of Code"};
+const REPORT_SEV={high:"High severity",med:"Medium severity",low:"Low severity",breach:"Breach of Code"};
+const optLabel=o=>(BTN_LABEL[o.code]&&/priority|^pass$|breach/i.test(o.l))?BTN_LABEL[o.code]:o.l;
 let S_FORMAT=ANS_VERSION;        // format of the answers currently in memory (1 only while a legacy audit is being converted)
 const optOf=(set,v)=>(v===undefined||v===null||v==="")?null:(set.find(o=>o.code===v)||null);
 const CODE_BY_LABEL={"pass":"pass","high priority":"high","medium priority":"med","low priority":"low","breach of code":"breach","found":"found","not found":"notfound","n/a":"na"};
@@ -1965,7 +2012,15 @@ function qRow(it,suf){
   return `<div class="eb"><div class="ebar"><span class="etag">Question</span>${moveDel(it.id)}</div>
     <textarea class="ein" data-edit="${it.id}" data-field="t" style="min-height:44px;margin-bottom:5px">${esc(it.t)}</textarea>
     <div class="erow"><input class="ein" style="flex:2" data-edit="${it.id}" data-field="c" value="${esc(it.c||"")}" placeholder="Clause reference (e.g. AS 1428.1 Cl 10.2)">
-    <select class="ein" style="flex:1" data-rs="${it.id}">${opts}</select></div></div>`;
+    <select class="ein" style="flex:1" data-rs="${it.id}">${opts}</select></div>
+    <details class="ewording"${it.f||it.imp||it.act?" open":""}><summary>Report wording${it.f?"":" (not written yet)"}</summary>
+     <label class="emeta">Finding statement, used when this is not met
+      <textarea class="ein" data-edit="${it.id}" data-field="f" placeholder="e.g. There is no continuous accessible path from the bay to the entrance.">${esc(it.f||"")}</textarea></label>
+     <label class="emeta">Standard impact: who is excluded, and from what
+      <textarea class="ein" data-edit="${it.id}" data-field="imp" placeholder="e.g. A wheelchair user cannot get from the car to the entrance unassisted.">${esc(it.imp||"")}</textarea></label>
+     <label class="emeta">Standard action: the works instruction
+      <textarea class="ein" data-edit="${it.id}" data-field="act" placeholder="e.g. Provide a continuous accessible path of travel complying with AS 1428.1.">${esc(it.act||"")}</textarea></label>
+    </details></div>`;
  }
  const v=S[key], note=S[key+"|n"]||"";
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}</div>`+
@@ -2363,7 +2418,7 @@ function radioGroup(key,set0,v,nameAttr){
  const sel=optOf(set,v)?String(v):null;
  return `<div class="opts" role="radiogroup" ${nameAttr}>`+set.map((o,j)=>{
   const on=sel===o.code, tab=sel===null?j===0:on;
-  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${esc(o.code)}">${esc(o.l)}</button>`;
+  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${esc(o.code)}">${esc(optLabel(o))}</button>`;
  }).join("")+`</div>`;
 }
 function syncRadioGroup(group,v){
@@ -2578,7 +2633,7 @@ function collectFindings(){
  const map=sectionMap();
  /* position of each section in the journey, so findings sort by journey order within a priority */
  const secOrder=[]; map.forEach(v=>{ if(!secOrder.includes(v.section)) secOrder.push(v.section); });
- return allQs().map(x=>{
+ return allQs().map((x,qIdx)=>{
   const v=S[x.key], set=RS(x.item.rs).opts;
   const o=optOf(set,v); if(!o) return null;
   const meta=map.get(x.page&&x.page.id)||{section:"General",pri:2};
@@ -2588,10 +2643,14 @@ function collectFindings(){
            : /low/i.test(o.l)?"lo"
            : o.flag?"md":"pass";
   return {
-   key:x.key, item:x.item, page:x.page, trail:x.trail||[], opt:o, flag:!!o.flag,
-   gc, gl:o.l, section:meta.section, pri:meta.pri, secIdx:Math.max(0,secOrder.indexOf(meta.section)),
-   diff:S[x.key+"|diff"]||"", impact:S[x.key+"|impact"]||"",
-   action:S[x.key+"|action"]||"", note:S[x.key+"|n"]||"",
+   key:x.key, item:x.item, page:x.page, trail:x.trail||[], opt:o, flag:!!o.flag, qIdx,
+   gc, gl:REPORT_SEV[o.code]||o.l, section:meta.section, pri:meta.pri, secIdx:Math.max(0,secOrder.indexOf(meta.section)),
+   /* Report wording. A question is written as the requirement ("A continuous path is provided"), so a finding
+      must not repeat it as if it were the result. The template can hold a finding statement and a standard
+      impact and action for each question; without them the finding says "Not met:" before the requirement. */
+   stmt:(x.item.f||"").trim()||("Not met: "+x.item.t), stmtStd:!!(x.item.f||"").trim(),
+   diff:S[x.key+"|diff"]||"", impact:S[x.key+"|impact"]||(x.item.imp||"").trim(),
+   action:S[x.key+"|action"]||(x.item.act||"").trim(), note:S[x.key+"|n"]||"",
    zone:zoneOf(meta.pri,S[x.key+"|diff"]||"")
   };
  }).filter(Boolean);
@@ -2608,11 +2667,11 @@ function diffSelect(key,val){
    are then written as plain text (empty ones omitted) instead of textareas,
    so the client gets a finished document. */
 let EXPORTING=false;
-function rfField(key,suffix,label,placeholder){
- const v=S[key+"|"+suffix]||"";
+function rfField(key,suffix,label,placeholder,def){
+ const own=S[key+"|"+suffix]||"", v=own||def||"";
  if(EXPORTING) return v.trim()?`<div class="rf"><span class="rf-l">${esc(label)}</span>
    <div class="rf-v">${esc(v)}</div></div>`:"";
- return `<div class="rf"><label class="rf-l" for="rf-${esc(key)}-${suffix}">${esc(label)}</label>
+ return `<div class="rf"><label class="rf-l" for="rf-${esc(key)}-${suffix}">${esc(label)}${!own&&def?` <span class="stdtag">standard wording</span>`:""}</label>
    <textarea class="rf-t" id="rf-${esc(key)}-${suffix}" data-rf="${esc(key)}" data-rfk="${suffix}"
      placeholder="${esc(placeholder)}" rows="2">${esc(v)}</textarea></div>`;
 }
@@ -2632,7 +2691,7 @@ function buildFigures(all){
   no.set(p.id,list.length+1);
   list.push({n:list.length+1,p,key,title:item.t,page:whereOf({page,trail}),label});
  });
- flags.forEach(f=>add(f.key,f.item,f.page,f.gl,f.trail));
+ flags.forEach(f=>add(f.key,f.stmtStd?{t:f.stmt}:f.item,f.page,f.gl,f.trail));
  const fk=new Set(flags.map(f=>f.key));
  allQs().filter(x=>!fk.has(x.key)).forEach(x=>add(x.key,x.item,x.page,"Comment",x.trail));
  return {no,list};
@@ -2644,54 +2703,73 @@ const figText=(FIG,key)=>(PHOTOS[key]||[]).map(p=>FIG.no.get(p.id)).filter(Boole
    liability when a client asks why an area was not assessed. The wording
    comes from the Access Audit Details page; coverage is derived from what
    was actually answered; the auditor adds exclusions in one editable field. */
-function scopeHTML(all){
- const gv=l=>getFieldVal("Access Audit Details",l).trim();
- const lab=(l,v)=>v?`<div class="rf"><span class="rf-l">${esc(l)}</span><div class="rf-v">${esc(v)}</div></div>`:"";
+function coverageData(all){
  const by=new Map(), pass=passCode();
  allQs().forEach(x=>{ const id=x.page.id;
   if(x.page.title==="Summary") return;          // the auditor's own summary page is not an assessed area
   if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0,sw:0,na:0}); const r0=by.get(id); r0.total++; if(S[x.key]==="na") r0.na++; });
  all.forEach(f=>{ const r=f.page&&by.get(f.page.id); if(r){ r.ans++; if(f.flag) r.flag++; if(S[f.key+"|sw"]==="1"&&S[f.key]===pass) r.sw++; } });
- const swTotal=[...by.values()].reduce((n,r)=>n+r.sw,0);
- const pages=[...by.values()], gap=pages.filter(r=>!r.ans&&r.na<r.total);
- const naItems=allQs().filter(x=>S[x.key]==="na"&&x.page.title!=="Summary");
+ const pages=[...by.values()];
+ return {pages,gap:pages.filter(r=>!r.ans&&r.na<r.total),swTotal:pages.reduce((n,r)=>n+r.sw,0),
+  naItems:allQs().filter(x=>S[x.key]==="na"&&x.page.title!=="Summary")};
+}
+/* Section 2: what was audited, against what, what was left out and why. */
+function scopeMethodHTML(all,headMeta){
+ const gv=l=>getFieldVal("Access Audit Details",l).trim();
+ const lab=(l,v)=>v?`<div class="rf"><span class="rf-l">${esc(l)}</span><div class="rf-v">${esc(v)}</div></div>`:"";
+ const cov=coverageData(all);
  const agree=[gv("Access Audit Agreement")?esc(gv("Access Audit Agreement")):"",
    gv("Access Audit Agreement Supplied")?"Agreement supplied: "+esc(gv("Access Audit Agreement Supplied")):"",
    gv("Client approval received on")?"Client approval received: "+esc(gv("Client approval received on")):""].filter(Boolean);
- let h=`<div class="card flow"><h3 aria-level="2">Scope and limitations</h3>
+ const scopeDecl=(()=>{ const a=scopeAnswers(); const pg=T.pages.find(p=>p.title==="Site Scope"); if(!pg||!Object.values(a).some(Boolean)) return "";
+    const rows=pg.items.filter(x=>x.k==="pick"&&S[x.id]).map(x=>{const o=x.opts.find(o=>o[0]===S[x.id]);return o?`<tr><td>${esc(x.t)}</td><td>${esc(o[1])}</td></tr>`:"";}).join("");
+    const na=T.pages.map(p=>({p,k:pageSkip(p)})).filter(x=>x.k&&x.k.off);
+    return `<div class="rf"><span class="rf-l">The building, as declared before the audit</span>
+     <table class="rep-table cov"><tbody>${rows}</tbody></table>
+     ${na.length?`<p style="margin-top:6px"><b>Not applicable to this building:</b> ${na.map(x=>esc(x.p.title)+" ("+esc(x.k.reason.toLowerCase())+")").join("; ")}.</p>`:""}</div>`; })();
+ return `<div class="card flow newpage" id="sec-scope"><h3 aria-level="2"><span class="secno">2</span> Scope and method</h3>
+  ${headMeta}
   ${lab("Scope of the audit",gv("Scope"))}
   ${lab("Benchmark",gv("Benchmark"))}
   ${agree.length?`<div class="rf"><span class="rf-l">Engagement</span><div class="rf-v">${agree.join("<br>")}</div></div>`:""}
-  ${(()=>{ const a=scopeAnswers(); const pg=T.pages.find(p=>p.title==="Site Scope"); if(!pg||!Object.values(a).some(Boolean)) return "";
-    const rows=pg.items.filter(x=>x.k==="pick"&&S[x.id]).map(x=>{const o=x.opts.find(o=>o[0]===S[x.id]);return o?`<tr><td>${esc(x.t)}</td><td>${esc(o[1])}</td></tr>`:"";}).join("");
-    const na=T.pages.map(p=>({p,k:pageSkip(p)})).filter(x=>x.k&&x.k.off);
-    return `<div class="rf"><span class="rf-l">Scope declared before the audit</span>
-     <table class="rep-table cov"><tbody>${rows}</tbody></table>
-     ${na.length?`<p style="margin-top:6px"><b>Not applicable by scope:</b> ${na.map(x=>esc(x.p.title)+" ("+esc(x.k.reason.toLowerCase())+")").join("; ")}.</p>`:""}</div>`; })()}
+  ${scopeDecl}
   <div class="rf"><span class="rf-l">Coverage</span>
-   <p>${pages.length-gap.length} of ${pages.length} assessable pages have answers recorded.</p>
-   ${naItems.length?`<p style="margin-top:6px"><b>${naItems.length} question${naItems.length===1?"":"s"} marked not applicable to this building:</b>
-     ${naItems.slice(0,10).map(x=>esc(x.item.t)+" ("+esc(whereOf(x))+(S[x.key+"|nasrc"]==="nolift"?", no lift":"")+")").join("; ")}${naItems.length>10?`; and ${naItems.length-10} more`:""}.
-     These were looked at and do not apply, which is different from not being assessed.</p>`:""}
-   ${swTotal?`<p style="margin-top:6px"><b>${swTotal} Pass answer${swTotal===1?" was":"s were"} recorded by sweeping a whole group of requirements</b>,
-     not by assessing each item individually. Any answer the auditor changed or confirmed by hand is not counted here.</p>`:""}
-   ${gap.length?`<p style="margin-top:6px"><b>No items recorded for:</b> ${gap.map(r=>esc(r.t)).join("; ")}. These were either not
+   <p>${cov.pages.length-cov.gap.length} of ${cov.pages.length} assessable areas have answers recorded.
+      ${cov.naItems.length?` ${cov.naItems.length} question${cov.naItems.length===1?" was":"s were"} looked at and marked not applicable to this building.`:""}
+      ${cov.swTotal?` ${cov.swTotal} Pass answer${cov.swTotal===1?" was":"s were"} recorded by checking a whole group of requirements together rather than item by item.`:""}
+      The full breakdown is in Appendix A.</p>
+   ${cov.gap.length?`<p style="margin-top:6px"><b>No items recorded for:</b> ${cov.gap.map(r=>esc(r.t)).join("; ")}. These were either not
      assessed or do not apply to this building.</p>
-     <p class="rf-hint">Say which in the field below, for each area, so the report states why it was left out.</p>`:""}
-   <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Flagged</th>${swTotal?"<th>Passed by sweep</th>":""}</tr></thead><tbody>`+
-   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total-r.na}${r.na?` · ${r.na} not applicable`:""}`:(r.na&&r.na>=r.total?"All not applicable":"Not assessed")}</td><td>${r.ans?r.flag:"—"}</td>${swTotal?`<td>${r.sw||"—"}</td>`:""}</tr>`).join("")+
-   `</tbody></table></div>
-  ${rfField("report","limits","Limitations and exclusions — areas not assessed, and why","e.g. The roof terrace was locked and not assessed. Staff-only areas were excluded by agreement.")}
-  ${lab("Priority rating system",gv("Priority Rating System"))}
-  <div class="rf"><span class="rf-l">How to read the ratings</span><dl class="defs">
-   <dt>Breach of Code</dt><dd>A mandatory NCC or Premises Standards failure. Not a best-practice gap.</dd>
-   <dt>High / Medium / Low</dt><dd>How serious a non-compliant or best-practice finding is.</dd>
-   <dt>Journey priority 1–4</dt><dd>Where the item sits in a visitor's journey: ${[1,2,3,4].map(p=>p+" "+esc(PRI_LABEL[p])).join(", ")}. It is position, not severity.</dd>
-   <dt>Effort</dt><dd>${DIFFS.map(d=>esc(d[1])).join(" / ")} — a rough order of magnitude for time and funding, not a dollar figure.</dd>
-   <dt>When</dt><dd>${ZONE.slice(1).map(z=>esc(z.l)+" ("+esc(z.sub.toLowerCase())+")").join("; ")}.</dd></dl></div>
+     <p class="rf-hint">Say which in the field below, for each area, so the report states why it was left out.</p>`:""}</div>
+  ${rfField("report","limits","Limitations and exclusions: areas not assessed, and why","e.g. The roof terrace was locked and not assessed. Staff-only areas were excluded by agreement.")}
   ${lab("Disclaimer",gv("Disclaimer"))}
  </div>`;
- return h;
+}
+/* Appendix A: the coverage table. */
+function appendixCoverageHTML(all){
+ const cov=coverageData(all);
+ return `<div class="card flow newpage" id="app-a"><h3 aria-level="2"><span class="secno">A</span> Appendix A: coverage</h3>
+   <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Findings</th>${cov.swTotal?"<th>Passed as a group</th>":""}</tr></thead><tbody>`+
+   cov.pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total-r.na}${r.na?` · ${r.na} not applicable`:""}`:(r.na&&r.na>=r.total?"All not applicable":"Not assessed")}</td><td>${r.ans?r.flag:"—"}</td>${cov.swTotal?`<td>${r.sw||"—"}</td>`:""}</tr>`).join("")+
+   `</tbody></table>
+   ${cov.naItems.length?`<p style="margin-top:12px"><b>Questions marked not applicable to this building (${cov.naItems.length}):</b>
+     ${cov.naItems.slice(0,30).map(x=>esc(x.item.t)+" ("+esc(whereOf(x))+(S[x.key+"|nasrc"]==="nolift"?", no lift":"")+")").join("; ")}${cov.naItems.length>30?`; and ${cov.naItems.length-30} more`:""}.</p>`:""}
+   ${cov.swTotal?`<p style="margin-top:8px">"Passed as a group" counts Pass answers recorded by checking a whole group of requirements together. Any answer changed or confirmed individually is not counted there.</p>`:""}
+ </div>`;
+}
+/* Appendix B: how to read the ratings. */
+function appendixRatingsHTML(){
+ const pr=getFieldVal("Access Audit Details","Priority Rating System").trim();
+ return `<div class="card flow" id="app-b"><h3 aria-level="2"><span class="secno">B</span> Appendix B: how to read the ratings</h3>
+  ${pr?`<div class="rf"><div class="rf-v">${esc(pr)}</div></div>`:""}
+  <dl class="defs">
+   <dt>Breach of Code</dt><dd>A mandatory NCC or Premises Standards failure. Not a best-practice gap.</dd>
+   <dt>High, Medium, Low severity</dt><dd>How serious a non-compliant or best-practice finding is.</dd>
+   <dt>Journey priority 1–4</dt><dd>Where the item sits in a visitor's journey: ${[1,2,3,4].map(p=>p+" "+esc(PRI_LABEL[p])).join(", ")}. It is position, not severity.</dd>
+   <dt>Effort</dt><dd>${DIFFS.map(d=>esc(d[1])).join(" / ")}: a rough order of magnitude for time and funding, not a dollar figure.</dd>
+   <dt>When</dt><dd>${ZONE.slice(1).map(z=>esc(z.l)+" ("+esc(z.sub.toLowerCase())+")").join("; ")}.</dd>
+   <dt>F1, F2 …</dt><dd>Finding references. The same number is used in the findings, the action plan and the spreadsheet export.</dd></dl>
+ </div>`;
 }
 
 /* --- 5. The report -------------------------------------------------- */
@@ -2700,6 +2778,7 @@ let REPFILTER={pri:null,diff:null};      // set by clicking a matrix cell
 function reportHTML(){
  const all=collectFindings();
  const flags=all.filter(f=>f.flag);
+ const {sorted,ref}=numberFindings(flags);
  const FIG=buildFigures(all);
  /* In the report a photo is a reference, not a thumbnail: "Figure 3" links to its plate.
     Small thumbnails show on screen only, so the auditor can still see the picture beside the finding. */
@@ -2707,42 +2786,45 @@ function reportHTML(){
   const l=PHOTOS[key]||[]; if(!l.length) return "";
   return `<div class="figrefs"><b>${l.length===1?"Photo":"Photos"}:</b> `+
     l.map(p=>`<a href="#fig-${FIG.no.get(p.id)}">Figure ${FIG.no.get(p.id)}</a>`).join(", ")+`</div>`+
-    `<div class="thumbs">`+l.map(p=>`<span class="qphoto"><img src="${p.data}" alt=""></span>`).join("")+`</div>`;
+    `<div class="thumbs">`+l.map(p=>`<span class="qphoto"><img src="${esc(p.data)}" alt=""></span>`).join("")+`</div>`;
  };
- const breaches=flags.filter(f=>f.gc==="br");
- const onPath=flags.filter(f=>f.pri===1);
- const quick=flags.filter(f=>f.diff==="low");
+ const breaches=flags.filter(f=>f.gc==="br"), onPath=flags.filter(f=>f.pri===1), quick=flags.filter(f=>f.diff==="low");
  const noEffort=flags.filter(f=>!f.diff);
- const site=esc(getFieldVal("Title Page","Site conducted")||"—");
-
- const siteRaw=getFieldVal("Title Page","Site conducted")||"";
+ const siteRaw=getFieldVal("Title Page","Site conducted")||"", site=esc(siteRaw||"—");
+ const firm=esc(firmName());
  const rev=(S["report|revision"]||"").trim();
  const today=new Date().toLocaleDateString("en-AU");
  const client=esc(getFieldVal("Title Page","Name")||"—"), consultant=esc(getFieldVal("Title Page","Consultant Name")||"—"),
        conducted=esc(getFieldVal("Title Page","Conducted on")||"—");
- /* Print furniture. Page numbers and the running header are @page margin
-    boxes (Chrome/Edge); the site name has to be baked into the rule as a CSS
-    string, so every character that could end the string or the <style> is
+ /* Print furniture. Page numbers and the running header are @page margin boxes (Chrome/Edge); text has to be
+    baked into the rule as a CSS string, so every character that could end the string or the <style> is
     hex-escaped. Browsers without margin boxes simply print without them. */
  const cssStr=x=>String(x).replace(/[\\"<>&\r\n]/g,c=>"\\"+c.charCodeAt(0).toString(16)+" ");
  const headTxt=cssStr((siteRaw||"Access audit")+(rev?"  ·  Rev "+rev:""));
- const draftOpen=reviewOpen().length, tbcInReport=flags.filter(f=>/TBC/.test(f.item.c||""));
- let h=`<div class="pg report2">${draftOpen||tbcInReport.length?`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
-   ${draftOpen} item${draftOpen===1?"":"s"} still need review with the access consultant.
-   ${tbcInReport.length?`${tbcInReport.length} finding${tbcInReport.length===1?"":"s"} in this report cite a clause marked "TBC": ${tbcInReport.slice(0,4).map(f=>esc(f.item.t.length>70?f.item.t.slice(0,70)+"…":f.item.t)).join("; ")}${tbcInReport.length>4?" and more":""}.`:""}
-   <button type="button" class="btn" data-reviewopen>Open the Review list</button> This box is not printed or exported.</div>`:""}${unnamedInstances().length?`<div class="draftbox" role="note"><b>Name the repeated elements.</b>
-   ${unnamedInstances().length} ${unnamedInstances().length===1?"entrance, toilet or similar is":"entrances, toilets or similar are"} not named, so the report calls
-   ${unnamedInstances().length===1?"it":"them"} "#2", "#3" and so on: ${unnamedInstances().slice(0,4).map(i=>esc(i.page.title)+" "+esc(i.sec.t)+" #"+(i.inst+1)).join("; ")}${unnamedInstances().length>4?" and more":""}.
-   Add a name on the audit page. This box is not printed or exported.</div>`:""}<style>
+ const draftOpen=reviewOpen().length, tbcInReport=flags.filter(f=>/TBC/.test(f.item.c||"")), unworded=flags.filter(f=>!f.stmtStd);
+ const un=unnamedInstances();
+
+ /* ---- screen-only notes for the auditor (removed from print and export) ---- */
+ let h=`<div class="pg report2">`;
+ if(draftOpen||tbcInReport.length||unworded.length) h+=`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
+   ${draftOpen?`${draftOpen} item${draftOpen===1?"":"s"} still need review with the access consultant.`:""}
+   ${unworded.length?`${unworded.length} of ${flags.length} finding${flags.length===1?"":"s"} use the fallback wording "Not met: …" because the template has no finding statement for that question yet.`:""}
+   ${tbcInReport.length?`${tbcInReport.length} finding${tbcInReport.length===1?"":"s"} cite a clause marked "TBC".`:""}
+   <button type="button" class="btn" data-reviewopen>Open the Review list</button> This box is not printed or exported.</div>`;
+ if(un.length) h+=`<div class="draftbox" role="note"><b>Name the repeated elements.</b>
+   ${un.length} ${un.length===1?"entrance, toilet or similar is":"entrances, toilets or similar are"} not named, so the report calls
+   ${un.length===1?"it":"them"} "#2", "#3" and so on: ${un.slice(0,4).map(i=>esc(i.page.title)+" "+esc(i.sec.t)+" #"+(i.inst+1)).join("; ")}${un.length>4?" and more":""}.
+   Add a name on the audit page. This box is not printed or exported.</div>`;
+ h+=`<style>
   @page{size:A4;margin:20mm 15mm 18mm;
    @top-left{content:"${headTxt}";width:68%;font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:bottom;padding-bottom:3mm}
    @top-right{content:"${cssStr(T.meta.title)}";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:right;vertical-align:bottom;padding-bottom:3mm}
-   @bottom-left{content:"Inclusive Access Co.";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:top;padding-top:3mm}
+   @bottom-left{content:"${cssStr(firmName())}";font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:left;vertical-align:top;padding-top:3mm}
    @bottom-right{content:"Page " counter(page) " of " counter(pages);font:8.5pt Arial,Helvetica,sans-serif;color:#4A4E5C;text-align:right;vertical-align:top;padding-top:3mm}}
   @page :first{@top-left{content:none}@top-right{content:none}@bottom-left{content:none}@bottom-right{content:none}}
  </style>
   <section class="cover" aria-label="Cover page">
-   <div class="cv-co">Inclusive Access Co.</div>
+   <div class="cv-co">${firm}</div>
    <h1>${esc(T.meta.title)}</h1>
    <div class="cv-site">${site}</div>
    <dl class="cv-meta">
@@ -2754,47 +2836,33 @@ function reportHTML(){
    </dl>
    ${reportPhotos(getFieldKey("Title Page","Site photo / media"))}
   </section>
-  <h1>${esc(T.meta.title)} — Report</h1>
-  <div class="crumb">Inclusive Access Co. — generated ${today}</div>
+  <h1>${esc(T.meta.title)}: report</h1>
+  <div class="crumb">${firm} · ${site} · generated ${today}</div>
+  <nav class="toc" aria-label="Report contents"><a href="#sec-summary">1 Summary</a><a href="#sec-about">About this report</a><a href="#sec-scope">2 Scope and method</a><a href="#sec-findings">3 Findings</a><a href="#sec-plan">4 Action plan</a><a href="#sec-monitor">5 Items to monitor</a><a href="#app-a">Appendices</a></nav>`;
 
-  <div class="card">
-   <h3 aria-level="2">Scope</h3>
-   <p><b>Site:</b> ${site} &nbsp; <b>Client:</b> ${client}
-      &nbsp; <b>Consultant:</b> ${consultant}
-      &nbsp; <b>Conducted:</b> ${conducted}</p>
+ /* ===== 1 SUMMARY: position, numbers, the most serious findings, where to start, the journey ===== */
+ const posKey="report|position", pos=S[posKey]||"";
+ const top=flags.slice().sort((a,b)=>SEV_RANK[a.gc]-SEV_RANK[b.gc]||a.pri-b.pri||a.secIdx-b.secIdx).slice(0,5);
+ h+=`<div class="card" id="sec-summary"><h3 aria-level="2"><span class="secno">1</span> Summary</h3>
+   <p class="rf-hint">One paragraph a client can read alone and act on: the two or three findings that carry real risk, and what still works.
+      "Insert a draft" writes one from the answers for you to rewrite.</p>
    ${EXPORTING
-     ? (rev?`<p style="margin-top:6px"><b>Revision:</b> ${esc(rev)}</p>`:"")
-     : `<p style="margin-top:8px"><label for="rf-revision"><b>Revision:</b></label>
-        <input id="rf-revision" class="rf-i" data-rf="report" data-rfk="revision" maxlength="24" value="${esc(S["report|revision"]||"")}"
-         placeholder="e.g. A or 2.0"> <span class="rf-hint" style="display:inline">Appears on the cover and in every page header.</span></p>`}
-   <div class="scope-photo">${reportPhotos(getFieldKey("Title Page","Site photo / media"))}</div>
+     ? (pos.trim()?`<div class="rf-v pos">${esc(pos)}</div>`:"")
+     : `<label class="vh" for="rf-position">Position</label><textarea class="rf-t pos" id="rf-position" data-rf="report" data-rfk="position" rows="5"
+          placeholder="e.g. The centre is reachable and enterable without assistance, but…">${esc(pos)}</textarea>
+        <div class="screen-only posdraft"><button type="button" class="btn" data-posdraft>Insert a draft from the findings</button><span class="rf-hint" data-posmsg role="status"></span></div>`}
+   <div class="tiles">
+    <div class="tile c-breach"><span class="tl">Breaches of code</span><b class="statv">${breaches.length}</b><span class="tn">Mandatory, no discretion</span></div>
+    <div class="tile c-red"><span class="tl">On the path of travel</span><b class="statv">${onPath.length}</b><span class="tn">Met before any service</span></div>
+    <div class="tile c-orange"><span class="tl">Quick wins</span><b class="statv">${quick.length}</b><span class="tn">Low effort to fix</span></div>
+    <div class="tile"><span class="tl">Findings</span><b class="statv">${flags.length}</b><span class="tn">from ${all.length} items assessed</span></div>
+   </div>
+   ${top.length?`<h4 aria-level="3" class="subhead">The most serious findings</h4><ol class="toprisks">`+top.map(f=>`<li><a href="#${ref.get(f.key)}" class="fno">${ref.get(f.key)}</a>
+      <span class="badge ${f.gc}">${esc(f.gl)}</span> <span class="tr-s">${esc(f.stmt)}</span> <span class="tr-w">${esc(whereOf(f))}</span></li>`).join("")+`</ol>`:""}
   </div>`;
-
- /* ---- Position statement (auditor-written, saved like any field) ---- */
- const posKey="report|position";
- h+=`<div class="card"><h3 aria-level="2">Position</h3>
-   <p class="rf-hint">One paragraph a client can read alone and act on. Name the two or three findings that
-      carry real risk, and say what still works. This replaces a percentage score — a score invites
-      "is 78% a pass?", and because unanswered and N/A items move it, it rewards leaving things blank.</p>
-   ${EXPORTING
-     ? `<div class="rf-v pos">${esc(S[posKey]||"")}</div>`
-     : `<textarea class="rf-t pos" data-rf="report" data-rfk="position" rows="4"
-     placeholder="e.g. The centre is reachable and enterable without assistance, but…">${esc(S[posKey]||"")}</textarea>`}
-  </div>`;
-
- /* ---- Tiles ---- */
- h+=`<div class="tiles">
-   <div class="tile c-breach"><span class="tl">Code breaches</span><b class="statv">${breaches.length}</b><span class="tn">Mandatory, no discretion</span></div>
-   <div class="tile c-red"><span class="tl">On path of travel</span><b class="statv">${onPath.length}</b><span class="tn">Reached before any service</span></div>
-   <div class="tile c-orange"><span class="tl">Quick wins</span><b class="statv">${quick.length}</b><span class="tn">Low effort, flagged</span></div>
-   <div class="tile"><span class="tl">Total flagged</span><b class="statv">${flags.length}</b><span class="tn">of ${all.length} answered</span></div>
-  </div>`;
-
- /* ---- Matrix ---- */
  h+=`<div class="card"><h3 aria-level="2">Where to start</h3>
-   <p class="rf-hint">Findings plotted by position in the journey against effort to remedy. Read top-left to
-      bottom-right. Select a cell to filter the findings below.
-      ${noEffort.length?`<b style="color:var(--orange)">${noEffort.length} finding${noEffort.length===1?" has":"s have"} no effort set</b> — set it on each finding and this fills in.`:""}</p>
+   <p class="rf-hint">Findings by position in the journey against effort to fix. Read top-left to bottom-right. Select a cell to filter the findings.
+      ${noEffort.length?`<b style="color:var(--orange)">${noEffort.length} finding${noEffort.length===1?" has":"s have"} no effort set</b>: set it on each finding and this fills in.`:""}</p>
    <table class="mx"><thead><tr><th><span class="vh">Journey priority</span></th>`+
    DIFFS.map(([,l])=>`<th class="ch">${l}</th>`).join("")+`</tr></thead><tbody>`;
  [1,2,3,4].forEach(p=>{
@@ -2809,37 +2877,25 @@ function reportHTML(){
   h+=`</tr>`;
  });
  h+=`</tbody></table>
-   <div class="mxlegend">`+ZONE.slice(1).map(z=>`<span><i class="sw ${z.k}"></i> ${z.l} — ${z.sub}</span>`).join("")+`</div>
-   <p class="rf-hint" style="margin-top:10px">Priority follows position in the journey, not the size of the breach:
-      a 20&nbsp;mm lip at the front door outranks a poorly contrasted sign in a store room. Effort is a rough
-      order of magnitude for time and funding — deliberately not a dollar figure.</p>
+   <div class="mxlegend">`+ZONE.slice(1).map(z=>`<span><i class="sw ${z.k}"></i> ${z.l}: ${z.sub}</span>`).join("")+`</div>
+   <p class="mxnote">Priority follows position in the journey, not the size of the problem: a 20&nbsp;mm lip at the front door comes before a
+      poorly contrasted sign in a store room. Effort is a rough order of magnitude for time and funding, not a dollar figure.</p>
   </div>`;
-
- /* ---- Journey ---- */
  const smap=sectionMap(); const allSecs=[];
  smap.forEach(v=>{ if(!allSecs.some(s=>s.name===v.section)) allSecs.push({name:v.section,pri:v.secPri}); });
- /* Admin pages (Title, Introduction, Summary) land in a synthetic
-    "General" section and hold no assessed items — drop any such stage
-    rather than rendering an empty rung on the journey. */
  const liveSecs=allSecs.filter(s=>all.some(f=>f.section===s.name));
  h+=`<div class="card"><h3 aria-level="2">The building, walked through</h3>
-   <p class="rf-hint">A section with a breach breaks the chain: everything beyond it is unreachable for someone,
-      however compliant it is in isolation.</p><div class="jrn">`;
+   <p class="mxnote" style="margin:0 0 12px">A breach on the way in affects everything beyond it: a compliant toilet cannot be used by someone who cannot get through the door.</p><div class="jrn">`;
  liveSecs.forEach(s=>{
   const items=all.filter(f=>f.section===s.name), fl=items.filter(f=>f.flag);
   const worst=fl.some(f=>f.gc==="br")?"breach":fl.some(f=>f.gc==="hi")?"red":fl.length?"orange":"green";
-  const col=`var(--${worst==="breach"?"breach":worst==="red"?"red":worst==="orange"?"orange":"green"})`;
   const counts={}; fl.forEach(f=>{counts[f.gl]=(counts[f.gl]||0)+1;});
-  /* A section normally carries one priority. If a page inside it has been
-     overridden, say so honestly rather than reporting the section's. */
   const prisIn=[...new Set(items.map(f=>f.pri))].sort();
-  const priTxt = prisIn.length===1
-    ? `Priority ${prisIn[0]} \u00b7 ${PRI_LABEL[prisIn[0]]}`
-    : `Priorities ${prisIn.join(", ")}`;
-  h+=`<div class="jstage"><div class="jrail" style="color:${col}">
-     <i class="jdot" style="background:${col}"></i><i class="jline"></i></div>
+  const priTxt=prisIn.length===1?`Priority ${prisIn[0]} · ${PRI_LABEL[prisIn[0]]}`:`Priorities ${prisIn.join(", ")}`;
+  h+=`<div class="jstage"><div class="jrail" style="color:var(--${worst})">
+     <i class="jdot" style="background:var(--${worst})"></i><i class="jline"></i></div>
     <div class="jbody"><div class="jname">${esc(s.name)}</div>
-     <div class="jmeta">${priTxt} \u00b7 ${items.length} assessed \u00b7 ${fl.length} flagged</div>
+     <div class="jmeta">${priTxt} · ${items.length} assessed · ${fl.length} finding${fl.length===1?"":"s"}</div>
      <div class="jchips">`+
      (Object.keys(counts).length?Object.entries(counts).map(([l,n])=>
        `<span class="chip ${/breach/i.test(l)?"b":/high/i.test(l)?"h":"m"}">${n} ${esc(l)}</span>`).join("")
@@ -2848,83 +2904,103 @@ function reportHTML(){
  });
  h+=`</div></div>`;
 
- h+=scopeHTML(all);
+ /* ===== About this report: the Access Audit Overview text, as edited for this audit ===== */
+ { const k=getFieldKey("Access Audit Introduction","Access Audit Overview"), it=k&&findItem(k);
+   const about=(k&&S[k]!==undefined?S[k]:(it&&it.prefill)||"").trim();
+   if(about){ const paras=about.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+     const isHead=t=>t.length<60&&!/[.:;]$/.test(t)&&!t.includes("\n");
+     h+=`<div class="card flow about" id="sec-about">`+paras.map((t,i)=>i===0&&isHead(t)?`<h3 aria-level="2">${esc(t)}</h3>`:isHead(t)?`<h4 aria-level="3" class="subhead">${esc(t)}</h4>`:`<p>${esc(t)}</p>`).join("")+
+       (paras.length&&!isHead(paras[0])?"":"")+`<p class="rf-hint">Edit this text on the Access Audit Introduction page.</p></div>`; } }
 
- /* ---- Findings ---- */
- let shown=flags;
+ /* ===== 2 SCOPE AND METHOD ===== */
+ const headMeta=`<p class="scope-meta"><span><b>Site</b> ${site}</span><span><b>Client</b> ${client}</span><span><b>Consultant</b> ${consultant}</span><span><b>Conducted</b> ${conducted}</span>
+   ${EXPORTING?(rev?`<span><b>Revision</b> ${esc(rev)}</span>`:""):""}</p>
+   ${EXPORTING?"":`<p class="screen-only" style="margin-top:8px"><label for="rf-revision"><b>Revision:</b></label>
+        <input id="rf-revision" class="rf-i" data-rf="report" data-rfk="revision" maxlength="24" value="${esc(rev)}"
+         placeholder="e.g. A or 2.0"> <span class="rf-hint" style="display:inline">Appears on the cover and in every page header.</span></p>`}
+   <div class="scope-photo">${reportPhotos(getFieldKey("Title Page","Site photo / media"))}</div>`;
+ h+=scopeMethodHTML(all,headMeta);
+
+ /* ===== 3 FINDINGS, by journey stage, then by place ===== */
+ let shown=sorted;
  const filt=!EXPORTING&&REPFILTER.pri;
  if(filt) shown=shown.filter(f=>f.pri===REPFILTER.pri&&f.diff===REPFILTER.diff);
- const RANK={br:0,hi:1,md:2,lo:3,pass:9};
- shown=shown.slice().sort((a,b)=>a.pri-b.pri||a.secIdx-b.secIdx||RANK[a.gc]-RANK[b.gc]);
- h+=`<div class="card flow newpage"><h3 aria-level="2">Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
-   ${filt?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>`;
- if(!shown.length){
-  h+=`<p style="color:var(--muted)">No findings match.</p>`;
- }else{
-  let lastSec=null;
-  shown.forEach(f=>{
-   if(f.section!==lastSec){ lastSec=f.section;
-    h+=`<h4 aria-level="3" class="secbreak">${esc(f.section)} <span class="cnt">Priority ${f.pri}</span></h4>`; }
-   const z=ZONE[zoneOf(f.pri,f.diff)];
-   const flagCls=f.gc==="br"?"breach":f.gc==="hi"?"":"med";
-   h+=`<div class="flagitem ${flagCls}">
-     <span class="badge ${f.gc}">${esc(f.gl)}</span> &nbsp; <b>${esc(f.item.t)}</b>
-     <div class="fp">${esc(whereOf(f))}${f.item.c?" — "+esc(f.item.c):""}</div>
-     ${f.note?`<div class="rf-note"><b>Site note:</b> ${esc(f.note)}</div>`:""}
-     ${rfField(f.key,"impact","Impact — who is excluded, and from what","A wheelchair user cannot… / A person who is blind cannot…")}
-     ${rfField(f.key,"action","Action — the works instruction","Extend the lower handrail by 160 mm with a matching return to the wall.")}
+ h+=`<div class="card flow newpage" id="sec-findings"><h3 aria-level="2"><span class="secno">3</span> Findings <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
+   ${filt?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>
+   <p class="mxnote" style="margin:0 0 4px">In the order a visitor meets them. Each finding states what was found, the requirement it is measured against, and who it affects. What to do about each one is in section 4.</p>`;
+ if(!shown.length) h+=`<p style="color:var(--muted)">No findings match.</p>`;
+ let lastSec=null, lastWhere=null;
+ shown.forEach(f=>{
+  if(f.section!==lastSec){ lastSec=f.section; lastWhere=null;
+   h+=`<h4 aria-level="3" class="secbreak">${esc(f.section)} <span class="cnt">Journey priority ${f.pri}</span></h4>`; }
+  const where=whereOf(f);
+  if(where!==lastWhere){ lastWhere=where; h+=`<h5 class="wherehead" aria-level="4">${esc(where)}</h5>`; }
+  const z=ZONE[zoneOf(f.pri,f.diff)], r=ref.get(f.key);
+  const flagCls=f.gc==="br"?"breach":f.gc==="hi"?"":"med";
+  h+=`<div class="flagitem finding ${flagCls}" id="${r}">
+    <div class="fhead"><span class="fno">${r}</span><span class="badge ${f.gc}">${esc(f.gl)}</span><span class="fstmt">${esc(f.stmt)}</span></div>
+    ${f.stmtStd?`<div class="freq"><b>Requirement:</b> ${esc(f.item.t)}${f.item.c?` <span class="cl">(${esc(f.item.c)})</span>`:""}</div>`
+               :(f.item.c?`<div class="freq"><span class="cl">${esc(f.item.c)}</span></div>`:"")}
+    ${f.note?`<div class="rf-note"><b>Site note:</b> ${esc(f.note)}</div>`:""}
+    ${rfField(f.key,"impact","Who this affects",f.item.imp?"":"A wheelchair user cannot… / A person who is blind cannot…",(f.item.imp||"").trim())}
+    <div class="screen-only">
+     ${rfField(f.key,"action","Action: the works instruction (shown in section 4)","Extend the lower handrail by 160 mm with a matching return to the wall.",(f.item.act||"").trim())}
      <div class="tf-row">
        ${diffSelect(f.key,f.diff)}
        <label class="tf-label">Fix by:
          <select class="tf-select" data-tf="${esc(f.key)}">${tfOptions(TF_MAX_MONTHS[f.gc]||12,S[f.key+"|tf"])}</select></label>
        <span class="tag">When <b>${z.l}</b></span>
-     </div>
-     ${figRefs(f.key)}</div>`;
-  });
- }
+     </div></div>
+    ${figRefs(f.key)}</div>`;
+ });
  h+=`</div>`;
 
- /* ---- Works schedule ---- */
- h+=`<div class="card flow newpage"><h3 aria-level="2">Works schedule</h3>
-   <p class="rf-hint">The hand-off table. Export this as CSV beside the PDF so the client can paste it
-      into their maintenance system or send it to a builder.</p>
-   <table class="rep-table"><thead><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th><th>Fig.</th></tr></thead><tbody>`;
+ /* ===== 4 ACTION PLAN: what to do, grouped by when ===== */
+ h+=`<div class="card flow newpage" id="sec-plan"><h3 aria-level="2"><span class="secno">4</span> Action plan</h3>
+   <p class="mxnote" style="margin:0 0 10px">Grouped by when to act. The reference links each action to its finding in section 3. The same table is available as a spreadsheet.</p>
+   <table class="rep-table plan"><thead><tr><th>Ref</th><th>Finding</th><th>Action</th><th>Where</th><th>Effort</th><th>Fix by</th></tr></thead><tbody>`;
  let any=false;
- [1,2,3,4].forEach(z=>{
-  const items=flags.filter(f=>zoneOf(f.pri,f.diff)===z);
-  if(!items.length)return; any=true;
-  h+=`<tr class="schband"><td colspan="6">${ZONE[z].l} — ${ZONE[z].sub} (${items.length})</td></tr>`;
+ [1,2,3,4].forEach(zn=>{
+  const items=sorted.filter(f=>zoneOf(f.pri,f.diff)===zn);
+  if(!items.length) return; any=true;
+  h+=`<tr class="schband"><td colspan="6">${ZONE[zn].l}: ${ZONE[zn].sub} (${items.length})</td></tr>`;
   items.forEach(f=>{
-   h+=`<tr><td data-label="Element">${esc(f.item.t)}</td><td data-label="Location">${esc(whereOf(f))}</td>
-     <td data-label="Works">${f.action?esc(f.action):`<span style="color:var(--muted)">— not yet written —</span>`}</td>
-     <td data-label="Clause" style="font-size:12px;color:var(--muted)">${esc(f.item.c||"")}</td>
+   const tf=S[f.key+"|tf"];
+   h+=`<tr><td data-label="Ref"><a href="#${ref.get(f.key)}" class="fno">${ref.get(f.key)}</a></td>
+     <td data-label="Finding">${esc(f.stmt)}</td>
+     <td data-label="Action">${f.action?esc(f.action):`<span style="color:var(--muted)">Not yet written</span>`}</td>
+     <td data-label="Where">${esc(where_short(f))}</td>
      <td data-label="Effort">${f.diff?esc(DIFF_LABEL[f.diff]):`<span style="color:var(--muted)">—</span>`}</td>
-     <td data-label="Fig." style="font-size:12px">${esc(figText(FIG,f.key))||`<span style="color:var(--muted)">—</span>`}</td></tr>`;
+     <td data-label="Fix by">${tf===undefined||tf===""?`<span style="color:var(--muted)">—</span>`:(tf==="0"?"Immediately":`${tf} month${tf==="1"?"":"s"}`)}</td></tr>`;
   });
  });
- if(!any) h+=`<tr><td colspan="6" style="color:var(--muted)">No flagged items.</td></tr>`;
+ if(!any) h+=`<tr><td colspan="6" style="color:var(--muted)">No findings.</td></tr>`;
  h+=`</tbody></table></div>`;
 
- /* ---- Monitor list (unchanged behaviour) ---- */
+ /* ===== 5 ITEMS TO MONITOR ===== */
  const flagKeys=new Set(flags.map(f=>f.key));
  const monitored=allQs().filter(x=>(S[x.key+"|n"]||(PHOTOS[x.key]&&PHOTOS[x.key].length))&&!flagKeys.has(x.key));
- h+=`<div class="card flow"><h3 aria-level="2">Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
- if(!monitored.length) h+=`<p style="color:var(--muted)">No additional comments or photos recorded.</p>`;
+ h+=`<div class="card flow" id="sec-monitor"><h3 aria-level="2"><span class="secno">5</span> Items to monitor <span class="cnt">${monitored.length}</span></h3>`;
+ if(!monitored.length) h+=`<p style="color:var(--muted)">No other comments or photos were recorded.</p>`;
+ else h+=`<p class="mxnote" style="margin:0 0 10px">Not findings: items that met the requirement but carry a note or photo worth keeping an eye on.</p>`;
  monitored.forEach(x=>{
   h+=`<div class="flagitem med"><span class="badge md">Comment</span> &nbsp; ${esc(x.item.t)}
    <div class="fp">${esc(whereOf(x))}${x.item.c?" — "+esc(x.item.c):""}</div>
    ${S[x.key+"|n"]?`<div class="rf-note"><b>Comment:</b> ${esc(S[x.key+"|n"])}</div>`:""}
    ${figRefs(x.key)}</div>`;
  });
- h+=`</div>`;                          // close the "other items" card
- /* ---- Photographic record (plates) ---- */
+ h+=`</div>`;
+
+ /* ===== APPENDICES ===== */
+ h+=appendixCoverageHTML(all);
+ h+=appendixRatingsHTML();
  if(FIG.list.length){
-  h+=`<div class="card flow newpage"><h3 aria-level="2">Photographic record <span class="cnt">${FIG.list.length}</span></h3>`;
+  h+=`<div class="card flow newpage" id="app-c"><h3 aria-level="2"><span class="secno">C</span> Appendix C: photographs <span class="cnt">${FIG.list.length}</span></h3>`;
   FIG.list.forEach(f=>{
-   const ck=f.key+"|cap:"+f.p.id, cap=S[ck]||"";
+   const cap=S[f.key+"|cap:"+f.p.id]||"";
    h+=`<figure class="plate" id="fig-${f.n}">
-     <img src="${f.p.data}" alt="Figure ${f.n}: ${esc(f.title)}">
-     <figcaption><b>Figure ${f.n}</b> — ${esc(f.title)}<span class="fp"> · ${esc(f.page)} · ${esc(f.label)}</span>
+     <img src="${esc(f.p.data)}" alt="Figure ${f.n}: ${esc(f.title)}">
+     <figcaption><b>Figure ${f.n}</b>${ref.get(f.key)?` (${ref.get(f.key)})`:""}: ${esc(f.title)}<span class="fp"> · ${esc(f.page)} · ${esc(f.label)}</span>
       ${EXPORTING
         ? (cap.trim()?`<div class="rf-v cap">${esc(cap)}</div>`:"")
         : `<input class="rf-i cap" data-rf="${esc(f.key)}" data-rfk="cap:${esc(f.p.id)}" value="${esc(cap)}"
@@ -2935,16 +3011,50 @@ function reportHTML(){
  }
  return h+`</div>`;
 }
+/* Location without the page when the page is already the heading context: used in the action plan, where it stands alone. */
+const where_short=f=>whereOf(f);
+
+/* The firm named on the report comes from the Title Page (Consultant > Company Name). */
+const firmName=()=>(getFieldVal("Title Page","Company Name")||"").trim()||"Inclusive Access Co.";
+/* Order and numbering shared by the findings, the action plan, the summary and the CSV. */
+const SEV_RANK={br:0,hi:1,md:2,lo:3,pass:9};
+/* Journey stage, then place (page and named element, in the order a visitor meets them), then severity. Keeping a
+   place's findings together means each place is introduced once in the report. */
+const findingOrder=(a,b)=>a.pri-b.pri||a.secIdx-b.secIdx||(a.locIdx??a.qIdx)-(b.locIdx??b.qIdx)||SEV_RANK[a.gc]-SEV_RANK[b.gc]||a.qIdx-b.qIdx;
+function numberFindings(flags){
+ const first=new Map(); flags.forEach(f=>{ const w=whereOf(f); if(!first.has(w)||f.qIdx<first.get(w)) first.set(w,f.qIdx); });
+ flags.forEach(f=>{ f.locIdx=first.get(whereOf(f)); });
+ const sorted=flags.slice().sort(findingOrder), m=new Map(); sorted.forEach((f,i)=>m.set(f.key,"F"+(i+1))); return {sorted,ref:m}; }
+/* A draft of the Position paragraph, built only from the answers, for the auditor to rewrite. */
+function sentenceOf(f){ return f.stmtStd?f.stmt.replace(/[.\s]+$/,""):`"${f.item.t.replace(/[.\s]+$/,"")}" is not met`; }
+function draftPosition(all,flags){
+ const site=(getFieldVal("Title Page","Site conducted")||"").trim()||"the building";
+ if(!flags.length) return `This audit of ${site} recorded no findings in the areas assessed.`;
+ const c={br:0,hi:0,md:0,lo:0}; flags.forEach(f=>{ if(f.gc in c) c[f.gc]++; });
+ const and=a=>a.length>1?a.slice(0,-1).join(", ")+" and "+a[a.length-1]:(a[0]||"");
+ const sev=[[c.hi,"high"],[c.md,"medium"],[c.lo,"low"]].filter(x=>x[0]), nSev=sev.reduce((n,x)=>n+x[0],0);
+ const parts=[];
+ if(c.br) parts.push(c.br+" "+(c.br===1?"breach":"breaches")+" of code");
+ if(nSev) parts.push(and(sev.map(x=>x[0]+" "+x[1]))+" severity finding"+(nSev===1?"":"s"));
+ let t=`This audit of ${site} recorded ${flags.length} finding${flags.length===1?"":"s"}: ${parts.join(", and ")}.`;
+ const path=flags.filter(f=>f.pri===1).length;
+ if(path) t+=` ${path===flags.length?"All":path} of them ${path===1?"is":"are"} on the path of travel (arriving, entering, moving around or leaving), which a visitor meets before reaching any service.`;
+ const top=flags.slice().sort((a,b)=>SEV_RANK[a.gc]-SEV_RANK[b.gc]||a.pri-b.pri||a.secIdx-b.secIdx).slice(0,3);
+ t+=` The most serious ${top.length===1?"is":"are"}: `+top.map(f=>sentenceOf(f)+" ("+whereOf(f)+")").join("; ")+".";
+ const stages=[...new Set(all.map(f=>f.section))].filter(sec=>sec!=="General"&&!flags.some(f=>f.section===sec));
+ if(stages.length) t+=` No issues were recorded in ${stages.length>1?stages.slice(0,-1).join(", ")+" and "+stages[stages.length-1]:stages[0]}.`;
+ return t;
+}
 
 /* --- 6. CSV export of the works schedule ---------------------------- */
 function exportScheduleCSV(){
- const flags=collectFindings().filter(f=>f.flag)
-   .sort((a,b)=>zoneOf(a.pri,a.diff)-zoneOf(b.pri,b.diff)||a.pri-b.pri);
+ const all=collectFindings(), {ref}=numberFindings(all.filter(f=>f.flag));
+ const flags=all.filter(f=>f.flag).sort((a,b)=>zoneOf(a.pri,a.diff)-zoneOf(b.pri,b.diff)||findingOrder(a,b));
  const q=s=>'"'+String(s==null?"":s).replace(/"/g,'""')+'"';
- const rows=[["When","Priority","Journey section","Element","Location","Clause",
-              "Classification","Effort","Impact","Works","Fix by (months)","Figures"]];
- const FIG=buildFigures(collectFindings());
- flags.forEach(f=>rows.push([ZONE[zoneOf(f.pri,f.diff)].l,f.pri,f.section,f.item.t,
+ const rows=[["Ref","When","Journey priority","Journey section","Finding","Requirement","Location","Clause",
+              "Severity","Effort","Impact","Action","Fix by (months)","Figures"]];
+ const FIG=buildFigures(all);
+ flags.forEach(f=>rows.push([ref.get(f.key),ZONE[zoneOf(f.pri,f.diff)].l,f.pri,f.section,f.stmt,f.item.t,
    whereOf(f),f.item.c||"",f.gl,DIFF_LABEL[f.diff]||"",f.impact,f.action,
    S[f.key+"|tf"]||"",figText(FIG,f.key)]));
  const csv="﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n");
@@ -2967,7 +3077,7 @@ function exportScheduleCSV(){
    its "Fix by:" label when it has one. */
 function flattenForExport(html){
  const t=document.createElement("template"); t.innerHTML=html;
- t.content.querySelectorAll(".rf-hint,.draftbox,.draftchip").forEach(n=>n.remove());
+ t.content.querySelectorAll(".rf-hint,.draftbox,.draftchip,.screen-only,.stdtag").forEach(n=>n.remove());
  t.content.querySelectorAll("select").forEach(sel=>{
   const opt=sel.querySelector("option[selected]");
   const host=sel.closest("label")||sel;
@@ -3279,6 +3389,12 @@ content.addEventListener("click",e=>{
  const ov=e.target.closest("[data-scopeov]");
  if(ov){ if(ov.dataset.on==="1") S["scopeov|"+ov.dataset.scopeov]="1"; else delete S["scopeov|"+ov.dataset.scopeov]; saveA(); render(); return; }
  if(e.target.closest("[data-reviewopen]")){ reviewModal(); return; }
+ if(e.target.closest("[data-posdraft]")){
+  const ta=document.getElementById("rf-position"), msg=content.querySelector("[data-posmsg]");
+  if(ta&&ta.value.trim()){ if(msg) msg.textContent="The paragraph already has text. Clear it first to insert a draft."; return; }
+  const all=collectFindings(), d=draftPosition(all,all.filter(f=>f.flag));
+  S["report|position"]=d; saveA(); if(ta){ ta.value=d; ta.focus(); } if(msg) msg.textContent="Draft inserted. Rewrite it in your own words before sending.";
+  return; }
  if(b){const id=b.dataset.q;setLastQ(id);S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];delete S[id+"|nasrc"];saveA();updateAnswerUI(id);return;}
  const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
  if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
@@ -3815,6 +3931,7 @@ async function runMigrations(){
 async function boot(){
  syncDrawerInert();
  loadAll();
+ { const pg=T.pages.find(p=>p.title==="Access Audit Introduction"); const walk=a=>a.forEach(it=>{ if(it.k==="txt"&&it.t==="Access Audit Overview"&&!it.prefill){ it.prefill=ABOUT_REPORT; saveT(); } if(it.items) walk(it.items); }); if(pg) walk(pg.items); }
  loadLastQ();
  await runMigrations();
  render();

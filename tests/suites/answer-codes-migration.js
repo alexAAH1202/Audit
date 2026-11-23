@@ -1,6 +1,6 @@
 // Run by tests/run.js:  node tests/suites/answer-codes-migration.js <path to access-audit.html>
 const {chromium}=require('playwright');const fs=require('fs');const D=(process.env.TEST_OUT+'/');
-const SUM=`(()=>{const f=collectFindings().map(x=>[x.key,x.gl,x.gc,x.flag,x.section,x.pri].join("|")).sort();const t=totals();const sc=[...allPageScores().entries()].map(([p,v])=>p.title+":"+[v.got,v.max,v.hi,v.med,v.brc,v.ans,v.n].join(",")).join(";");
+const SUM=`(()=>{const f=collectFindings().map(x=>[x.key,x.gc,x.flag,x.section,x.pri].join("|")).sort();const t=totals();const sc=[...allPageScores().entries()].map(([p,v])=>p.title+":"+[v.got,v.max,v.hi,v.med,v.brc,v.ans,v.n].join(",")).join(";");
  return JSON.stringify({f,t,sc,top:[document.getElementById('tScore').textContent,document.getElementById('tFlag').textContent,document.getElementById('tAns').textContent],nav:[...document.querySelectorAll('#nav a .sc')].map(x=>x.textContent).join(',')})})()`;
 const wipe=d=>{ for(const k of Object.keys(localStorage)) localStorage.removeItem(k); for(const [k,v] of Object.entries(d||{})) localStorage.setItem(k,v); };
 (async()=>{const b=await chromium.launch();const ctx=await b.newContext({acceptDownloads:true});const errs=[];

@@ -23,7 +23,7 @@ console.log("5 undo:",await info());
 await p.locator('[data-sweepgo]').first().click();
 // report + export + backup
 await p.evaluate(()=>{mode="report";render()});
-console.log("6 report disclosure:",await p.evaluate(()=>{const t=[...document.querySelectorAll('.cov th')].map(x=>x.textContent);const r=[...document.querySelectorAll('.cov tr')].find(r=>r.textContent.includes("Entrances"));return [t.join("/"),r&&r.innerText.replace(/\s+/g,' ')]}),await p.evaluate(()=>[...document.querySelectorAll('#content p')].map(x=>x.textContent).find(t=>t.includes('sweeping')).trim().slice(0,110)));
+console.log("6 report disclosure:",await p.evaluate(()=>{const t=[...document.querySelectorAll('.cov th')].map(x=>x.textContent);const r=[...document.querySelectorAll('.cov tr')].find(r=>r.textContent.includes("Entrances"));return [t.join("/"),r&&r.innerText.replace(/\s+/g,' ')]}),await p.evaluate(()=>[...document.querySelectorAll('#content p')].map(x=>x.textContent).find(t=>t.includes('checking a whole group')).trim().slice(0,110)));
 const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#btnBackup')]);const bk=JSON.parse(fs.readFileSync(await dl.path(),'utf8'));
 console.log("7 backup keeps sweep marks:",Object.keys(bk.answers.s).filter(k=>k.endsWith("|sw")).length);
 await p.evaluate(()=>{localStorage.clear()});await p.reload();await p.waitForTimeout(200);

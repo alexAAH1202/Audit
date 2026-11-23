@@ -15,13 +15,13 @@ console.log("4 first named:",await p.$$eval('.rep h4',h=>h.map(x=>x.textContent)
 await p.evaluate(()=>{const o=RS("phml").opts;const hi=((o.find(x=>x.flag&&x.score===0))||{}).code,br=((o.find(x=>x.breach))||{}).code;const qs=allQs().filter(x=>x.page.title==="Accessible Car Parking"&&x.trail.length);
  const a=qs.find(x=>x.trail[0]==="Bay 1 nearest entry"),b2=qs.find(x=>x.trail[0]==="Bay 2 near the door");S[a.key]=hi;S[b2.key]=br;S[b2.key+"|action"]="Re-mark bay";
  const jpg=(()=>{const c=document.createElement('canvas');c.width=200;c.height=100;return c.toDataURL('image/jpeg')})();PHOTOS[b2.key]=[{id:"z1",key:b2.key,data:jpg,ts:1}];saveA();mode="report";render()});
-console.log("5 report locations:",await p.$$eval('.flagitem .fp',n=>n.map(x=>x.textContent.slice(0,60)).join(" || ")));
-console.log("  schedule Location:",await p.$$eval('.rep-table td[data-label=Location]',n=>n.map(x=>x.textContent).join(" || ")),"| plate:",await p.$$eval('.plate figcaption',n=>n.map(x=>x.innerText.replace(/\s+/g,' ').slice(0,110)).join()));
-const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#btnCsv')]);console.log("  CSV Location col:",fs.readFileSync(await dl.path(),'utf8').split("\r\n").slice(1).map(l=>l.split('","')[4]).join(" || "));
+console.log("5 report locations:",await p.$$eval('#sec-findings .wherehead',n=>n.map(x=>x.textContent.slice(0,60)).join(" || ")));
+console.log("  schedule Location:",await p.$$eval('.plan td[data-label=Where]',n=>n.map(x=>x.textContent).join(" || ")),"| plate:",await p.$$eval('.plate figcaption',n=>n.map(x=>x.innerText.replace(/\s+/g,' ').slice(0,110)).join()));
+const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#btnCsv')]);console.log("  CSV Location col:",fs.readFileSync(await dl.path(),'utf8').split("\r\n").slice(1).map(l=>l.split('","')[6]).join(" || "));
 // unnamed third bay -> default text + draft box
 await p.evaluate(()=>{mode="audit";cur=T.pages.findIndex(x=>x.title==="Accessible Car Parking");render()});await p.click('[data-addrep]');
 await p.evaluate(()=>{const o=RS("phml").opts;const hi=((o.find(x=>x.flag&&x.score===0))||{}).code;const x=allQs().find(q=>q.page.title==="Accessible Car Parking"&&q.trail.length&&/#3/.test(q.trail[0]));S[x.key]=hi;saveA();mode="report";render()});
-console.log("6 unnamed fallback in report:",await p.$$eval('.flagitem .fp',n=>n.map(x=>x.textContent.slice(0,60)).filter(t=>/#3/.test(t)).join()),"| draft box mentions unnamed:",await p.$$eval('.draftbox',n=>n.some(x=>/Name the repeated/.test(x.textContent))));
+console.log("6 unnamed fallback in report:",await p.$$eval('#sec-findings .wherehead',n=>n.map(x=>x.textContent.slice(0,60)).filter(t=>/#3/.test(t)).join()),"| draft box mentions unnamed:",await p.$$eval('.draftbox',n=>n.some(x=>/Name the repeated/.test(x.textContent))));
 const [d2]=await Promise.all([p.waitForEvent('download'),p.click('#btnExport')]);fs.copyFileSync(await d2.path(),D+'in-export.html');const q=await ctx.newPage();await q.goto('file://'+D+'in-export.html');
 console.log("  export: draft box gone:",await q.$$eval('.draftbox',n=>n.length)===0,"| names present:",(await q.content()).includes("Bay 2 near the door"));
 // remove last instance deletes its name; persistence; backup/restore

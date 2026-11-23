@@ -16,7 +16,7 @@ const r=await p.evaluate(async([L,P])=>{
  saveA();mode="report";render();return [qs[0].key,qs[200].key,qs[5].key]},[L,P]);
 console.log("screen refs:",await p.$$eval('.figrefs',n=>n.map(x=>x.innerText.replace(/\s+/g,' ')).join(" | ")));
 console.log("plates:",await p.$$eval('.plate figcaption',n=>n.map(x=>x.innerText.replace(/\s+/g,' ').slice(0,80)).join("\n   ")));
-console.log("schedule fig col:",await p.$$eval('.rep-table tbody tr:not(.schband) td:last-child',n=>n.map(x=>x.innerText).join(",")));
+console.log("finding photo refs:",await p.$$eval('#sec-findings .figrefs',n=>n.map(x=>x.innerText.replace(/\s+/g,' ')).join(" | ")));
 // caption typing + anchor
 await p.fill('input[aria-label="Caption for Figure 3"]','Rear view');console.log("caption saved:",await p.evaluate(k=>S[k+"|cap:b1"],r[1]),await p.evaluate(()=>[...document.querySelectorAll('.plate input')].length));
 await p.evaluate(()=>{ /* fig order check */ });

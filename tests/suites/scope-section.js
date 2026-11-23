@@ -14,8 +14,8 @@ await p.evaluate(()=>{
  const y=qs.filter(q=>q.page.title==="Entrances")[1];S[y.key]="pass";
  S["report|limits"]='Roof terrace locked: not assessed.\n"Plant room" excluded <by agreement>.';
  saveA();mode="report";render()});
-console.log("screen card:",await p.$eval('h3:text("Scope and limitations")',h=>h.parentElement.innerText.replace(/\n+/g,' | ').slice(0,700)));
-console.log("textareas in scope card:",await p.$$eval('h3',hs=>hs.find(h=>h.textContent.startsWith("Scope and"))?.parentElement.querySelectorAll('textarea').length));
+console.log("screen card:",await p.$eval('#sec-scope',h=>h.innerText.replace(/\n+/g,' | ').slice(0,700)));
+console.log("textareas in scope card:",await p.$eval('#sec-scope',c=>c.querySelectorAll('textarea').length));
 const [d]=await Promise.all([p.waitForEvent('download'),p.click('#btnExport')]);const ef=D+'sc-export.html';fs.copyFileSync(await d.path(),ef);
 const q=await ctx.newPage();await q.goto('file://'+ef);
 console.log("export: textareas",await q.$$eval('textarea',n=>n.length),"| hint paras",await q.$$eval('.rf-hint',n=>n.length));
@@ -24,5 +24,5 @@ console.log("benchmark once:",(await q.content()).split("Benchmark").length-1);
 await q.pdf({path:D+'sc.pdf',preferCSSPageSize:true,printBackground:true});
 // empty template: card still renders
 const e=await ctx.newPage();await e.goto('file://'+process.argv[2]);await e.evaluate(()=>{localStorage.clear();});await e.reload();await e.evaluate(()=>{mode="report";render()});
-console.log("empty audit card:",await e.$eval('h3:text("Scope and limitations")',h=>h.parentElement.innerText.replace(/\n+/g,' | ').slice(0,260)));
+console.log("empty audit card:",await e.$eval('#sec-scope',h=>h.innerText.replace(/\n+/g,' | ').slice(0,260)));
 console.log("errors:",errs);await b.close()})();

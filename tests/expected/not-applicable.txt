@@ -10,7 +10,7 @@
    shown as selected N/A on the page: true
 10 hand answer replaces it: pass / no scope mark
 11 lift = Yes undoes scope marks only: pass , high , - , -
-12 report coverage: 3 questions marked not applicable to this building: Plant litter (leaves, seed pods, bark) does not accumulate on the accessible path of travel (Landscaping); A warning sign against using the lift in a fire is displayed near every passenger lift call button (E
+12 report coverage: Questions marked not applicable to this building (3): Plant litter (leaves, seed pods, bark) does not accumulate on the accessible path of travel (Landscaping); A warning sign against using the lift in a fire is displayed near every passenger lift call button
     table cell: [ 'Landscaping 1 of 4 · 1 not applicable 0' ]
     export mentions it: true
 13 backup keeps N/A: 3 na answers, 2 scope marks

@@ -1,14 +1,14 @@
 1 aria snapshot:
 - radiogroup "The required number of accessible parking bays is provided for the building classification and total bay count":
   - radio "Pass"
-  - radio "High Priority"
-  - radio "Medium Priority"
-  - radio "Low Priority"
+  - radio "High"
+  - radio "Medium"
+  - radio "Low"
   - radio "Breach of Code"
   - radio "Not applicable"
 2 label resolves: The required number of accessible parking bays is
 3 initial (none chosen): ○0 ○-1 ○-1 ○-1 ○-1 ○-1
-4 ArrowRight: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 | focus: High Priority
+4 ArrowRight: ○-1 ●0 ○-1 ○-1 ○-1 ○-1 | focus: High
 5 End: ○-1 ○-1 ○-1 ○-1 ○-1 ●0 | answer saved: na
 6 wrap: ●0 ○-1 ○-1 ○-1 ○-1 ○-1
 7 left: ○-1 ○-1 ○-1 ○-1 ○-1 ●0

@@ -68,8 +68,12 @@ sweep groups on page: [
   score: '0/503 (0%)',
   flag: '3'
 }
-6 report disclosure: [ 'Area/Answered/Flagged/Passed by sweep', 'Entrances 31 of 72 3 28' ] 28 Pass answers were recorded by sweeping a whole group of requirements,
-     not by assessing each item indiv
+6 report disclosure: [
+  'Area/Answered/Findings/Passed as a group',
+  'Entrances 31 of 72 3 28'
+] 1 of 22 assessable areas have answers recorded.
+
+       28 Pass answers were recorded by checking a whol
 7 backup keeps sweep marks: 28
   restored sweep marks: 28
 8 after restore: Swept · 28 of 31 | undo visible true

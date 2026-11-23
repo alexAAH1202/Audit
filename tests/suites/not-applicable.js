@@ -41,7 +41,7 @@ await p.evaluate(()=>{[...document.querySelectorAll('[data-pick]')].find(b=>b.cl
 console.log("11 lift = Yes undoes scope marks only:",await p.evaluate(()=>SCOPE_QRULES[0].texts.map(t=>{const x=allQs().find(q=>q.item.t===t);return x?(S[x.key]||"-"):"?"}).join(" , ")));
 // report
 await p.evaluate(()=>{[...document.querySelectorAll('[data-pick]')].find(b=>b.closest('.qrow').innerText.startsWith("Is a passenger")&&b.dataset.v==="no").click();mode="report";render()});
-console.log("12 report coverage:",await p.$$eval('h3',hs=>{const c=hs.find(h=>h.textContent.startsWith("Scope and"));return c.parentElement.innerText.replace(/\n+/g,' ').match(/\d+ questions? marked not applicable[^.]*\./)?.[0]?.slice(0,260)}));
+console.log("12 report coverage:",await p.evaluate(()=>{const m=document.getElementById("content").innerText.replace(/\n+/g," ").match(/Questions marked not applicable to this building \(\d+\):[^.]*\./);return m?m[0].slice(0,260):"(missing)"}));
 console.log("    table cell:",await p.$$eval('.cov tr',r=>r.map(x=>x.innerText.replace(/\s+/g,' ')).filter(t=>/not applicable/.test(t)).slice(0,2)));
 const [d]=await Promise.all([p.waitForEvent('download'),p.click('#btnExport')]);fs.copyFileSync(await d.path(),D+'na-export.html');console.log("    export mentions it:",fs.readFileSync(D+'na-export.html','utf8').includes('marked not applicable'));
 // backup carries na + nasrc

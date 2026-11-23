@@ -1,10 +1,10 @@
-1 default: comment box hidden: true | toggle: + Comment | aria-expanded: false | row height: 319
+1 default: comment box hidden: true | toggle: + Comment | aria-expanded: false | row height: 306
 2 click opens + focuses: true true | label now: − Comment true
 3 typed note saved: Measured 2.3m
 4 collapse keeps the text, shows a dot: true | + Comment •
 5 re-render keeps it collapsed (auditor closed it): true
 6 after reload a saved note opens by itself: true | value: Measured 2.3m | other rows still folded: true
 7 Enter on the toggle opens it: true
-8 comment + photo buttons on one row: {"sameRow":true,"tH":44,"aH":44} | row height now: 295
+8 comment + photo buttons on one row: {"sameRow":true,"tH":44,"aH":44} | row height now: 282
 9 note reaches the report: true
 errors: []
