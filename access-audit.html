@@ -1693,7 +1693,7 @@ const isScored=opts=>opts.some(o=>typeof o.score==="number");
 const ANS_VERSION=2;
 /* What a severity is CALLED. The stored codes never change; only the words shown do. "Priority" is kept for
    the journey (1-4), so severities are not called "High Priority" any more (CLAUDE.md: never conflate them). */
-const BTN_LABEL={pass:"Pass",high:"High",med:"Medium",low:"Low",breach:"Breach of Code",tbc:"To be confirmed"};
+const BTN_LABEL={pass:"Pass",high:"High",med:"Medium",low:"Low",breach:"Breach of Code",tbc:"TBC"};
 const REPORT_SEV={high:"High severity",med:"Medium severity",low:"Low severity",breach:"Breach of Code"};
 const optLabel=o=>(BTN_LABEL[o.code]&&/priority|^pass$|breach|confirmed/i.test(o.l))?BTN_LABEL[o.code]:o.l;
 let S_FORMAT=ANS_VERSION;        // format of the answers currently in memory (1 only while a legacy audit is being converted)
@@ -2421,7 +2421,7 @@ function radioGroup(key,set0,v,nameAttr){
  const sel=optOf(set,v)?String(v):null;
  return `<div class="opts" role="radiogroup" ${nameAttr}>`+set.map((o,j)=>{
   const on=sel===o.code, tab=sel===null?j===0:on;
-  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${esc(o.code)}">${esc(optLabel(o))}</button>`;
+  return `<button type="button" role="radio" aria-checked="${on}" tabindex="${tab?0:-1}" class="opt ${o.cls} ${on?"on":""}" data-q="${key}" data-v="${esc(o.code)}"${o.code==="tbc"&&optLabel(o)==="TBC"?' aria-label="TBC, to be confirmed"':""}>${esc(optLabel(o))}</button>`;
  }).join("")+`</div>`;
 }
 function syncRadioGroup(group,v){
