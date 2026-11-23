@@ -46,6 +46,7 @@ architectural changes.
 | Action | localStorage | `S[key + "\|action"]` |
 | Name of a repeated element | localStorage | `S[sectionId + suffix + "~" + n + "\|lbl"]` |
 | Passed by group sweep | localStorage | `S[key + "\|sw"]` = `"1"` |
+| Not applicable | localStorage | `S[key]` = `"na"` (a sixth option on every question); `S[key + "\|nasrc"]` = rule id when the Site Scope set it |
 | Photo caption | localStorage | `S[key + "\|cap:" + photoId]` |
 | Site Scope answer | localStorage | `S[itemId]`, a text code such as `"no"` |
 | Page switched back on despite scope | localStorage | `S["scopeov\|" + pageId]` |

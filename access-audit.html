@@ -98,6 +98,8 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
 .opt{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.25;color:var(--muted);text-align:center;min-height:44px;overflow-wrap:anywhere}
 .opt.on::before{content:"\2713\00a0"}
+.opt.x{border-style:dashed}
+.opt.x.on{background:#EEF0F4;border-color:var(--muted);border-style:solid;color:var(--ink);font-weight:700}
 .opt.g.on{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:700}
 .opt.r.on{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:700}
 .opt.o.on{background:var(--orange-bg);border-color:var(--orange);color:var(--orange);font-weight:700}
@@ -1376,6 +1378,27 @@ const scopeAns=name=>getFieldVal("Site Scope",SCOPE_Q[name])||"";
 const scopeAnswers=()=>({cls:scopeAns("cls"),storeys:scopeAns("storeys"),lift:scopeAns("lift"),parking:scopeAns("parking"),
  sanitary:scopeAns("sanitary"),built:scopeAns("built"),use:scopeAns("use")});
 const sanOff=a=>a.sanitary==="no"?"No sanitary facilities for the public":a.sanitary==="shared"?"Sanitary facilities are shared and outside the audited area":"";
+/* Questions the Site Scope can mark not applicable. They are marked ("na", with S[key+"|nasrc"]=rule id) only when the
+   scope answer is set and the question is still unanswered; changing the answer back removes the marks it made,
+   and an answer the auditor gave by hand is never touched. Matched by question text. */
+const SCOPE_QRULES=[
+ {id:"nolift",reason:"No passenger lift",when:a=>a.lift==="no",texts:[
+  "Lift landings and lobbies provide required circulation dimensions",
+  "Lifts are equipped with audible and visual indicators / hearing augmentation",
+  "A warning sign against using the lift in a fire is displayed near every passenger lift call button",
+  "Passenger lifts are not relied on as an exit route unless the emergency plan says they are for evacuation"]}
+];
+function applyScopeNA(){
+ const a=scopeAnswers(), raw=[]; let changed=false;
+ T.pages.forEach(p=>{ if(!p.divider) walkQs(p.items,"",raw,p); });
+ SCOPE_QRULES.forEach(r=>{ const on=!!r.when(a);
+  raw.filter(x=>r.texts.includes(x.item.t)).forEach(x=>{ const k=x.key, v=S[k];
+   if(on){ if(v===undefined||v===""){ S[k]="na"; S[k+"|nasrc"]=r.id; changed=true; } }
+   else if(S[k+"|nasrc"]===r.id){ if(v==="na") delete S[k]; delete S[k+"|nasrc"]; changed=true; }
+  }); });
+ if(changed) saveA();
+ return changed;
+}
 /* page title -> function(answers) returning a reason, or "" to keep the page */
 const SCOPE_RULES=[
  ["Accessible Car Parking",a=>a.parking==="no"?"No on-site parking":a.parking==="attended"?"Parking is attended or valet only":""],
@@ -1410,7 +1433,8 @@ const REVIEW_ITEMS=[
  {id:"leave-pri",g:"LEAVE section",t:"Journey priority of Emergency Information & Alarms",d:"Set to 4 (information). A missing visual alarm could arguably block leaving, which would make it 1."},
  {id:"scope-class",g:"Site Scope",t:"Building class only records, skips nothing",d:"NCC D4D2 sets the extent of access by class, but the pages are organised by element, so no page is skipped by class. Confirm, or say which classes drop which pages."},
  {id:"scope-storeys",g:"Site Scope",t:"One storey skips Refuge & Assisted Evacuation",d:"The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift."},
- {id:"scope-lift",g:"Site Scope",t:"Lift answer only records",d:"The template has no lift page. About nine lift questions on other pages are not switched off. Needs per-question not-applicable."},
+ {id:"scope-lift",g:"Site Scope",t:"No lift marks four lift-only questions not applicable",d:"Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list."},
+ {id:"capture-na",g:"Capture",t:"Not applicable on every question",d:"A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each."},
  {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
  {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
  {id:"scope-built",g:"Site Scope",t:"Build-date follow-up skips the other 2011 toilet page",d:"My addition to the six questions. Remove it if unwanted."},
@@ -1682,7 +1706,7 @@ function allPageScores(){
   /* progress counts every question except the optional blank "additional" rows */
   if(!String(x.key).includes("|addl")){ bucket.n++; const a=S[x.key]; if(a!==undefined&&a!=="") bucket.ans++; }
   const set=RS(x.item.rs).opts; if(!isScored(set)) return;
-  bucket.max++; const v=S[x.key];
+  if(S[x.key]!=="na") bucket.max++; const v=S[x.key];
   if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)bucket.got++; if(o.flag){ if(o.breach)bucket.brc++; else if(o.score===0)bucket.hi++; else bucket.med++; } }}
  });
  return map;
@@ -1733,7 +1757,7 @@ function pageScore(pg){
  let got=0,max=0,hi=0,med=0,brc=0;
  allQs().filter(x=>x.page===pg).forEach(x=>{
    const set=RS(x.item.rs).opts; if(!isScored(set))return;
-   max++; const v=S[x.key];
+   if(S[x.key]!=="na") max++; const v=S[x.key];
    if(v!==undefined&&v!==""){const o=optOf(set,v); if(o){ if(o.score===1)got++; if(o.flag){ if(o.breach)brc++; else if(o.score===0)hi++; else med++; } }}
  });
  return {got,max,hi,med,brc};
@@ -1742,7 +1766,7 @@ function totals(){
  let got=0,max=0,flag=0,ans=0,n=0;
  allQs().forEach(x=>{const set=RS(x.item.rs).opts;const v=S[x.key];n++;
    if(v!==undefined&&v!=="")ans++;
-   if(isScored(set)){max++; if(v!==undefined&&v!==""){const o=optOf(set,v);if(o){if(o.score===1)got++;}}}
+   if(isScored(set)){if(v!=="na")max++; if(v!==undefined&&v!==""){const o=optOf(set,v);if(o){if(o.score===1)got++;}}}
    if(v!==undefined&&v!==""){const o=optOf(set,v);if(o&&o.flag)flag++;}
  });
  return {got,max,flag,ans,n};
@@ -2085,7 +2109,13 @@ function sweepGroup(card,undo){
    Clicking the selected option still clears it, as before. */
 const fieldId=key=>"f-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
 const qlId=key=>"ql-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
-function radioGroup(key,set,v,nameAttr){
+/* "Not applicable" is a sixth option on every question, stored as the code "na". It is a real answer: the
+   question counts as resolved in progress, is left out of the score, and the report says it was marked
+   not applicable rather than leaving it looking unassessed. */
+const NA_OPT={l:"Not applicable",code:"na",cls:"x"};
+const withNA=set=>set.some(o=>o.code==="na")?set:set.concat([NA_OPT]);
+function radioGroup(key,set0,v,nameAttr){
+ const set=withNA(set0);
  const sel=optOf(set,v)?String(v):null;
  return `<div class="opts" role="radiogroup" ${nameAttr}>`+set.map((o,j)=>{
   const on=sel===o.code, tab=sel===null?j===0:on;
@@ -2376,10 +2406,11 @@ function scopeHTML(all){
  const by=new Map(), pass=passCode();
  allQs().forEach(x=>{ const id=x.page.id;
   if(x.page.title==="Summary") return;          // the auditor's own summary page is not an assessed area
-  if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0,sw:0}); by.get(id).total++; });
+  if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0,sw:0,na:0}); const r0=by.get(id); r0.total++; if(S[x.key]==="na") r0.na++; });
  all.forEach(f=>{ const r=f.page&&by.get(f.page.id); if(r){ r.ans++; if(f.flag) r.flag++; if(S[f.key+"|sw"]==="1"&&S[f.key]===pass) r.sw++; } });
  const swTotal=[...by.values()].reduce((n,r)=>n+r.sw,0);
- const pages=[...by.values()], gap=pages.filter(r=>!r.ans);
+ const pages=[...by.values()], gap=pages.filter(r=>!r.ans&&r.na<r.total);
+ const naItems=allQs().filter(x=>S[x.key]==="na"&&x.page.title!=="Summary");
  const agree=[gv("Access Audit Agreement")?esc(gv("Access Audit Agreement")):"",
    gv("Access Audit Agreement Supplied")?"Agreement supplied: "+esc(gv("Access Audit Agreement Supplied")):"",
    gv("Client approval received on")?"Client approval received: "+esc(gv("Client approval received on")):""].filter(Boolean);
@@ -2395,13 +2426,16 @@ function scopeHTML(all){
      ${na.length?`<p style="margin-top:6px"><b>Not applicable by scope:</b> ${na.map(x=>esc(x.p.title)+" ("+esc(x.k.reason.toLowerCase())+")").join("; ")}.</p>`:""}</div>`; })()}
   <div class="rf"><span class="rf-l">Coverage</span>
    <p>${pages.length-gap.length} of ${pages.length} assessable pages have answers recorded.</p>
+   ${naItems.length?`<p style="margin-top:6px"><b>${naItems.length} question${naItems.length===1?"":"s"} marked not applicable to this building:</b>
+     ${naItems.slice(0,10).map(x=>esc(x.item.t)+" ("+esc(whereOf(x))+(S[x.key+"|nasrc"]==="nolift"?", no lift":"")+")").join("; ")}${naItems.length>10?`; and ${naItems.length-10} more`:""}.
+     These were looked at and do not apply, which is different from not being assessed.</p>`:""}
    ${swTotal?`<p style="margin-top:6px"><b>${swTotal} Pass answer${swTotal===1?" was":"s were"} recorded by sweeping a whole group of requirements</b>,
      not by assessing each item individually. Any answer the auditor changed or confirmed by hand is not counted here.</p>`:""}
    ${gap.length?`<p style="margin-top:6px"><b>No items recorded for:</b> ${gap.map(r=>esc(r.t)).join("; ")}. These were either not
      assessed or do not apply to this building.</p>
      <p class="rf-hint">Say which in the field below, for each area, so the report states why it was left out.</p>`:""}
    <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Flagged</th>${swTotal?"<th>Passed by sweep</th>":""}</tr></thead><tbody>`+
-   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total}`:"Not assessed"}</td><td>${r.ans?r.flag:"—"}</td>${swTotal?`<td>${r.sw||"—"}</td>`:""}</tr>`).join("")+
+   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total-r.na}${r.na?` · ${r.na} not applicable`:""}`:(r.na&&r.na>=r.total?"All not applicable":"Not assessed")}</td><td>${r.ans?r.flag:"—"}</td>${swTotal?`<td>${r.sw||"—"}</td>`:""}</tr>`).join("")+
    `</tbody></table></div>
   ${rfField("report","limits","Limitations and exclusions — areas not assessed, and why","e.g. The roof terrace was locked and not assessed. Staff-only areas were excluded by agreement.")}
   ${lab("Priority rating system",gv("Priority Rating System"))}
@@ -2987,7 +3021,7 @@ content.addEventListener("click",e=>{
  const ov=e.target.closest("[data-scopeov]");
  if(ov){ if(ov.dataset.on==="1") S["scopeov|"+ov.dataset.scopeov]="1"; else delete S["scopeov|"+ov.dataset.scopeov]; saveA(); render(); return; }
  if(e.target.closest("[data-reviewopen]")){ reviewModal(); return; }
- if(b){const id=b.dataset.q;lastQ=id;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];saveA();updateAnswerUI(id);return;}
+ if(b){const id=b.dataset.q;lastQ=id;S[id]=S[id]===b.dataset.v?"":b.dataset.v;delete S[id+"|sw"];delete S[id+"|nasrc"];saveA();updateAnswerUI(id);return;}
  const sg=e.target.closest("[data-sweepgo],[data-sweepundo]");
  if(sg){ if(sg.getAttribute("aria-disabled")==="true") return; sweepGroup(sg.closest(".card"),sg.hasAttribute("data-sweepundo")); return; }
  const nav=e.target.closest("[data-nav]");
@@ -3093,7 +3127,7 @@ document.getElementById("btnNextUn").addEventListener("click",e=>{ if(e.currentT
 /* Site Scope answer: stored as a text code; tapping the selected one clears it. The page is
    re-rendered because the answer changes follow-up questions and which pages are left out. */
 function pickAnswer(key,code){
- S[key]=S[key]===code?"":code; saveA(); render();
+ S[key]=S[key]===code?"":code; applyScopeNA(); saveA(); render();
  const sel=content.querySelector(`[data-pick="${CSS.escape(key)}"][aria-checked="true"]`)||content.querySelector(`[data-pick="${CSS.escape(key)}"]`);
  if(sel) sel.focus({preventScroll:true});
 }
@@ -3103,7 +3137,7 @@ content.addEventListener("keydown",e=>{
   const k={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1,Home:"first",End:"last"}; if(!(e.key in k)) return;
   const bs=[...pr.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]')], i=bs.indexOf(pr), st=k[e.key];
   const nx=st==="first"?bs[0]:st==="last"?bs[bs.length-1]:bs[(i+st+bs.length)%bs.length];
-  e.preventDefault(); const key=nx.dataset.pick; S[key]=nx.dataset.v; saveA(); render();
+  e.preventDefault(); const key=nx.dataset.pick; S[key]=nx.dataset.v; applyScopeNA(); saveA(); render();
   const el=content.querySelector(`[data-pick="${CSS.escape(key)}"][aria-checked="true"]`); if(el) el.focus({preventScroll:true});
   return;
  }
@@ -3114,7 +3148,7 @@ content.addEventListener("keydown",e=>{
  const i=btns.indexOf(r), step=keys[e.key];
  const next=step==="first"?btns[0]:step==="last"?btns[btns.length-1]:btns[(i+step+btns.length)%btns.length];
  e.preventDefault();
- const id=next.dataset.q; S[id]=next.dataset.v; delete S[id+"|sw"]; saveA(); updateAnswerUI(id);   // updates in place: focus is not lost
+ const id=next.dataset.q; S[id]=next.dataset.v; delete S[id+"|sw"]; delete S[id+"|nasrc"]; saveA(); updateAnswerUI(id);   // updates in place: focus is not lost
  next.focus();
 });
 

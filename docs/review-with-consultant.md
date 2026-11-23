@@ -8,6 +8,7 @@ still open, and orange **Needs review** tags mark questions whose clause is stil
 This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, add it in both places.
 
 
+
 ## LEAVE section
 
 - [ ] **Questions whose clause is still "TBC"** (`leave-tbc`)  
@@ -25,8 +26,16 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
   NCC D4D2 sets the extent of access by class, but the pages are organised by element, so no page is skipped by class. Confirm, or say which classes drop which pages.
 - [ ] **One storey skips Refuge & Assisted Evacuation** (`scope-storeys`)  
   The question counts basements. Mezzanines and raised floors are a risk. NCC D4D4 also lets a small building of up to 3 storeys leave upper levels without a lift.
-- [ ] **Lift answer only records** (`scope-lift`)  
-  The template has no lift page. About nine lift questions on other pages are not switched off. Needs per-question not-applicable.
+- [ ] **No lift marks four lift-only questions not applicable** (`scope-lift`)  
+  Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list.
+
+## Capture
+
+- [ ] **Not applicable on every question** (`capture-na`)  
+  A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each.
+
+## Site Scope
+
 - [ ] **No parking, or attended-only, skips Accessible Car Parking** (`scope-parking`)  
   Attended-only follows D4D6 (parking service, no public access to spaces). Confirm.
 - [ ] **No sanitary facilities, or shared, skips four pages** (`scope-sanitary`)  
