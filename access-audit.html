@@ -219,6 +219,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .rf-t{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;
   font-size:13px;background:#fff;color:var(--ink);resize:vertical;min-height:42px}
 .rf-t.pos{min-height:92px;font-size:14px}
+.rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
 .rf-t:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .tf-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 .tag{font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;
@@ -1664,8 +1665,14 @@ function diffSelect(key,val){
    DIFFS.map(([k,l])=>`<option value="${k}"${val===k?" selected":""}>${esc(l)}</option>`).join("")+
    `</select>`;
 }
+/* True only while exportReport() builds the standalone file. Prose fields
+   are then written as plain text (empty ones omitted) instead of textareas,
+   so the client gets a finished document. */
+let EXPORTING=false;
 function rfField(key,suffix,label,placeholder){
  const v=S[key+"|"+suffix]||"";
+ if(EXPORTING) return v.trim()?`<div class="rf"><span class="rf-l">${esc(label)}</span>
+   <div class="rf-v">${esc(v)}</div></div>`:"";
  return `<div class="rf"><label class="rf-l" for="rf-${esc(key)}-${suffix}">${esc(label)}</label>
    <textarea class="rf-t" id="rf-${esc(key)}-${suffix}" data-rf="${esc(key)}" data-rfk="${suffix}"
      placeholder="${esc(placeholder)}" rows="2">${esc(v)}</textarea></div>`;
@@ -1701,8 +1708,10 @@ function reportHTML(){
    <p class="rf-hint">One paragraph a client can read alone and act on. Name the two or three findings that
       carry real risk, and say what still works. This replaces a percentage score — a score invites
       "is 78% a pass?", and because unanswered and N/A items move it, it rewards leaving things blank.</p>
-   <textarea class="rf-t pos" data-rf="report" data-rfk="position" rows="4"
-     placeholder="e.g. The centre is reachable and enterable without assistance, but…">${esc(S[posKey]||"")}</textarea>
+   ${EXPORTING
+     ? `<div class="rf-v pos">${esc(S[posKey]||"")}</div>`
+     : `<textarea class="rf-t pos" data-rf="report" data-rfk="position" rows="4"
+     placeholder="e.g. The centre is reachable and enterable without assistance, but…">${esc(S[posKey]||"")}</textarea>`}
   </div>`;
 
  /* ---- Tiles ---- */
@@ -1891,6 +1900,9 @@ function exportReport(){
   .flag-group h4.hi{color:#B3261E}
   .flag-group h4.md,.flag-group h4.lo{color:#8A5A00}
   .tf-row{margin-top:8px}
+  .rf{margin-top:9px}
+  .rf-l{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#283593;font-weight:700;margin-bottom:3px}
+  .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
   .tf-label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#4A4E5C}
   .tf-select{border:1px solid #D3D6E0;border-radius:6px;padding:6px 8px;font:inherit;font-size:12.5px;color:#1B1E2B;min-height:36px}
   .tf-select:focus-visible{outline:3px solid #283593;outline-offset:2px}
@@ -1950,10 +1962,12 @@ function exportReport(){
    <button type="button" class="rbtn" onclick="window.print()">🖨️ Print / Save as PDF</button>
    <span class="rhint" id="rHint">Click "Edit this report" to correct wording before sending it on.</span>
   </div>`;
+ let reportBody;
+ EXPORTING=true; try{ reportBody=reportHTML(); } finally { EXPORTING=false; }
  const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">`+
    `<meta name="viewport" content="width=device-width, initial-scale=1">`+
    `<title>${site} — Access Audit Report (${date})</title><style>${css}</style></head>`+
-   `<body>${toolbar}<div id="rContent">${reportHTML()}</div><script>${js}<\/script></body></html>`;
+   `<body>${toolbar}<div id="rContent">${reportBody}</div><script>${js}<\/script></body></html>`;
  const blob=new Blob([doc],{type:"text/html"});
  const a=document.createElement("a");
  a.href=URL.createObjectURL(blob);
