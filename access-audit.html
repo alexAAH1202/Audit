@@ -15,14 +15,14 @@
 }
 *{box-sizing:border-box;margin:0}
 body{font-family:Arial,Helvetica,"Helvetica Neue",sans-serif;color:var(--ink);background:var(--bg);font-size:14.5px;line-height:1.45}
-.side .logo h1,.pg h2,.card h3,.divpage h2,.rep .rh h4,.top .stat b{font-family:Verdana,Geneva,sans-serif}
+.side .logo .logoh,.pg h1,.pg h2,.card h3,.divpage h1,.rep .rh h4,.top .stat b{font-family:Verdana,Geneva,sans-serif}
 button{font:inherit;cursor:pointer}
 input,textarea,select{font:inherit;color:var(--ink)}
 .app{display:flex;height:100vh;overflow:hidden}
 /* ---------- sidebar ---------- */
 .side{width:290px;min-width:290px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column}
 .side .logo{padding:16px 18px;border-bottom:1px solid var(--line)}
-.side .logo h1{font-size:15px;color:var(--brand)}
+.side .logo .logoh{font-size:15px;color:var(--brand);font-weight:700;margin:0}
 .side .logo small{color:var(--muted)}
 .nav{flex:1;overflow-y:auto;padding:6px 0}
 .nav .div{padding:12px 18px 4px;font-size:11px;letter-spacing:.12em;color:var(--brand);font-weight:700}
@@ -33,14 +33,34 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .nav a .sc.bad{color:var(--red);font-weight:700}
 .nav .div{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .nav .div .sc{font-size:11px;letter-spacing:0;font-weight:600;color:var(--muted)}
+.skip{position:absolute;left:8px;top:-60px;z-index:100;background:var(--brand);color:#fff;padding:12px 18px;border-radius:0 0 8px 8px;font-weight:700;text-decoration:none}
+.skip:focus{top:0;outline:3px solid var(--ink);outline-offset:2px}
+.field .lbl{display:block;font-weight:700;margin-bottom:6px}
+/* Touch targets: 24px is the WCAG minimum; the brief asks for 44px on a phone, where the tool is used one-handed. */
+input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
+@media (max-width:820px){
+  .opt,.btn,.addphoto,.ebtn{min-height:44px}
+  input[type="text"],input[type="datetime-local"],input[type="number"],select{min-height:44px}
+  .opt{padding:8px 11px}
+}
+@media (max-width:480px){
+  .mx{border-spacing:2px}
+  .mx th{padding:4px 2px;font-size:9.5px;letter-spacing:0;overflow-wrap:anywhere}
+  .mx td button{padding:10px 1px;border-width:2px}
+  .mx .n{font-size:17px}
+}
+.eb input[type="checkbox"],.eb input[type="radio"]{width:24px;height:24px;vertical-align:middle}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.fab{position:fixed;right:16px;bottom:16px;z-index:40;min-height:48px;padding:0 20px;border:none;border-radius:24px;
-  background:var(--brand);color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer}
+/* A bar under the questions, not a floating button: nothing ever sits on top of an answer. */
+.nextbar{flex:none;display:flex;justify-content:flex-end;padding:8px 14px;background:var(--card);border-top:1px solid var(--line)}
+.nextbar[hidden]{display:none}
+.fab{min-height:48px;padding:0 22px;border:none;border-radius:8px;
+  background:var(--brand);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+@media (max-width:820px){.nextbar{padding:6px 10px}.fab{width:100%}}
 .fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .fab[aria-disabled="true"]{background:var(--green);cursor:default}
-.fab[hidden]{display:none}
 .qrow.flash{outline:3px solid var(--brand);outline-offset:3px;border-radius:8px}
-@media print{.fab{display:none}}
+@media print{.nextbar{display:none}}
 .side .foot{border-top:1px solid var(--line);padding:12px 18px;font-size:12px;color:var(--muted)}
 /* ---------- main ---------- */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
@@ -54,7 +74,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .btn.danger{color:var(--red)}
 .content{flex:1;overflow-y:auto;padding:26px 30px 80px}
 .pg{max-width:880px;margin:0 auto}
-.pg h2{font-size:21px;margin-bottom:2px}
+.pg h1,.pg h2{font-size:21px;margin-bottom:2px}
 .pg .crumb{color:var(--muted);font-size:12.5px;margin-bottom:18px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
 .card h3{font-size:15px;margin-bottom:12px;color:var(--brand)}
@@ -102,7 +122,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .stub{border:1px dashed var(--orange);background:var(--orange-bg);border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:14px}
 .pgnav{display:flex;justify-content:space-between;margin-top:26px}
 .divpage{text-align:center;padding:70px 20px}
-.divpage h2{font-size:34px;letter-spacing:.2em;color:var(--brand)}
+.divpage h1{font-size:34px;letter-spacing:.2em;color:var(--brand)}
 .divpage p{color:var(--muted);max-width:520px;margin:14px auto 0}
 .sig{border:1px solid var(--line);border-radius:8px;background:#fff}
 /* report */
@@ -155,7 +175,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
   .top .stat{padding:5px 9px;font-size:12px}
   .top .stat b{font-size:13px}
   .content{padding:18px 15px 90px}
-  .pg h2{font-size:19px}
+  .pg h1,.pg h2{font-size:19px}
   .qrow{flex-direction:column;gap:8px}
   .qrow .opts{width:100%}
   .opt{flex:1;text-align:center}
@@ -204,7 +224,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
    (background:transparent;color:inherit), hence the extra selector. */
 .z1,.mx td button.z1{background:var(--z1);color:#fff}.z2,.mx td button.z2{background:var(--z2);color:#fff}
 .z3,.mx td button.z3{background:var(--z3);color:#0b0b0b}.z4,.mx td button.z4{background:var(--z4);color:#0b0b0b}
-.zempty,.mx td button.zempty{background:#F1F2F6;color:#9A9DA8}
+.zempty,.mx td button.zempty{background:#F1F2F6;color:#5C606C}
 .mxlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .mxlegend span{display:flex;align-items:center;gap:6px}
 .sw{width:13px;height:13px;border-radius:3px;flex:none}
@@ -269,6 +289,21 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .sweptchip{display:inline-block;font-size:12.5px;font-weight:700;border-radius:5px;padding:3px 9px;white-space:nowrap;background:var(--brand-lt);color:var(--brand)}
 .sweep [hidden]{display:none!important}
 .opts.wrap{flex-wrap:wrap}
+/* WCAG 1.4.11: the edge of a text box is what identifies it, so it needs 3:1 against the page (4.0:1 here). */
+:root{--field-line:#7A7F8E}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=datetime-local],.field textarea,
+.qnote,.ein,.rf-t,.rf-i,.tf-select,.addl input[type=text],.resetdlg input,select{border-color:var(--field-line)}
+.eb .ein,.resetdlg .ein{border-color:var(--field-line)}
+@media (max-width:820px){ .addphoto{min-height:44px} }
+/* Works schedule: stack each row on a narrow screen so the report reflows (WCAG 1.4.10). */
+@media (max-width:520px){
+  .report2 .rep-table:not(.cov) thead{position:absolute;left:-9999px}
+  .report2 .rep-table:not(.cov),.report2 .rep-table:not(.cov) tbody,.report2 .rep-table:not(.cov) tr,.report2 .rep-table:not(.cov) td{display:block;width:100%}
+  .report2 .rep-table:not(.cov) tr{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;padding:6px 8px}
+  .report2 .rep-table:not(.cov) td{border:none;padding:3px 0}
+  .report2 .rep-table:not(.cov) td[data-label]::before{content:attr(data-label)": ";font-weight:700;color:var(--brand)}
+  .report2 .rep-table:not(.cov) tr.schband{padding:0;border:none}
+}
 .nav a.na{color:var(--muted);font-style:italic}
 .draftchip{display:inline-block;background:var(--orange-bg);color:var(--orange);font-size:11px;font-weight:700;border-radius:4px;padding:1px 7px;font-style:normal;margin-left:4px}
 .draftbar,.draftbox{background:var(--orange-bg);border:1px solid var(--orange);color:var(--ink);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
@@ -322,7 +357,7 @@ input,textarea,select{font:inherit;color:var(--ink)}
   .cv-meta{display:grid;grid-template-columns:max-content 1fr;gap:6px 22px;font-size:14px;margin-bottom:12mm}
   .cv-meta dt{color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
   .cv-meta dd{margin:0}
-  .report2 > h2,.report2 > .crumb{display:none}      /* the cover replaces the on-screen title block */
+  .report2 > h1,.report2 > .crumb{display:none}      /* the cover replaces the on-screen title block */
   .scope-photo{display:none}                          /* the photo is on the cover */
   .rf-i{border:none;padding:0;width:auto;background:none}
   .report2 label[for="rf-revision"],.report2 .rf:has(.rf-t:placeholder-shown),
@@ -349,13 +384,14 @@ input,textarea,select{font:inherit;color:var(--ink)}
 </style>
 </head>
 <body>
+<a class="skip" href="#content">Skip to the audit</a>
 <div class="app">
   <aside class="side">
     <div class="logo">
-      <h1>Inclusive Access Co.</h1>
+      <p class="logoh">Inclusive Access Co.</p>
       <small>Premises Access Audit — DDA / Premises Standards 2010 &amp; AS 1428</small>
     </div>
-    <nav class="nav" id="nav"></nav>
+    <nav class="nav" id="nav" aria-label="Audit sections"></nav>
     <div class="foot">Inclusive Access Co</div>
   </aside>
   <main class="main">
@@ -371,10 +407,11 @@ input,textarea,select{font:inherit;color:var(--ink)}
       <button class="btn danger" id="btnReset">Reset audit</button>
     </div>
     <div id="notices" role="status" aria-live="polite"></div>
-    <div class="content" id="content"></div>
+    <div class="content" id="content" tabindex="-1"></div>
+    <div class="nextbar" id="nextbar" hidden><button type="button" class="fab" id="btnNextUn"></button></div>
   </main>
   <div class="backdrop" id="backdrop"></div>
-  <button type="button" class="fab" id="btnNextUn" hidden></button>
+
 </div>
 <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" aria-hidden="true">
 
@@ -1661,7 +1698,7 @@ function rItem(it,suf){
   case "std":{
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Standards</span>${moveDel(it.id)}</div>
      <input class="ein" data-edit="${it.id}" data-field="opts" value="${esc((it.opts||[]).join(', '))}" placeholder="AS1428.1, AS1428.2, …"></div>`;
-   return `<div class="card"><h3>Relevant Australian Standards</h3>`+
+   return `<div class="card"><h3 aria-level="2">Relevant Australian Standards</h3>`+
      (it.opts||[]).map((o,j)=>`<label class="chk"><input type="checkbox" data-a="${it.id}${suf}|${j}" ${S[it.id+suf+"|"+j]?"checked":""}> ${esc(o)}</label>`).join("")+`</div>`;}
   case "pick":{
    const key=it.id+suf;
@@ -1680,19 +1717,20 @@ function rItem(it,suf){
      <label class="emeta"><input type="checkbox" data-edit="${it.id}" data-field="multi" ${it.multi?"checked":""}> multi-line</label></div>
      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" placeholder="Field label"></div>`;
    const v=S[it.id+suf]??it.prefill??"";
-   const inner=it.multi?`<textarea data-a="${it.id}${suf}" ${it.prefill?'style="min-height:200px"':''}>${esc(v)}</textarea>`
-                       :`<input type="text" data-a="${it.id}${suf}" value="${esc(v)}">`;
-   return `<div class="field"><label>${esc(it.t)} ${it.req?'<span class="req">*</span>':""}</label>${inner}</div>`;}
+   const fid=fieldId(it.id+suf);
+   const inner=it.multi?`<textarea id="${fid}" data-a="${it.id}${suf}" ${it.prefill?'style="min-height:200px"':''}>${esc(v)}</textarea>`
+                       :`<input type="text" id="${fid}" data-a="${it.id}${suf}" value="${esc(v)}">`;
+   return `<div class="field"><label for="${fid}">${esc(it.t)} ${it.req?'<span class="req" aria-hidden="true">*</span><span class="vh"> (required)</span>':""}</label>${inner}</div>`;}
   case "dt":
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Date/time</span>${moveDel(it.id)}</div>
      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
-   return `<div class="field"><label>${esc(it.t)} ${it.req?'<span class="req">*</span>':""}</label><input type="datetime-local" data-a="${it.id}${suf}" value="${esc(S[it.id+suf]||"")}"></div>`;
+   return `<div class="field"><label for="${fieldId(it.id+suf)}">${esc(it.t)} ${it.req?'<span class="req" aria-hidden="true">*</span><span class="vh"> (required)</span>':""}</label><input type="datetime-local" id="${fieldId(it.id+suf)}" data-a="${it.id}${suf}" value="${esc(S[it.id+suf]||"")}"></div>`;
   case "media":
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Media</span>${moveDel(it.id)}</div><input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
-   return `<div class="field"><label>${esc(it.t)}</label>${photoBlock(it.id+suf)}</div>`;
+   return `<div class="field" role="group" aria-label="${esc(it.t)}"><span class="lbl">${esc(it.t)}</span>${photoBlock(it.id+suf)}</div>`;
   case "sig":
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Signature</span>${moveDel(it.id)}</div><input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}"></div>`;
-   return `<div class="field"><label>${esc(it.t)}</label><input type="text" data-a="${it.id}${suf}" placeholder="Type full name to sign" value="${esc(S[it.id+suf]||"")}" style="width:100%;padding:14px;font-style:italic;font-size:17px"></div>`;
+   return `<div class="field"><label for="${fieldId(it.id+suf)}">${esc(it.t)}</label><input type="text" id="${fieldId(it.id+suf)}" data-a="${it.id}${suf}" placeholder="Type full name to sign" value="${esc(S[it.id+suf]||"")}" style="width:100%;padding:14px;font-style:italic;font-size:17px"></div>`;
   case "q": return qRow(it,suf);
   case "grp":{
    if(EDIT){
@@ -1703,13 +1741,13 @@ function rItem(it,suf){
     h+=`<button class="ebtn p" data-act="addq" data-id="${it.id}">+ Add question</button></div>`;
     return h;
    }
-   let h=`<div class="card"><h3>${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
+   let h=`<div class="card"><h3 aria-level="2">${esc(it.t)} <span class="cnt">${it.items.length} item${it.items.length!==1?"s":""}</span></h3>`;
    h+=sweepHTML(it,suf);
    h+=rItems(it.items,suf);
    for(let a=0;a<(it.addl??2);a++){const ak=it.id+suf+"|addl"+a;
-     h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" placeholder="Additional item…" value="${esc(S[ak+"|t"]||"")}">
-        <label class="qnote-lbl">Comment</label>
-        <textarea class="qnote show" data-a="${ak}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(S[ak+"|n"]||"")}</textarea>
+     h+=`<div class="qrow addl"><div class="qt"><input type="text" data-a="${ak}|t" aria-label="Additional item description" placeholder="Additional item…" value="${esc(S[ak+"|t"]||"")}">
+        <label class="qnote-lbl" for="${fieldId(ak+"|n")}">Comment</label>
+        <textarea class="qnote show" id="${fieldId(ak+"|n")}" data-a="${ak}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(S[ak+"|n"]||"")}</textarea>
         ${photoBlock(ak)}</div>`+
         radioGroup(ak,RS("phml").opts,S[ak],'aria-label="Rating for this additional item"')+`</div>`;}
    return h+`</div>`;}
@@ -1726,7 +1764,7 @@ function rItem(it,suf){
    }
    const n=rep?(REPS[it.id+suf]||1):1; let h="";
    for(let inst=0;inst<n;inst++){
-     h+=`<div class="rep"><div class="rh"><h4>${esc(it.t)}${n>1?" #"+(inst+1):""}</h4>`+
+     h+=`<div class="rep"><div class="rh"><h4 aria-level="3">${esc(it.t)}${n>1?" #"+(inst+1):""}</h4>`+
         (rep&&n>1&&inst===n-1?`<button class="btn" data-delrep="${it.id+suf}">Remove</button>`:"")+
         `</div><div class="rb">${rItems(it.items,suf+"~"+inst)}</div></div>`;}
    if(rep)h+=`<button class="btn addrep" data-addrep="${it.id+suf}">+ Add another ${esc(it.t)}</button>`;
@@ -1739,12 +1777,12 @@ function rItem(it,suf){
     h+=`<button class="ebtn" data-act="addfield" data-id="${it.id}">+ Field</button></div>`;
     return h;
    }
-   return `<div class="card"><h3>${esc(it.t)}</h3>${rItems(it.items,suf)}</div>`;}
+   return `<div class="card"><h3 aria-level="2">${esc(it.t)}</h3>${rItems(it.items,suf)}</div>`;}
   case "inst":
    if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Instruction</span>${moveDel(it.id)}</div>
      <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" style="margin-bottom:6px">
      <textarea class="ein" data-edit="${it.id}" data-field="body" style="min-height:90px">${esc(it.body)}</textarea></div>`;
-   return `<div class="card"><h3>${esc(it.t)}</h3><div class="inst">${esc(it.body)}</div></div>`;
+   return `<div class="card"><h3 aria-level="2">${esc(it.t)}</h3><div class="inst">${esc(it.body)}</div></div>`;
   case "stub":
    return EDIT?"":`<div class="stub"><b>Build note:</b> ${esc(it.body)}</div>`;
   default:return "";
@@ -1761,8 +1799,8 @@ function qRow(it,suf){
  }
  const v=S[key], note=S[key+"|n"]||"";
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}
-   <label class="qnote-lbl">Comment</label>
-   <textarea class="qnote show" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
+   <label class="qnote-lbl" for="${fieldId(key+"|n")}">Comment</label>
+   <textarea class="qnote show" id="${fieldId(key+"|n")}" data-a="${key}|n" placeholder="Note anything to monitor, change or follow up on this item…">${esc(note)}</textarea>
    ${photoBlock(key)}</div>`+
    radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+`</div>`;
 }
@@ -1956,6 +1994,7 @@ function sweepGroup(card,undo){
 /* Priority options are a radio group (WCAG 1.3.1 / 4.1.2): the group is named by its question,
    each button reports aria-checked, and only one button is in the tab order (roving tabindex).
    Clicking the selected option still clears it, as before. */
+const fieldId=key=>"f-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
 const qlId=key=>"ql-"+String(key).replace(/\|/g,"-p-").replace(/[^\w-]/g,"_");
 function radioGroup(key,set,v,nameAttr){
  const sel=v!==undefined&&v!==""&&set[+v]?String(v):null;
@@ -2006,9 +2045,10 @@ function render(){
    </div>`;
  }
  if(p.divider && !EDIT){
-  h+=`<div class="divpage"><h2>${esc(p.title)}</h2><p>${esc(p.blurb||"")}</p></div>`;
+  h+=`<div class="divpage"><h1>${esc(p.title)}</h1><p>${esc(p.blurb||"")}</p></div>`;
  }else if(!p.divider){
-  if(!EDIT){h+=`<h2>${esc(p.title)}</h2><div class="crumb">Page ${cur+1} of ${T.pages.length} — ${esc(T.meta.title)}</div>`;}
+  if(EDIT){h+=`<h1 class="vh">Editing template page: ${esc(p.title)}</h1>`;}
+  if(!EDIT){h+=`<h1>${esc(p.title)}</h1><div class="crumb">Page ${cur+1} of ${T.pages.length} — ${esc(T.meta.title)}</div>`;}
   const sk=EDIT?null:pageSkip(p);
   if(!EDIT&&p.title==="Site Scope"&&reviewOpenIn("Site Scope"))
    h+=`<div class="draftbar" role="note"><b>DRAFT RULES.</b> Set from best-practice defaults, not yet reviewed with the access consultant. ${reviewOpenIn("Site Scope")} scope items open in the <button type="button" class="linkbtn" data-reviewopen>Review list</button>.</div>`;
@@ -2037,6 +2077,15 @@ function render(){
  h+=`<div class="pgnav"><button class="btn" ${cur===0?"disabled":""} data-nav="-1">&larr; Previous</button>
    <button class="btn primary" ${cur===T.pages.length-1?"disabled":""} data-nav="1">Next &rarr;</button></div></div>`;
  c.innerHTML=h; c.scrollTop=keepScroll;
+ if(EDIT) nameEditControls(c);
+}
+/* Template-editor controls have no visible labels; give each a name a screen reader can announce. */
+function nameEditControls(c){
+ const nm=(sel,t)=>c.querySelectorAll(sel).forEach(e=>{ if(!e.getAttribute("aria-label")&&!e.closest("label")) e.setAttribute("aria-label",t); });
+ nm("[data-ptitle]","Page title"); nm("[data-pblurb]","Divider description");
+ nm('[data-edit][data-field="t"]',"Label or heading text"); nm('[data-edit][data-field="c"]',"Clause reference");
+ nm('[data-edit][data-field="body"]',"Instruction text"); nm("[data-rs]","Response set for this question");
+ nm('[data-edit][data-field="addl"]',"Number of blank rows"); nm("[data-ppri]","Journey priority");
 }
 /* Navigation shows progress (answered / total), not a compliance score; a finished page or
    section reads "✓". Flag counts stay. */
@@ -2056,7 +2105,7 @@ function renderNav(){
     sc.n=ps.length; sc.ans=ps.filter(x=>{const v=S[x.id];return v!==undefined&&v!=="";}).length; }
   const lab=sc.n?`${progTxt(sc.ans,sc.n)}${sc.brc?" ⛔"+sc.brc:""}${sc.hi?" ⚑"+sc.hi:""}`:"";
   const aria=sc.n?` aria-label="${esc(p.title)}, ${sc.ans} of ${sc.n} answered${sc.ans>=sc.n?", complete":""}${sc.brc?`, ${sc.brc} breach of code`:""}${sc.hi?`, ${sc.hi} high priority`:""}"`:"";
-  return `<a href="#" data-pg="${i}"${aria} class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
+  return `<a href="#" data-pg="${i}"${aria}${i===cur&&mode==="audit"?' aria-current="page"':""} class="${i===cur&&mode==="audit"?"on":""}"><span>${i+1}. ${esc(p.title)}</span><span class="sc ${(sc.brc||sc.hi)?"bad":""}">${lab}</span></a>`;
  }).join("")+(EDIT?`<div style="padding:10px 18px"><button class="ebtn p" data-act="addpage">+ Add page</button></div>`:"");
 }
 function renderTop(){
@@ -2068,7 +2117,7 @@ function renderTop(){
  const fab=document.getElementById("btnNextUn");
  if(fab){ const un=unansweredKeys().length;
   fab.textContent=un?`Next unanswered · ${un}`:"✓ All answered"; fab.setAttribute("aria-disabled",String(!un));
-  fab.hidden=mode!=="audit"||EDIT; }
+  document.getElementById("nextbar").hidden=mode!=="audit"||EDIT; }
  const eb=document.getElementById("btnEdit"); if(eb) eb.textContent=EDIT?"✓ Editing template":"Edit template";
 }
 /* Timeframe <select> options for a flagged item, capped at maxMonths
@@ -2242,7 +2291,7 @@ function scopeHTML(all){
  const agree=[gv("Access Audit Agreement")?esc(gv("Access Audit Agreement")):"",
    gv("Access Audit Agreement Supplied")?"Agreement supplied: "+esc(gv("Access Audit Agreement Supplied")):"",
    gv("Client approval received on")?"Client approval received: "+esc(gv("Client approval received on")):""].filter(Boolean);
- let h=`<div class="card flow"><h3>Scope and limitations</h3>
+ let h=`<div class="card flow"><h3 aria-level="2">Scope and limitations</h3>
   ${lab("Scope of the audit",gv("Scope"))}
   ${lab("Benchmark",gv("Benchmark"))}
   ${agree.length?`<div class="rf"><span class="rf-l">Engagement</span><div class="rf-v">${agree.join("<br>")}</div></div>`:""}
@@ -2332,11 +2381,11 @@ function reportHTML(){
    </dl>
    ${reportPhotos(getFieldKey("Title Page","Site photo / media"))}
   </section>
-  <h2>${esc(T.meta.title)} — Report</h2>
+  <h1>${esc(T.meta.title)} — Report</h1>
   <div class="crumb">Inclusive Access Co. — generated ${today}</div>
 
   <div class="card">
-   <h3>Scope</h3>
+   <h3 aria-level="2">Scope</h3>
    <p><b>Site:</b> ${site} &nbsp; <b>Client:</b> ${client}
       &nbsp; <b>Consultant:</b> ${consultant}
       &nbsp; <b>Conducted:</b> ${conducted}</p>
@@ -2350,7 +2399,7 @@ function reportHTML(){
 
  /* ---- Position statement (auditor-written, saved like any field) ---- */
  const posKey="report|position";
- h+=`<div class="card"><h3>Position</h3>
+ h+=`<div class="card"><h3 aria-level="2">Position</h3>
    <p class="rf-hint">One paragraph a client can read alone and act on. Name the two or three findings that
       carry real risk, and say what still works. This replaces a percentage score — a score invites
       "is 78% a pass?", and because unanswered and N/A items move it, it rewards leaving things blank.</p>
@@ -2369,11 +2418,11 @@ function reportHTML(){
   </div>`;
 
  /* ---- Matrix ---- */
- h+=`<div class="card"><h3>Where to start</h3>
+ h+=`<div class="card"><h3 aria-level="2">Where to start</h3>
    <p class="rf-hint">Findings plotted by position in the journey against effort to remedy. Read top-left to
       bottom-right. Select a cell to filter the findings below.
       ${noEffort.length?`<b style="color:var(--orange)">${noEffort.length} finding${noEffort.length===1?" has":"s have"} no effort set</b> — set it on each finding and this fills in.`:""}</p>
-   <table class="mx"><thead><tr><th></th>`+
+   <table class="mx"><thead><tr><th><span class="vh">Journey priority</span></th>`+
    DIFFS.map(([,l])=>`<th class="ch">${l}</th>`).join("")+`</tr></thead><tbody>`;
  [1,2,3,4].forEach(p=>{
   h+=`<tr><th scope="row">${p} · ${PRI_LABEL[p]}</th>`;
@@ -2400,7 +2449,7 @@ function reportHTML(){
     "General" section and hold no assessed items — drop any such stage
     rather than rendering an empty rung on the journey. */
  const liveSecs=allSecs.filter(s=>all.some(f=>f.section===s.name));
- h+=`<div class="card"><h3>The building, walked through</h3>
+ h+=`<div class="card"><h3 aria-level="2">The building, walked through</h3>
    <p class="rf-hint">A section with a breach breaks the chain: everything beyond it is unreachable for someone,
       however compliant it is in isolation.</p><div class="jrn">`;
  liveSecs.forEach(s=>{
@@ -2434,7 +2483,7 @@ function reportHTML(){
  if(filt) shown=shown.filter(f=>f.pri===REPFILTER.pri&&f.diff===REPFILTER.diff);
  const RANK={br:0,hi:1,md:2,lo:3,pass:9};
  shown=shown.slice().sort((a,b)=>a.pri-b.pri||a.secIdx-b.secIdx||RANK[a.gc]-RANK[b.gc]);
- h+=`<div class="card flow newpage"><h3>Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
+ h+=`<div class="card flow newpage"><h3 aria-level="2">Findings &amp; recommended actions <span class="cnt">${shown.length}${filt?` of ${flags.length}`:""}</span>
    ${filt?`<button class="btn" style="float:right;padding:4px 10px;font-size:12.5px" data-mxclear>Clear filter</button>`:""}</h3>`;
  if(!shown.length){
   h+=`<p style="color:var(--muted)">No findings match.</p>`;
@@ -2442,7 +2491,7 @@ function reportHTML(){
   let lastSec=null;
   shown.forEach(f=>{
    if(f.section!==lastSec){ lastSec=f.section;
-    h+=`<h4 class="secbreak">${esc(f.section)} <span class="cnt">Priority ${f.pri}</span></h4>`; }
+    h+=`<h4 aria-level="3" class="secbreak">${esc(f.section)} <span class="cnt">Priority ${f.pri}</span></h4>`; }
    const z=ZONE[zoneOf(f.pri,f.diff)];
    const flagCls=f.gc==="br"?"breach":f.gc==="hi"?"":"med";
    h+=`<div class="flagitem ${flagCls}">
@@ -2463,7 +2512,7 @@ function reportHTML(){
  h+=`</div>`;
 
  /* ---- Works schedule ---- */
- h+=`<div class="card flow newpage"><h3>Works schedule</h3>
+ h+=`<div class="card flow newpage"><h3 aria-level="2">Works schedule</h3>
    <p class="rf-hint">The hand-off table. Export this as CSV beside the PDF so the client can paste it
       into their maintenance system or send it to a builder.</p>
    <table class="rep-table"><thead><tr><th>Element</th><th>Location</th><th>Works</th><th>Clause</th><th>Effort</th><th>Fig.</th></tr></thead><tbody>`;
@@ -2473,11 +2522,11 @@ function reportHTML(){
   if(!items.length)return; any=true;
   h+=`<tr class="schband"><td colspan="6">${ZONE[z].l} — ${ZONE[z].sub} (${items.length})</td></tr>`;
   items.forEach(f=>{
-   h+=`<tr><td>${esc(f.item.t)}</td><td>${esc(f.page?f.page.title:"")}</td>
-     <td>${f.action?esc(f.action):`<span style="color:var(--muted)">— not yet written —</span>`}</td>
-     <td style="font-size:12px;color:var(--muted)">${esc(f.item.c||"")}</td>
-     <td>${f.diff?esc(DIFF_LABEL[f.diff]):`<span style="color:var(--muted)">—</span>`}</td>
-     <td style="font-size:12px">${esc(figText(FIG,f.key))||`<span style="color:var(--muted)">—</span>`}</td></tr>`;
+   h+=`<tr><td data-label="Element">${esc(f.item.t)}</td><td data-label="Location">${esc(f.page?f.page.title:"")}</td>
+     <td data-label="Works">${f.action?esc(f.action):`<span style="color:var(--muted)">— not yet written —</span>`}</td>
+     <td data-label="Clause" style="font-size:12px;color:var(--muted)">${esc(f.item.c||"")}</td>
+     <td data-label="Effort">${f.diff?esc(DIFF_LABEL[f.diff]):`<span style="color:var(--muted)">—</span>`}</td>
+     <td data-label="Fig." style="font-size:12px">${esc(figText(FIG,f.key))||`<span style="color:var(--muted)">—</span>`}</td></tr>`;
   });
  });
  if(!any) h+=`<tr><td colspan="6" style="color:var(--muted)">No flagged items.</td></tr>`;
@@ -2486,7 +2535,7 @@ function reportHTML(){
  /* ---- Monitor list (unchanged behaviour) ---- */
  const flagKeys=new Set(flags.map(f=>f.key));
  const monitored=allQs().filter(x=>(S[x.key+"|n"]||(PHOTOS[x.key]&&PHOTOS[x.key].length))&&!flagKeys.has(x.key));
- h+=`<div class="card flow"><h3>Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
+ h+=`<div class="card flow"><h3 aria-level="2">Other items with comments or photos to monitor <span class="cnt">${monitored.length}</span></h3>`;
  if(!monitored.length) h+=`<p style="color:var(--muted)">No additional comments or photos recorded.</p>`;
  monitored.forEach(x=>{
   h+=`<div class="flagitem med"><span class="badge md">Comment</span> &nbsp; ${esc(x.item.t)}
@@ -2497,7 +2546,7 @@ function reportHTML(){
  h+=`</div>`;                          // close the "other items" card
  /* ---- Photographic record (plates) ---- */
  if(FIG.list.length){
-  h+=`<div class="card flow newpage"><h3>Photographic record <span class="cnt">${FIG.list.length}</span></h3>`;
+  h+=`<div class="card flow newpage"><h3 aria-level="2">Photographic record <span class="cnt">${FIG.list.length}</span></h3>`;
   FIG.list.forEach(f=>{
    const ck=f.key+"|cap:"+f.p.id, cap=S[ck]||"";
    h+=`<figure class="plate" id="fig-${f.n}">
@@ -2658,12 +2707,12 @@ function exportReport(){
    });
   })();
  `;
- const toolbar=`<div class="rtoolbar noprint">
+ const toolbar=`<header class="rtoolbar noprint">
    <button type="button" class="rbtn primary" id="rEdit" aria-pressed="false">✏️ Edit this report</button>
    <button type="button" class="rbtn" id="rSave" hidden>💾 Save edited copy</button>
    <button type="button" class="rbtn" onclick="window.print()">🖨️ Print / Save as PDF</button>
    <span class="rhint" id="rHint">Click "Edit this report" to correct wording before sending it on.</span>
-  </div>`;
+  </header>`;
  /* The report v2 styles live once, in the app's own <style> block. Copy
     them (plus the :root colour tokens they reference) into the export
     rather than duplicating them here, so the two cannot drift apart. */
@@ -2677,7 +2726,7 @@ function exportReport(){
  const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">`+
    `<meta name="viewport" content="width=device-width, initial-scale=1">`+
    `<title>${site} — Access Audit Report (${date})</title><style>${fullCss}</style></head>`+
-   `<body>${toolbar}<div id="rContent">${reportBody}</div><script>${js}<\/script></body></html>`;
+   `<body>${toolbar}<main id="rContent">${reportBody}</main><script>${js}<\/script></body></html>`;
  const blob=new Blob([doc],{type:"text/html"});
  const a=document.createElement("a");
  a.href=URL.createObjectURL(blob);
@@ -2734,10 +2783,10 @@ function rsModal(){
    `<div class="card"><b>${esc(set.name)}</b> <span class="emeta">(key: ${k})</span><br>
     ${set.opts.map(o=>`<span class="opt ${o.cls} on" style="margin:3px 3px 0 0;display:inline-block">${esc(o.l)}${typeof o.score==="number"?" · score "+o.score:""}${o.flag?" · flag":""}</span>`).join("")}</div>`).join("");
  const box=document.createElement("div");box.className="modal";
- box.innerHTML=`<div class="box"><h3>Response sets</h3>
+ box.innerHTML=`<div class="box"><h3 aria-level="2">Response sets</h3>
    <p class="emeta" style="margin-bottom:10px">Sets with a numeric score count toward the % score. "Flag" items appear in the report's flagged list.</p>
    ${rows}
-   <h3 style="margin-top:14px">Add a new set</h3>
+   <h3 aria-level="2" style="margin-top:14px">Add a new set</h3>
    <input class="ein" id="rsName" placeholder="Set name" style="margin-bottom:8px">
    <div id="rsRows"></div>
    <button class="ebtn" id="rsAddRow">+ option</button>
@@ -2908,8 +2957,15 @@ photoInput.addEventListener("change",async()=>{
 
 /* ---- mobile sidebar drawer ---- */
 const sideEl=document.querySelector(".side"), backdrop=document.getElementById("backdrop"), btnMenu=document.getElementById("btnMenu");
+/* On a phone the closed drawer is slid off screen but its links were still in the tab order, so a keyboard
+   or switch user tabbed into things they could not see. While it is closed it is now inert; on wider
+   screens the sidebar is always visible and never inert. */
+const narrowMQ=window.matchMedia("(max-width:820px)");
+function syncDrawerInert(){ sideEl.inert=narrowMQ.matches&&!sideEl.classList.contains("open"); }
+narrowMQ.addEventListener("change",syncDrawerInert);
 function drawer(open){
  sideEl.classList.toggle("open",open);
+ syncDrawerInert();
  backdrop.classList.toggle("show",open);
  btnMenu.setAttribute("aria-expanded",open?"true":"false");
  /* Keep the page behind the backdrop out of the tab order while the drawer
@@ -3073,7 +3129,7 @@ function resetModal(){
  const status=()=>!hasAuditData()?"There is nothing in this audit yet."
    :auditSig()===BK.sig?`This audit matches its last backup (${esc(fmtDate(BK.at))}).`
    :`<b>This audit is not backed up.</b> ${BK.at?"Last backed up "+esc(fmtDate(BK.at))+".":"It has never been backed up."}`;
- dlg.innerHTML=`<h3 id="resetTitle">Reset this audit?</h3>
+ dlg.innerHTML=`<h3 aria-level="2" id="resetTitle">Reset this audit?</h3>
   <p>This permanently deletes <b>${pl(countAnswers(S),"answer")}</b>, all notes and report text, and
      <b>${pl(countPhotos(),"photo")}</b> from this device. The template is kept. It cannot be undone.</p>
   <p role="status" data-st>${status()}</p>
@@ -3165,10 +3221,10 @@ function reviewModal(){
  const dlg=document.createElement("dialog"); dlg.className="resetdlg reviewdlg"; dlg.setAttribute("aria-labelledby","reviewTitle");
  const draw=()=>{
   const done=REVIEW_ITEMS.length-reviewOpen().length; let g="";
-  dlg.innerHTML=`<h3 id="reviewTitle" style="color:var(--brand)">Review with the access consultant</h3>
+  dlg.innerHTML=`<h3 aria-level="2" id="reviewTitle" style="color:var(--brand)">Review with the access consultant</h3>
    <p>These were set from best-practice defaults, not confirmed decisions. Tick each one once it has been reviewed or changed.
       <b>${done} of ${REVIEW_ITEMS.length} reviewed.</b> Wording and rules can be edited later; nothing here is locked.</p>`+
-   REVIEW_ITEMS.map(i=>{ const head=i.g!==g?`<h4 class="revg">${esc(i.g)}</h4>`:""; g=i.g;
+   REVIEW_ITEMS.map(i=>{ const head=i.g!==g?`<h4 aria-level="3" class="revg">${esc(i.g)}</h4>`:""; g=i.g;
     return head+`<label class="revitem"><input type="checkbox" data-rev="${i.id}" ${reviewedMap()[i.id]?"checked":""}>
      <span><b>${esc(i.t)}</b><br><span class="revd">${esc(i.d)}</span></span></label>`; }).join("")+
    `<p class="revd">Questions still showing a "TBC" clause: <b>${tbcQuestions().length}</b>. Find them by the orange "Needs review" tag.</p>
@@ -3250,6 +3306,7 @@ function updateDoneBtn(){ if(bDone) bDone.textContent=BK.complete?"Reopen audit"
 })();
 
 /* ---- go ---- */
+syncDrawerInert();
 loadAll();
 render();
 checkPersistence();
