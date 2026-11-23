@@ -240,6 +240,10 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .rf-v{white-space:pre-wrap;font-size:13px}.rf-v.pos{font-size:14px}
 .rf-i{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:inherit;font-size:13px;width:11em;background:#fff;color:var(--ink)}
 .cover{display:none}
+.cov{margin-top:8px;font-size:12.5px}.cov td:nth-child(2),.cov td:nth-child(3){white-space:nowrap}
+.cov tr.none td{color:var(--muted)}
+.defs{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;font-size:13px;margin:4px 0 0}
+.defs dt{font-weight:700}.defs dd{margin:0}
 .figrefs{margin-top:8px;font-size:12.5px}.figrefs a{color:var(--brand)}
 .thumbs{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 .plate{margin:0 0 20px}
@@ -1496,7 +1500,7 @@ function getFieldKey(pageTitle,label){
  let foundId=null;
  (function look(arr){
   return arr.some(it=>{
-   if(it.t===label&&(it.k==="txt"||it.k==="q"||it.k==="media")){foundId=it.id;return true;}
+   if(it.t===label&&(it.k==="txt"||it.k==="dt"||it.k==="q"||it.k==="media")){foundId=it.id;return true;}
    if(it.items)return look(it.items);
    return false;
   });
@@ -1505,7 +1509,9 @@ function getFieldKey(pageTitle,label){
 }
 function getFieldVal(pageTitle,label){
  const id=getFieldKey(pageTitle,label);
- return id?(S[id]||""):"";
+ const v=id?(S[id]||""):"";
+ /* date fields are stored as yyyy-mm-dd; show them the way the report is read */
+ return /^\d{4}-\d{2}-\d{2}$/.test(v)?v.split("-").reverse().join("/"):v;
 }
 
 /* =====================================================================
@@ -1947,6 +1953,48 @@ function buildFigures(all){
 }
 const figText=(FIG,key)=>(PHOTOS[key]||[]).map(p=>FIG.no.get(p.id)).filter(Boolean).join(", ");
 
+/* --- 4c. Scope and limitations ---------------------------------------
+   Every professional access report carries one, and it is what limits
+   liability when a client asks why an area was not assessed. The wording
+   comes from the Access Audit Details page; coverage is derived from what
+   was actually answered; the auditor adds exclusions in one editable field. */
+function scopeHTML(all){
+ const gv=l=>getFieldVal("Access Audit Details",l).trim();
+ const lab=(l,v)=>v?`<div class="rf"><span class="rf-l">${esc(l)}</span><div class="rf-v">${esc(v)}</div></div>`:"";
+ const by=new Map();
+ allQs().forEach(x=>{ const id=x.page.id;
+  if(x.page.title==="Summary") return;          // the auditor's own summary page is not an assessed area
+  if(!by.has(id)) by.set(id,{t:x.page.title,total:0,ans:0,flag:0}); by.get(id).total++; });
+ all.forEach(f=>{ const r=f.page&&by.get(f.page.id); if(r){ r.ans++; if(f.flag) r.flag++; } });
+ const pages=[...by.values()], gap=pages.filter(r=>!r.ans);
+ const agree=[gv("Access Audit Agreement")?esc(gv("Access Audit Agreement")):"",
+   gv("Access Audit Agreement Supplied")?"Agreement supplied: "+esc(gv("Access Audit Agreement Supplied")):"",
+   gv("Client approval received on")?"Client approval received: "+esc(gv("Client approval received on")):""].filter(Boolean);
+ let h=`<div class="card flow"><h3>Scope and limitations</h3>
+  ${lab("Scope of the audit",gv("Scope"))}
+  ${lab("Benchmark",gv("Benchmark"))}
+  ${agree.length?`<div class="rf"><span class="rf-l">Engagement</span><div class="rf-v">${agree.join("<br>")}</div></div>`:""}
+  <div class="rf"><span class="rf-l">Coverage</span>
+   <p>${pages.length-gap.length} of ${pages.length} assessable pages have answers recorded.</p>
+   ${gap.length?`<p style="margin-top:6px"><b>No items recorded for:</b> ${gap.map(r=>esc(r.t)).join("; ")}. These were either not
+     assessed or do not apply to this building.</p>
+     <p class="rf-hint">Say which in the field below, for each area, so the report states why it was left out.</p>`:""}
+   <table class="rep-table cov"><thead><tr><th>Area</th><th>Answered</th><th>Flagged</th></tr></thead><tbody>`+
+   pages.map(r=>`<tr class="${r.ans?"":"none"}"><td>${esc(r.t)}</td><td>${r.ans?`${r.ans} of ${r.total}`:"Not assessed"}</td><td>${r.ans?r.flag:"—"}</td></tr>`).join("")+
+   `</tbody></table></div>
+  ${rfField("report","limits","Limitations and exclusions — areas not assessed, and why","e.g. The roof terrace was locked and not assessed. Staff-only areas were excluded by agreement.")}
+  ${lab("Priority rating system",gv("Priority Rating System"))}
+  <div class="rf"><span class="rf-l">How to read the ratings</span><dl class="defs">
+   <dt>Breach of Code</dt><dd>A mandatory NCC or Premises Standards failure. Not a best-practice gap.</dd>
+   <dt>High / Medium / Low</dt><dd>How serious a non-compliant or best-practice finding is.</dd>
+   <dt>Journey priority 1–4</dt><dd>Where the item sits in a visitor's journey: ${[1,2,3,4].map(p=>p+" "+esc(PRI_LABEL[p])).join(", ")}. It is position, not severity.</dd>
+   <dt>Effort</dt><dd>${DIFFS.map(d=>esc(d[1])).join(" / ")} — a rough order of magnitude for time and funding, not a dollar figure.</dd>
+   <dt>When</dt><dd>${ZONE.slice(1).map(z=>esc(z.l)+" ("+esc(z.sub.toLowerCase())+")").join("; ")}.</dd></dl></div>
+  ${lab("Disclaimer",gv("Disclaimer"))}
+ </div>`;
+ return h;
+}
+
 /* --- 5. The report -------------------------------------------------- */
 let REPFILTER={pri:null,diff:null};      // set by clicking a matrix cell
 
@@ -2008,7 +2056,6 @@ function reportHTML(){
    <p><b>Site:</b> ${site} &nbsp; <b>Client:</b> ${client}
       &nbsp; <b>Consultant:</b> ${consultant}
       &nbsp; <b>Conducted:</b> ${conducted}</p>
-   ${getFieldVal("Access Audit Details","Benchmark")?`<p style="margin-top:6px"><b>Benchmark:</b> ${esc(getFieldVal("Access Audit Details","Benchmark"))}</p>`:""}
    ${EXPORTING
      ? (rev?`<p style="margin-top:6px"><b>Revision:</b> ${esc(rev)}</p>`:"")
      : `<p style="margin-top:8px"><label for="rf-revision"><b>Revision:</b></label>
@@ -2094,6 +2141,8 @@ function reportHTML(){
     `</div></div></div>`;
  });
  h+=`</div></div>`;
+
+ h+=scopeHTML(all);
 
  /* ---- Findings ---- */
  let shown=flags;
