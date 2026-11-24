@@ -28,7 +28,7 @@ await p.screenshot({path:D+'reset.png'});
 await p.fill('#resetConfirm','Kerrabee');console.log("C2 partial:",await p.isDisabled('[data-go]'));
 await p.fill('#resetConfirm','  kerrabee COMMUNITY  centre ');console.log("C3 case/space-insensitive match:",!await p.isDisabled('[data-go]'));
 await p.click('[data-cancel]');console.log("C4 cancelled, data kept:",await p.evaluate(()=>[Object.keys(S).length,!!document.querySelector('dialog')]));
-await p.click('#btnReset');await p.keyboard.press('Escape');console.log("C5 Esc closes:",await p.evaluate(()=>!document.querySelector('dialog')));
+await p.click('#btnReset');await p.keyboard.press('Escape');console.log("C5 Esc closes:",await p.waitForFunction(()=>!document.querySelector('dialog'),null,{timeout:3000}).then(()=>true,()=>false));
 await p.click('#btnReset');await p.type('#resetConfirm','Kerrabee Community Centre');await p.keyboard.press('Enter');await p.waitForTimeout(300);
 console.log("C6 reset by Enter:",await p.evaluate(()=>[Object.keys(S).length,countPhotos(),!!document.querySelector('dialog')]));
 await p.click('#btnReset');console.log("C7 no site -> word:",await p.textContent('#resetDlgLabel, label[for=resetConfirm]'));

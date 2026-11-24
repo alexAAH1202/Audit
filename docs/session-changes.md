@@ -219,3 +219,9 @@ what is not covered.
 - **Measured field** on the 106 questions whose text states a figure: mm limits, ranges, ± tolerances, gradients (entered as the N in 1:N), opening force (N). It says live whether the value meets the figure; the auditor still picks the answer. Saved under `key|m`; the report quotes it under the finding ("Measured: 820 mm (required: at least 850 mm)"). The rule is read from the question text (`measureRule`).
 - **Draft finding wording** when the template has none: `draftStatement` turns the requirement negative (375 of 459 questions), `draftImpact` picks a who-is-affected sentence by topic, `draftAction` reads "Rectify so that …, in accordance with <clause>". Template wording (item.f/imp/act) still wins; per-finding edits still win over both. The report's draft box counts findings using draft wording.
 - Review list gains `measurements` and `finding-drafts` (22 items).
+
+## Consultant review sheet
+
+- `docs/consultant-review-sheet.pdf` (A4 landscape, for printing) and `.html`: Part 1 the 22 open decisions, Part 2 the 106 measured limits, Part 3 the drafted statement, impact and effort for all 459 questions, each with OK / Change boxes. Rebuild after template changes with `node tests/review-sheet.js`.
+- Fix: the topic match for "Who this affects" now matches whole words, so "detectable" no longer reads as "table".
+- Two tests now wait for the result instead of a fixed time (the Reset dialog closing, the migration notice).

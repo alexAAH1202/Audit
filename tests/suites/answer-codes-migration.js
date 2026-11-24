@@ -34,7 +34,7 @@ console.log("  legacy labels recorded:",Object.keys(oldLabels).length);
 const nw=await mk();await nw.goto('file://'+process.argv[2]);
 const dls=[];nw.on('download',d=>dls.push(d.suggestedFilename()));
 await nw.evaluate(wipe,dump);
-await nw.reload();await nw.waitForTimeout(1200);
+await nw.reload();await nw.waitForSelector('[data-notice=migrated]',{timeout:8000}).catch(()=>{});await nw.waitForTimeout(300);
 console.log("2 migration notice:",await nw.$eval('[data-notice=migrated]',n=>n.innerText.replace(/\s+/g,' ').slice(0,210)).catch(e=>"NONE"));
 console.log("  backup file downloaded first:",dls);
 console.log("  pre-copy kept in browser:",await nw.evaluate(()=>[!!localStorage.getItem('iac_answers_v2_pre_codes'),!!localStorage.getItem('iac_template_v2_pre_codes')]));

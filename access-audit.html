@@ -2733,18 +2733,18 @@ function draftStatement(t){
  return s.slice(0,m.index)+word+s.slice(m.index+m[0].length)+".";
 }
 const IMPACTS=[
- [/refuge|evacuat|egress|exit|emergency|alarm|warden/i,"People with disability may be unable to leave the building safely, or to be helped to leave, in an emergency."],
- [/hearing|induction|loop|captio|audio/i,"People who are deaf or hard of hearing may be unable to hear, follow or take part."],
- [/tgsi|tactile ground|tactile indicator/i,"People who are blind or have low vision may not be warned of the hazard or guided past it safely."],
- [/sign|braille|wayfinding|symbol of access|pictogram/i,"People who are blind or have low vision, and people with cognitive disability, may be unable to find or identify the facility."],
- [/handrail|stair|step|nosing|tread|riser/i,"People with limited mobility or balance, and people who are blind or have low vision, are at greater risk of a fall."],
- [/ramp|kerb|gradient|cross-?fall|landing/i,"Wheelchair users and people with limited mobility may be unable to use the route safely or without help."],
- [/door|latch|handle|threshold|entrance|opening force|clear opening/i,"Wheelchair users and people with limited strength or dexterity may be unable to open or pass through the door independently."],
- [/toilet|pan|grab rail|basin|shower|sanitary|cubicle|change|aacf|hoist/i,"People with disability may be unable to use the facility independently, safely or with dignity."],
- [/park|bay|vehicle|drop-?off/i,"Drivers and passengers with disability may be unable to park, get in and out of the vehicle, and reach the entrance safely."],
- [/counter|service|bench|sink|vending|kitchen|table|seat|reach|control|switch/i,"Wheelchair users and people of short stature may be unable to reach or use it on equal terms."],
- [/lux|light|glare|contrast|luminance/i,"People with low vision may be unable to see the route, hazards or features clearly."],
- [/accessway|path|walkway|floor|surface|carpet|clear width|corridor|circulation|turning|passing|clearance|landscap/i,"Wheelchair users, people using walking aids or prams, and people who are blind or have low vision may be unable to travel the route safely and independently."]
+ [/\b(?:refuge|evacuat|egress|exit|emergency|alarm|warden)/i,"People with disability may be unable to leave the building safely, or to be helped to leave, in an emergency."],
+ [/\b(?:hearing|induction|loop|captio|audio)/i,"People who are deaf or hard of hearing may be unable to hear, follow or take part."],
+ [/\b(?:tgsi|tactile ground|tactile indicator)/i,"People who are blind or have low vision may not be warned of the hazard or guided past it safely."],
+ [/\b(?:sign|braille|wayfinding|symbol of access|pictogram)/i,"People who are blind or have low vision, and people with cognitive disability, may be unable to find or identify the facility."],
+ [/\b(?:handrail|stair|step|nosing|tread|riser)/i,"People with limited mobility or balance, and people who are blind or have low vision, are at greater risk of a fall."],
+ [/\b(?:ramp|kerb|gradient|cross-?fall|landing)/i,"Wheelchair users and people with limited mobility may be unable to use the route safely or without help."],
+ [/\b(?:door|latch|handle|threshold|entrance|opening force|clear opening)/i,"Wheelchair users and people with limited strength or dexterity may be unable to open or pass through the door independently."],
+ [/\b(?:toilet|pan|grab rail|basin|shower|sanitary|cubicle|change|aacf|hoist)/i,"People with disability may be unable to use the facility independently, safely or with dignity."],
+ [/\b(?:park|bay|vehicle|drop-?off)/i,"Drivers and passengers with disability may be unable to park, get in and out of the vehicle, and reach the entrance safely."],
+ [/\b(?:counter|service|bench|sink|vending|kitchen|table|seat|reach|control|switch)/i,"Wheelchair users and people of short stature may be unable to reach or use it on equal terms."],
+ [/\b(?:lux|light|glare|contrast|luminance)/i,"People with low vision may be unable to see the route, hazards or features clearly."],
+ [/\b(?:accessway|path|walkway|floor|surface|carpet|clear width|corridor|circulation|turning|passing|clearance|landscap)/i,"Wheelchair users, people using walking aids or prams, and people who are blind or have low vision may be unable to travel the route safely and independently."]
 ];
 function draftImpact(item,page){
  const t=(item.t||"")+" "+((page&&page.title)||"");
