@@ -550,6 +550,9 @@ const FNN=[{l:"Found",code:"found",cls:"r",flag:true},{l:"Not Found",code:"notfo
 
 /* Standard "About this report" wording: the starting text of the Access Audit Overview box (editable per audit). */
 const ABOUT_REPORT="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low severity describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe action plan in section 4 groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
+/* Standard text for Access Audit Details, editable per audit. Both are drafts awaiting the consultant (Review list). */
+const BENCHMARK_TEXT="The premises were assessed against the Disability (Access to Premises — Buildings) Standards 2010, the National Construction Code 2022 Volume One Part D4 and the Australian Standards they reference, including AS 1428.1-2009 and AS/NZS 1428.4.1. AS 1428.2-1992 and other current guidance are used as best practice. The Disability Discrimination Act 1992 is the overarching obligation: meeting the minimum technical requirements does not on its own remove the risk of a complaint. Best-practice recommendations go beyond those minimum requirements.";
+const DISCLAIMER_PLACEHOLDER="[PLACEHOLDER: replace with Inclusive Access Co.'s standard disclaimer before this report is issued.]";
 const ABOUT_REPORT_V1="About this report\n\nAn access audit is an assessment of a building, and of the way it is used, against the standards that govern access for people with disability in Australia. Its purpose is to identify barriers \u2014 the points at which the building stops working for someone \u2014 and to set out what can be done about each one.\n\nThe standards applied\n\nThree instruments matter here, and they do different things.\n\nThe Disability Discrimination Act 1992 (Cth) is the law. It makes discrimination on the basis of disability unlawful, including by providing premises a person cannot access. It applies to this building as it stands today, regardless of when it was built.\n\nThe Disability (Access to Premises \u2014 Buildings) Standards 2010 set out what must be achieved in new building work, and in the affected parts of existing buildings undergoing alteration. Where the Standards apply and are met, that compliance provides protection against a complaint under the DDA in relation to the matters the Standards cover.\n\nThe National Construction Code Part D4 and the AS 1428 series carry the technical detail: dimensions, gradients, clearances, luminance contrast.\n\nThe gap between them matters, and it is the reason an audit is worth more than a code check. A building can comply fully with the Premises Standards and still present real barriers \u2014 because the Standards attach to building work rather than to buildings as they stand, and because they say nothing about how a building is managed. Opening hours, staffing, booking practices and where the furniture is placed all affect whether a person can use a building, and none of them appear in the Code. Findings in that gap are identified separately in this report, so you can see which obligations are mandatory and which are a matter of good practice and reduced risk.\n\nHow the building was assessed\n\nThe audit follows the journey a visitor makes: arriving, entering, moving around, taking part, using the amenities, finding their way, and leaving.\n\nA building is only as accessible as the weakest link in that chain. A compliant meeting room on the first floor is of no use to a person who cannot reach the first floor. Findings are therefore reported in the order they are encountered, rather than grouped by clause number.\n\nHow findings are classified\n\nEach finding carries a classification, a priority and an effort.\n\nClassification describes what was found. Breach of Code is a failure to meet a mandatory requirement. High, Medium and Low Priority describe the degree to which a person is excluded. To be confirmed means the matter could not be determined on site and remains open.\n\nPriority describes where the finding sits in the visitor's journey. It is not a measure of how serious the breach is. A small step at the front door is met by everyone who arrives; a poorly contrasted sign in a store room is met by almost nobody.\n\nEffort indicates the work involved \u2014 low, moderate, or high and capital. It is a guide to planning and sequencing, not a cost estimate.\n\nWhat to do with this report\n\nThe works schedule at the end groups every finding by when it should be addressed. The immediate items are generally low in cost and can usually proceed without design or approval. The planned items will need drawings, budget, and in some cases a building approval.\n\nAddressing the immediate items first is not only the cheapest path. It is also the clearest evidence of a good-faith effort to improve access, which carries weight should the building ever be the subject of a complaint.";
 /* item helpers */
 const q=(t,c)=>({k:"q",t,c});           // scored Pass/High/Med/Low question (c = AS clause ref)
@@ -639,10 +642,11 @@ const PAGES=[
    txt("Access Audit Agreement",true,true),
    txt("Access Audit Agreement Supplied",true),
    dt("Client approval received on",true),
-   txt("Scope",true,true),
-   txt("Benchmark",true,true),
-   txt("Priority Rating System",true,true),
-   txt("Disclaimer",true,true)
+   txt("Scope",false,true),
+   {k:"txt",t:"Benchmark",multi:true,prefill:BENCHMARK_TEXT},
+   /* Kept (hidden) so the ids of every later item stay the same: Appendix B now explains the ratings. */
+   {k:"txt",t:"Priority Rating System",multi:true,hidden:true},
+   {k:"txt",t:"Disclaimer",multi:true,prefill:DISCLAIMER_PLACEHOLDER}
  ]}
 ]},
 
@@ -1533,6 +1537,7 @@ const REVIEW_ITEMS=[
  {id:"scope-lift",g:"Site Scope",t:"No lift marks four lift-only questions not applicable",d:"Lift landings, lift hearing augmentation, the lift fire-warning sign and lifts as an exit route. Matched by question text. Other questions that merely mention a lift (ramps, stairs, stage platform lifts) are left alone. Confirm the list."},
  {id:"report-wording",g:"Report",t:"Finding statements, standard impacts and actions",d:"None are written in the template yet. Until they are, each finding reads 'Not met:' followed by the requirement, and Impact and Action start empty. Write them per question in the template editor (Report wording)."},
  {id:"effort-defaults",g:"Report",t:"Suggested effort for each question",d:"Every finding starts with a draft effort guessed from the question text: lifts, ramps, toilets, door widths, egress and similar building works are High / capital; signs, information, fittings, management and small adjustments are Low; the rest Moderate. Override per question in the template editor (Report wording, Default effort), or per finding on site and in the report."},
+ {id:"details-text",g:"Report",t:"Standard Benchmark and Disclaimer text",d:"Benchmark is pre-filled with a draft naming the Premises Standards, NCC 2022 Part D4, AS 1428.1, AS/NZS 1428.4.1, AS 1428.2 (best practice) and the DDA. Disclaimer is a placeholder until the firm's own wording is supplied. Both are editable per audit; change the standard text in the template editor."},
  {id:"capture-na",g:"Capture",t:"Not applicable on every question",d:"A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each."},
  {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
  {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
@@ -1893,8 +1898,8 @@ function getFieldKey(pageTitle,label){
  return foundId;
 }
 function getFieldVal(pageTitle,label){
- const id=getFieldKey(pageTitle,label);
- const v=id?(S[id]||""):"";
+ const id=getFieldKey(pageTitle,label), it=id?findItem(id):null;
+ const v=id?(S[id]??(it&&it.prefill)??""):"";
  /* date fields are stored as yyyy-mm-dd; show them the way the report is read */
  return /^\d{4}-\d{2}-\d{2}$/.test(v)?v.split("-").reverse().join("/"):v;
 }
@@ -1902,13 +1907,17 @@ function getFieldVal(pageTitle,label){
 /* =====================================================================
    RENDER — audit mode
 ===================================================================== */
+const SHOW_STD_CHECKLIST=false;
 function rItems(items,suf){ return items.map(it=>rItem(it,suf)).join(""); }
 function rItem(it,suf){
  const eb=EDIT?editBar(it):"";
  switch(it.k){
   case "std":{
-   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Standards</span>${moveDel(it.id)}</div>
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Standards (not shown while auditing)</span>${moveDel(it.id)}</div>
      <input class="ein" data-edit="${it.id}" data-field="opts" value="${esc((it.opts||[]).join(', '))}" placeholder="AS1428.1, AS1428.2, …"></div>`;
+   /* Not shown while auditing: each question already cites its own clause, and the report never used these ticks.
+      Kept in the template (and any saved ticks kept in S) so no id shifts. */
+   if(!SHOW_STD_CHECKLIST) return "";
    return `<div class="card"><h3 aria-level="2">Relevant Australian Standards</h3>`+
      (it.opts||[]).map((o,j)=>`<label class="chk"><input type="checkbox" data-a="${it.id}${suf}|${j}" ${S[it.id+suf+"|"+j]?"checked":""}> ${esc(o)}</label>`).join("")+`</div>`;}
   case "pick":{
@@ -1924,9 +1933,11 @@ function rItem(it,suf){
      }).join("")+`</div></div>`;
   }
   case "txt":{
-   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Text field</span>${moveDel(it.id)}
+   if(it.hidden&&!EDIT) return "";
+   if(EDIT) return `<div class="eb"><div class="ebar"><span class="etag">Text field${it.hidden?" (hidden)":""}</span>${moveDel(it.id)}
      <label class="emeta"><input type="checkbox" data-edit="${it.id}" data-field="multi" ${it.multi?"checked":""}> multi-line</label></div>
-     <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" placeholder="Field label"></div>`;
+     <input class="ein" data-edit="${it.id}" data-field="t" value="${esc(it.t)}" placeholder="Field label">${it.prefill!==undefined?`
+     <label class="emeta">Standard text (used until it is edited in an audit)<textarea class="ein" data-edit="${it.id}" data-field="prefill" style="min-height:120px">${esc(it.prefill)}</textarea></label>`:""}</div>`;
    const v=S[it.id+suf]??it.prefill??"";
    const fid=fieldId(it.id+suf);
    const inner=it.multi?`<textarea id="${fid}" data-a="${it.id}${suf}" ${it.prefill?'style="min-height:200px"':''}>${esc(v)}</textarea>`
@@ -1981,7 +1992,7 @@ function rItem(it,suf){
    const n=rep?(REPS[it.id+suf]||1):1; let h="";
    for(let inst=0;inst<n;inst++){
      const ik=instKey(it,suf,inst), nm=instName(it,suf,inst), need=rep&&n>1&&!nm;
-     h+=`<div class="rep"><div class="rh"><h4 aria-level="3" data-base="${esc(it.t)}" data-num="${n>1?inst+1:0}">${esc(it.t)}${nm?` — <span class="rhname">${esc(nm)}</span>`:(n>1?` #${inst+1}`:"")}</h4>`+
+     h+=`<div class="rep"><div class="rh"><h4 aria-level="2" data-base="${esc(it.t)}" data-num="${n>1?inst+1:0}">${esc(it.t)}${nm?` — <span class="rhname">${esc(nm)}</span>`:(n>1?` #${inst+1}`:"")}</h4>`+
         (rep&&n>1&&inst===n-1?`<button class="btn" data-delrep="${it.id+suf}">Remove</button>`:"")+
         `</div>`+
         (rep?`<div class="instname"><label for="${fieldId(ik+"|lbl")}">Name this ${esc(it.t)}${n>1?` <span class="reqtag">(required)</span>`:""}</label>
@@ -2792,7 +2803,7 @@ function appendixCoverageHTML(all){
 }
 /* Appendix B: how to read the ratings. */
 function appendixRatingsHTML(){
- const pr=getFieldVal("Access Audit Details","Priority Rating System").trim();
+ const pr="";
  return `<div class="card flow" id="app-b"><h3 aria-level="2"><span class="secno">B</span> Appendix B: how to read the ratings</h3>
   ${pr?`<div class="rf"><div class="rf-v">${esc(pr)}</div></div>`:""}
   <dl class="defs">
@@ -2835,12 +2846,14 @@ function reportHTML(){
     hex-escaped. Browsers without margin boxes simply print without them. */
  const cssStr=x=>String(x).replace(/[\\"<>&\r\n]/g,c=>"\\"+c.charCodeAt(0).toString(16)+" ");
  const headTxt=cssStr((siteRaw||"Access audit")+(rev?"  ·  Rev "+rev:""));
+ const discPh=getFieldVal("Access Audit Details","Disclaimer").includes("[PLACEHOLDER");
  const draftOpen=reviewOpen().length, tbcInReport=flags.filter(f=>/TBC/.test(f.item.c||"")), unworded=flags.filter(f=>!f.stmtStd);
  const un=unnamedInstances();
 
  /* ---- screen-only notes for the auditor (removed from print and export) ---- */
  let h=`<div class="pg report2">`;
- if(draftOpen||tbcInReport.length||unworded.length) h+=`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
+ if(draftOpen||tbcInReport.length||unworded.length||discPh) h+=`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
+   ${discPh?`The disclaimer is still the placeholder (Access Audit Details).`:""}
    ${draftOpen?`${draftOpen} item${draftOpen===1?"":"s"} still need review with the access consultant.`:""}
    ${unworded.length?`${unworded.length} of ${flags.length} finding${flags.length===1?"":"s"} use the fallback wording "Not met: …" because the template has no finding statement for that question yet.`:""}
    ${tbcInReport.length?`${tbcInReport.length} finding${tbcInReport.length===1?"":"s"} cite a clause marked "TBC".`:""}
@@ -3975,6 +3988,14 @@ async function boot(){
  { const pg=T.pages.find(p=>p.title==="Access Audit Introduction"); const walk=a=>a.forEach(it=>{ if(it.k==="txt"&&it.t==="Access Audit Overview"&&(!it.prefill||it.prefill===ABOUT_REPORT_V1)){ it.prefill=ABOUT_REPORT; saveT(); } if(it.items) walk(it.items); }); if(pg) walk(pg.items); }
  loadLastQ();
  await runMigrations();
+ { const pg=T.pages.find(p=>p.title==="Access Audit Details"); let ch=false;
+   const walk=a=>{ for(let i=a.length-1;i>=0;i--){ const it=a[i];
+     if(it.k==="txt"&&it.t==="Priority Rating System"&&!it.hidden){ it.hidden=true; it.req=false; ch=true; }   // hidden, never removed: ids must not shift
+     if(it.k==="txt"&&["Scope","Benchmark","Disclaimer"].includes(it.t)&&it.req){ it.req=false; ch=true; }
+     if(it.k==="txt"&&it.t==="Benchmark"&&!it.prefill){ it.prefill=BENCHMARK_TEXT; ch=true; }
+     if(it.k==="txt"&&it.t==="Disclaimer"&&!it.prefill){ it.prefill=DISCLAIMER_PLACEHOLDER; ch=true; }
+     if(it.items) walk(it.items); } };
+   if(pg){ walk(pg.items); if(ch) saveT(); } }
  render();
  checkPersistence();
  offerLeave();

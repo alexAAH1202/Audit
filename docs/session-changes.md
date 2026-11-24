@@ -207,3 +207,9 @@ what is not covered.
 - On site: once an answer is a finding, an **Effort** dropdown appears beside + Comment, preset to "Moderate (suggested)" or similar. A choice is saved under `key|diff`; leaving it on the suggestion saves nothing, so a better template default still reaches it later.
 - Report view marks an untouched effort as *suggested* (not exported). Template editor: Report wording has a **Default effort** field per question (`item.eff`).
 - The To be confirmed button reads **TBC** (spoken "TBC, to be confirmed") so answers fit on one row on a phone.
+
+## Access Audit Details and the Standards checklists
+
+- Scope, Benchmark and Disclaimer are no longer required. Benchmark is pre-filled with standard text; Disclaimer holds a marked placeholder, and the report's draft box warns until it is replaced. The template editor can now edit a field's standard text.
+- Priority Rating System is hidden (Appendix B explains the ratings). It stays in the template so no later id shifts; anything typed in it stays in the saved audit and backups.
+- The "Relevant Australian Standards" checklists at the top of 20 pages are no longer shown while auditing: each question cites its own clause and the report never used the ticks. Kept in the template (ids unchanged); saved ticks are kept. Section headings moved up a level so the heading order stays valid.

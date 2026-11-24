@@ -3,5 +3,5 @@ textareas in scope card: 1
 export: textareas 0 | hint paras 0
 export limits: "Roof terrace locked: not assessed.\n\"Plant room\" excluded <by agreement>."
 benchmark once: 1
-empty audit card: 2 Scope and method | SITE — | CLIENT — | CONSULTANT — | CONDUCTED — | Revision:  Appears on the cover and in every page header. | COVERAGE | 0 of 22 assessable areas have answers recorded. The full breakdown is in Appendix A. | No items recorded for: Accessibl
+empty audit card: 2 Scope and method | SITE — | CLIENT — | CONSULTANT — | CONDUCTED — | Revision:  Appears on the cover and in every page header. | BENCHMARK | The premises were assessed against the Disability (Access to Premises — Buildings) Standards 2010, the National Constr
 errors: []

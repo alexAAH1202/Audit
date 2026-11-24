@@ -70,6 +70,9 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
 - [ ] **Suggested effort for each question** (`effort-defaults`)  
   Every finding starts with a draft effort guessed from the question text: lifts, ramps, toilets, door widths, egress and similar building works are High / capital; signs, information, fittings, staff and management items and small adjustments are Low; the rest Moderate. Override per question in the template editor (Report wording, Default effort), or per finding on site and in the report.
 
+- [ ] **Standard Benchmark and Disclaimer text** (`details-text`)  
+  Benchmark is pre-filled with a draft naming the Premises Standards, NCC 2022 Part D4, AS 1428.1, AS/NZS 1428.4.1, AS 1428.2 (best practice) and the DDA. Disclaimer is a placeholder until the firm's own wording is supplied; the report's draft box warns while it is still the placeholder. Both are editable per audit; change the standard text in the template editor.
+
 ## What is marked in the tool
 
 | Where | Marker |

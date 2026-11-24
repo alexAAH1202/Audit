@@ -1,5 +1,5 @@
 
-## audit page (desktop) | violations: 0 | needs review: color-contrast(2)
+## audit page (desktop) | violations: 0 | needs review: color-contrast(3)
 
 ## audit page (phone 390) | violations: 0 | needs review: color-contrast(3)
 
