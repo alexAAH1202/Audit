@@ -213,3 +213,9 @@ what is not covered.
 - Scope, Benchmark and Disclaimer are no longer required. Benchmark is pre-filled with standard text; Disclaimer holds a marked placeholder, and the report's draft box warns until it is replaced. The template editor can now edit a field's standard text.
 - Priority Rating System is hidden (Appendix B explains the ratings). It stays in the template so no later id shifts; anything typed in it stays in the saved audit and backups.
 - The "Relevant Australian Standards" checklists at the top of 20 pages are no longer shown while auditing: each question cites its own clause and the report never used the ticks. Kept in the template (ids unchanged); saved ticks are kept. Section headings moved up a level so the heading order stays valid.
+
+## Measurements and draft finding wording
+
+- **Measured field** on the 106 questions whose text states a figure: mm limits, ranges, ± tolerances, gradients (entered as the N in 1:N), opening force (N). It says live whether the value meets the figure; the auditor still picks the answer. Saved under `key|m`; the report quotes it under the finding ("Measured: 820 mm (required: at least 850 mm)"). The rule is read from the question text (`measureRule`).
+- **Draft finding wording** when the template has none: `draftStatement` turns the requirement negative (375 of 459 questions), `draftImpact` picks a who-is-affected sentence by topic, `draftAction` reads "Rectify so that …, in accordance with <clause>". Template wording (item.f/imp/act) still wins; per-finding edits still win over both. The report's draft box counts findings using draft wording.
+- Review list gains `measurements` and `finding-drafts` (22 items).

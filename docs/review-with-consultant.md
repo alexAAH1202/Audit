@@ -73,6 +73,12 @@ This file mirrors `REVIEW_ITEMS` in `access-audit.html`. If you add a default, a
 - [ ] **Standard Benchmark and Disclaimer text** (`details-text`)  
   Benchmark is pre-filled with a draft naming the Premises Standards, NCC 2022 Part D4, AS 1428.1, AS/NZS 1428.4.1, AS 1428.2 (best practice) and the DDA. Disclaimer is a placeholder until the firm's own wording is supplied; the report's draft box warns while it is still the placeholder. Both are editable per audit; change the standard text in the template editor.
 
+- [ ] **Measured values and their limits** (`measurements`)  
+  106 questions that state a figure (widths, heights, gradients, opening force) show a Measured field. The limit is read from the question text, so check each reads right. Questions with two dimensions (1540 x 2070mm) are left to judgement; a few name two limits and only the first is checked. The tool says whether a value meets the figure; the auditor still chooses the answer and severity.
+
+- [ ] **Draft finding wording made from the requirement** (`finding-drafts`)  
+  Until a question has its own wording, the statement is the requirement turned negative (375 of 459 questions; the rest keep "Not met:"), the impact is chosen by topic, and the action reads "Rectify so that <requirement>, in accordance with <clause>". Read each in the report, and replace the common ones with the consultant's own wording in the template editor (Report wording).
+
 ## What is marked in the tool
 
 | Where | Marker |

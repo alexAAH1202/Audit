@@ -3,7 +3,7 @@
 3 typed: heading live: Disability Accessible Parking Bay #1 | Disability Accessible Parking Bay — Bay 2 near the door | stored: Bay 2 near the door
 4 first named: Disability Accessible Parking Bay — Bay 1 nearest entry | Disability Accessible Parking Bay — Bay 2 near the door | unnamed notes: 0
 5 report locations: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door
-  schedule Location: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door | plate: Figure 1 (F2): The required number of accessible parking bays is provided for the building classification and
+  schedule Location: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door | plate: Figure 1 (F2): The required number of accessible parking bays is not provided for the building classification
   CSV Location col: Accessible Car Parking — Bay 1 nearest entry || Accessible Car Parking — Bay 2 near the door
 6 unnamed fallback in report:  | draft box mentions unnamed: true
   export: draft box gone: true | names present: true

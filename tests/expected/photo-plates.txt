@@ -1,12 +1,12 @@
 screen refs: Photos: Figure 1, Figure 2 | Photo: Figure 3 | Photo: Figure 4
-plates: Figure 1 (F1): The required number of accessible parking bays is provided for th
-   Figure 2 (F1): The required number of accessible parking bays is provided for th
-   Figure 3 (F2): Vision panels, where provided, allow sighting by both standing an
+plates: Figure 1 (F1): The required number of accessible parking bays is not provided fo
+   Figure 2 (F1): The required number of accessible parking bays is not provided fo
+   Figure 3 (F2): Vision panels, where provided, do not allow sighting by both stan
    Figure 4: Minimum headroom clearance of 2200mm is provided over the shared area
 finding photo refs: Photos: Figure 1, Figure 2 | Photo: Figure 3
 caption saved: Rear view 4
 n","Fix by (months)","Figures"
-ow effort","","Fix it.","","3"
-de","Moderate","","","","1, 2"
+ith dignity.","Fix it.","","3"
+s Sch.1 / BCA D3.5.","","1, 2"
 export: inputs in plates 0 | captions as text: [ 'Tape across bay: 2.1m "short" <b>', 'Rear view' ]
 errors: []

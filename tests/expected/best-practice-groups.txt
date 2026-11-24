@@ -12,5 +12,5 @@
    Next unanswered opened it and focused inside: true | radio
 8 goToQuestion (Resume) opens it: true
 9 template editor not folded: true
-10 page height folded vs all open: 6923 vs 9172 ( 25% shorter )
+10 page height folded vs all open: 7643 vs 9892 ( 23% shorter )
 errors: []

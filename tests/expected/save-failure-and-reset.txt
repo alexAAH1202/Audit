@@ -14,7 +14,7 @@ C1 go disabled: true | focus on input: resetConfirm
 C2 partial: true
 C3 case/space-insensitive match: true
 C4 cancelled, data kept: [ 2, true ]
-C5 Esc closes: false
+C5 Esc closes: true
 C6 reset by Enter: [ 0, 0, false ]
 C7 no site -> word: To confirm, type RESET
 errors: []

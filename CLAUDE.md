@@ -49,6 +49,7 @@ the snapshot diff. They are not part of the tool: constraint 2 (no build, no ins
 | Note | localStorage | `S[key + "\|n"]` |
 | Timeframe | localStorage | `S[key + "\|tf"]` |
 | Effort | localStorage | `S[key + "\|diff"]` |
+| Measured value | localStorage | `S[key + "\|m"]` (text, as typed) |
 | Impact | localStorage | `S[key + "\|impact"]` |
 | Action | localStorage | `S[key + "\|action"]` |
 | Name of a repeated element | localStorage | `S[sectionId + suffix + "~" + n + "\|lbl"]` |

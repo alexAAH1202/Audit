@@ -96,7 +96,10 @@ input[type="checkbox"],input[type="radio"]{width:24px;height:24px}
 .qrow .qt .cl{display:block;color:var(--muted);font-size:12.5px;font-weight:400;line-height:1.4;margin-top:6px}
 .qrow .qx{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px}
 .qx .notetoggle{order:1}.qx .addphoto{order:2;margin-top:0}.qx .qnotewrap{order:3;flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
-.qx .qnotewrap[hidden]{display:none}.qx .qeff{order:2;display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600}.qx .qeff[hidden]{display:none}.qx .qeff select{min-height:44px}
+.qx .qnotewrap[hidden]{display:none}
+.qmeas{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:4px 0 10px;font-size:.92rem}
+.qmeas label{font-weight:600}.qmeas input{width:6.5em;min-height:44px;font-size:1rem;padding:6px 10px;border:1px solid #6b6f80;border-radius:8px}
+.mverd{font-size:.88rem;color:#444}.mverd.ok{color:#1b6b33;font-weight:600}.mverd.bad{color:#a4161a;font-weight:600}.qx .qeff{order:2;display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600}.qx .qeff[hidden]{display:none}.qx .qeff select{min-height:44px}
 .effsug{margin-left:6px;font-size:.8rem;color:var(--muted,#555);font-style:italic}.qx .qphotos{order:4;flex:1 1 100%;margin-top:0}.qphotos:empty{display:none}
 .notetoggle{border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;min-height:44px;cursor:pointer}
 .notetoggle:hover,.notetoggle[aria-expanded="true"]{background:var(--brand-lt)}
@@ -1538,6 +1541,8 @@ const REVIEW_ITEMS=[
  {id:"report-wording",g:"Report",t:"Finding statements, standard impacts and actions",d:"None are written in the template yet. Until they are, each finding reads 'Not met:' followed by the requirement, and Impact and Action start empty. Write them per question in the template editor (Report wording)."},
  {id:"effort-defaults",g:"Report",t:"Suggested effort for each question",d:"Every finding starts with a draft effort guessed from the question text: lifts, ramps, toilets, door widths, egress and similar building works are High / capital; signs, information, fittings, management and small adjustments are Low; the rest Moderate. Override per question in the template editor (Report wording, Default effort), or per finding on site and in the report."},
  {id:"details-text",g:"Report",t:"Standard Benchmark and Disclaimer text",d:"Benchmark is pre-filled with a draft naming the Premises Standards, NCC 2022 Part D4, AS 1428.1, AS/NZS 1428.4.1, AS 1428.2 (best practice) and the DDA. Disclaimer is a placeholder until the firm's own wording is supplied. Both are editable per audit; change the standard text in the template editor."},
+ {id:"measurements",g:"Capture",t:"Measured values and their limits",d:"36 questions that state a figure (widths, heights, gradients, opening force) show a Measured field. The limit is read from the question text, so check it reads right; questions with two dimensions (e.g. 1540 x 2070mm) are left to judgement. The tool only says whether a value meets the figure; the auditor still chooses the answer and severity."},
+ {id:"finding-drafts",g:"Report",t:"Draft finding wording made from the requirement",d:"Until a question has its own wording, the finding statement is the requirement turned negative (e.g. 'Doorways ... do not provide the minimum 850mm clear opening'), the impact is chosen by topic, and the action reads 'Rectify so that <requirement>, in accordance with <clause>'. Read each in the report; replace the common ones with the consultant's own wording in the template editor."},
  {id:"capture-na",g:"Capture",t:"Not applicable on every question",d:"A sixth answer on each question. It counts as resolved in progress and is left out of the score. Confirm the wording, and whether the report should need a reason for each."},
  {id:"scope-parking",g:"Site Scope",t:"No parking, or attended-only, skips Accessible Car Parking",d:"Attended-only follows D4D6 (parking service, no public access to spaces). Confirm."},
  {id:"scope-sanitary",g:"Site Scope",t:"No sanitary facilities, or shared, skips four pages",d:"Shared facilities outside the audited area is treated as No. Confirm that is right for a tenancy using a landlord's toilets."},
@@ -1829,7 +1834,7 @@ function allPageScores(){
    leaving it orphaned (or, worse, resurfacing on a reused instance index). */
 function collectAnswerKeysDeep(items,suf,out){
  items.forEach(it=>{
-  if(it.k==="q"){ out.push(it.id+suf,it.id+suf+"|n",it.id+suf+"|tf"); }
+  if(it.k==="q"){ out.push(it.id+suf,it.id+suf+"|n",it.id+suf+"|tf",it.id+suf+"|m"); }
   else if(it.k==="txt"||it.k==="dt"||it.k==="sig"||it.k==="media"){ out.push(it.id+suf); }
   else if(it.k==="std"){ (it.opts||[]).forEach((o,j)=>out.push(it.id+suf+"|"+j)); }
   else if(it.k==="grp"){
@@ -2042,7 +2047,7 @@ function qRow(it,suf){
  }
  const v=S[key], note=S[key+"|n"]||"";
  return `<div class="qrow"><div class="qt"><span id="${qlId(key)}">${esc(it.t)}</span>${it.c?`<span class="cl">${esc(it.c)}${/TBC/.test(it.c)?` <span class="draftchip">Needs review</span>`:""}</span>`:""}</div>`+
-   radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+
+   measureBlock(key,it)+radioGroup(key,set,v,`aria-labelledby="${qlId(key)}"`)+
    `<div class="qx">${noteBlock(key,note)}${effortBlock(key,it,set,v)}${photoBlock(key)}</div></div>`;
 }
 /* Best Practice groups are folded by default (design brief): they matter, but they are not what gets audited
@@ -2659,6 +2664,98 @@ function suggestEffort(item){
  return "mod";
 }
 const effortOf=(key,item)=>S[key+"|diff"]||suggestEffort(item);
+
+/* ---- Measurements. A question that states a figure ("minimum 850mm clear opening", "does not exceed 1:20",
+   "830–870mm high", "does not exceed 20N") gets a Measured field. The rule is read from the question text, so it
+   follows template edits; questions with two dimensions (1540mm x 2070mm) are left to judgement. The measured
+   value is saved under key|m and quoted in the report; the tool says whether it meets the figure, the auditor
+   still chooses the answer. Draft: Review list "measurements". */
+const MRULE_CACHE=new Map();
+function measureRule(t){
+ if(MRULE_CACHE.has(t)) return MRULE_CACHE.get(t);
+ const s=String(t||""), num="(\\d+(?:\\.\\d+)?)"; let r=null, m;
+ const R=x=>new RegExp(x,"i");
+ if(/\d\s*(mm)?\s*x\s*\d/i.test(s)) r=null;
+ else if((m=s.match(R(num+"\\s*mm\\s*\\(\\s*±\\s*"+num+"\\s*mm"))))r={u:"mm",min:+m[1]-+m[2],max:+m[1]+ +m[2]};
+ else if((m=s.match(R(num+"\\s*(?:–|-|to)\\s*"+num+"\\s*mm"))))r={u:"mm",min:+m[1],max:+m[2]};
+ else if((m=s.match(R("(?:does not exceed|do not exceed|not steeper than|no steeper than|max(?:imum)?\\.?)[^\\d]{0,12}1\\s*:\\s*"+num))))r={u:"ratio",ratio:+m[1]};
+ else if((m=s.match(R("(?:does not exceed|do not exceed)\\s*"+num+"\\s*N\\b"))))r={u:"N",max:+m[1]};
+ else if((m=s.match(R("(?:does not exceed|do not exceed|not more than|no more than|max(?:imum)?\\.?)[^\\d]{0,15}"+num+"\\s*mm"))))r={u:"mm",max:+m[1]};
+ else if((m=s.match(R("(?:minimum|min\\.|not less than|at least)[^\\d]{0,25}"+num+"\\s*mm"))))r={u:"mm",min:+m[1]};
+ else if((m=s.match(R("(?:minimum|not less than|at least)[^\\d]{0,15}"+num+"\\s*lux"))))r={u:"lux",min:+m[1]};
+ MRULE_CACHE.set(t,r); return r;
+}
+function measureReq(r){
+ if(r.u==="ratio") return "no steeper than 1:"+r.ratio;
+ const u=" "+r.u;
+ if(r.min!=null&&r.max!=null) return r.min+"–"+r.max+u;
+ return r.min!=null?"at least "+r.min+u:"no more than "+r.max+u;
+}
+function measureOk(r,val){
+ const v=parseFloat(String(val).replace(",",".")); if(!isFinite(v)) return null;
+ if(r.u==="ratio") return v>=r.ratio;
+ return (r.min==null||v>=r.min)&&(r.max==null||v<=r.max);
+}
+const measureShown=(r,val)=>r.u==="ratio"?"1:"+val:val+" "+r.u;
+function measureVerdict(r,val){
+ const ok=String(val||"").trim()?measureOk(r,val):null;
+ return ok===null?`Required: ${measureReq(r)}`:ok?`Meets the requirement (${measureReq(r)})`:`Does not meet the requirement (${measureReq(r)})`;
+}
+function measureBlock(key,item){
+ const r=measureRule(item.t); if(!r) return "";
+ const v=S[key+"|m"]||"", id=fieldId(key+"|m"), ok=v.trim()?measureOk(r,v):null;
+ return `<div class="qmeas"><label for="${id}">${r.u==="ratio"?"Measured gradient, 1 :":"Measured ("+r.u+")"}</label>
+  <input id="${id}" type="text" inputmode="decimal" autocomplete="off" data-meas="${esc(key)}" value="${esc(v)}" aria-describedby="${id}-v">
+  <span class="mverd ${ok===false?"bad":ok?"ok":""}" id="${id}-v">${esc(measureVerdict(r,v))}</span></div>`;
+}
+
+/* ---- Draft finding wording, used until the template holds the consultant's own (item.f / item.imp / item.act).
+   The statement turns the requirement into what was found; the impact is chosen by topic; the action asks for
+   the requirement to be met. All three are drafts: Review list "finding-drafts". */
+/* Numeric limits are turned round first ("not less than 1500mm" becomes "less than 1500mm"); otherwise the first verb
+   is negated. A sentence that holds another negative ("... and does not overhang", "unless ...") is not reworded:
+   it would read wrongly, so it keeps the plain "Not met:" form. */
+const NEG_NUM=[[/\bdoes not exceed\b/i,"exceeds"],[/\bdo not exceed\b/i,"exceed"],[/\bnot less than\b/i,"less than"],[/\bnot more than\b/i,"more than"],
+ [/\bprovides? (?:a )?minimum\b/i,m=>/provides/i.test(m)?"does not provide the minimum":"do not provide the minimum"]];
+const VERBS="achieve|allow|connect|guide|display|drain|illuminate|support|cover|identify|include|meet|contain|serve|offer|match|abut|extend|exist|state|work|provide|indicate|operate|enable|permit|clear|align|lead|link|run|face|open|close|incorporate|comply|show|give|direct|warn|prevent|reach|remain|accommodate|use";
+const NEG_VERB=[
+ [/\b(is|are) not\b/i,null],[/\b(does|do) not\b/i,null],
+ [/\b(is|are|can be|has|have)\b/i,(m,a)=>({is:"is not",are:"are not","can be":"cannot be",has:"does not have",have:"do not have"})[a.toLowerCase()]],
+ [new RegExp("\\b("+VERBS+")(e?s)?\\b","i"),(m,v,sfx)=>sfx?"does not "+(/^(identifie|applie)/i.test(m)?v:v):"do not "+v]
+];
+function draftStatement(t){
+ const s=String(t||"").trim().replace(/[.\s]+$/,""); if(!s) return "";
+ const first=list=>{ let b=null; list.forEach(([re,to])=>{ const m=s.match(re); if(m&&(!b||m.index<b.m.index)) b={m,to}; }); return b; };
+ let b=first(NEG_NUM); if(!b){ b=first(NEG_VERB); if(!b||!b.to) return ""; }
+ const {m,to}=b, rest=s.slice(0,m.index)+" "+s.slice(m.index+m[0].length);
+ if(/\b(no|not|without|unless|nor|never|avoided|free of|other than|except)\b/i.test(rest)) return "";
+ const word=typeof to==="function"?to(...m):to;
+ return s.slice(0,m.index)+word+s.slice(m.index+m[0].length)+".";
+}
+const IMPACTS=[
+ [/refuge|evacuat|egress|exit|emergency|alarm|warden/i,"People with disability may be unable to leave the building safely, or to be helped to leave, in an emergency."],
+ [/hearing|induction|loop|captio|audio/i,"People who are deaf or hard of hearing may be unable to hear, follow or take part."],
+ [/tgsi|tactile ground|tactile indicator/i,"People who are blind or have low vision may not be warned of the hazard or guided past it safely."],
+ [/sign|braille|wayfinding|symbol of access|pictogram/i,"People who are blind or have low vision, and people with cognitive disability, may be unable to find or identify the facility."],
+ [/handrail|stair|step|nosing|tread|riser/i,"People with limited mobility or balance, and people who are blind or have low vision, are at greater risk of a fall."],
+ [/ramp|kerb|gradient|cross-?fall|landing/i,"Wheelchair users and people with limited mobility may be unable to use the route safely or without help."],
+ [/door|latch|handle|threshold|entrance|opening force|clear opening/i,"Wheelchair users and people with limited strength or dexterity may be unable to open or pass through the door independently."],
+ [/toilet|pan|grab rail|basin|shower|sanitary|cubicle|change|aacf|hoist/i,"People with disability may be unable to use the facility independently, safely or with dignity."],
+ [/park|bay|vehicle|drop-?off/i,"Drivers and passengers with disability may be unable to park, get in and out of the vehicle, and reach the entrance safely."],
+ [/counter|service|bench|sink|vending|kitchen|table|seat|reach|control|switch/i,"Wheelchair users and people of short stature may be unable to reach or use it on equal terms."],
+ [/lux|light|glare|contrast|luminance/i,"People with low vision may be unable to see the route, hazards or features clearly."],
+ [/accessway|path|walkway|floor|surface|carpet|clear width|corridor|circulation|turning|passing|clearance|landscap/i,"Wheelchair users, people using walking aids or prams, and people who are blind or have low vision may be unable to travel the route safely and independently."]
+];
+function draftImpact(item,page){
+ const t=(item.t||"")+" "+((page&&page.title)||"");
+ const hit=IMPACTS.find(([re])=>re.test(item.t||""))||IMPACTS.find(([re])=>re.test(t));
+ return hit?hit[1]:"";
+}
+function draftAction(item){
+ const s=String(item.t||"").trim().replace(/[.\s]+$/,""); if(!s) return "";
+ const c=(item.c||"").trim();
+ return "Rectify so that "+s.charAt(0).toLowerCase()+s.slice(1)+(c&&!/TBC/.test(c)?", in accordance with "+c:"")+".";
+}
 function zoneOf(pri,diff){
  const early=pri<=2;
  if(diff==="low") return early?1:3;
@@ -2692,9 +2789,13 @@ function collectFindings(){
    /* Report wording. A question is written as the requirement ("A continuous path is provided"), so a finding
       must not repeat it as if it were the result. The template can hold a finding statement and a standard
       impact and action for each question; without them the finding says "Not met:" before the requirement. */
-   stmt:(x.item.f||"").trim()||("Not met: "+x.item.t), stmtStd:!!(x.item.f||"").trim(),
-   diff:effortOf(x.key,x.item), diffSet:!!S[x.key+"|diff"], impact:S[x.key+"|impact"]||(x.item.imp||"").trim(),
-   action:S[x.key+"|action"]||(x.item.act||"").trim(), note:S[x.key+"|n"]||"",
+   ...(()=>{ const own=(x.item.f||"").trim(), dr=own?"":draftStatement(x.item.t);
+     const impDef=(x.item.imp||"").trim()||draftImpact(x.item,x.page), actDef=(x.item.act||"").trim()||draftAction(x.item);
+     const mr=measureRule(x.item.t), mv=(S[x.key+"|m"]||"").trim();
+     return {stmt:own||dr||("Not met: "+x.item.t), stmtStd:!!(own||dr), stmtDraft:!own&&!!dr, impDef, actDef,
+       measured:mr&&mv?{shown:measureShown(mr,mv),req:measureReq(mr),ok:measureOk(mr,mv)}:null,
+       impact:S[x.key+"|impact"]||impDef, action:S[x.key+"|action"]||actDef}; })(),
+   diff:effortOf(x.key,x.item), diffSet:!!S[x.key+"|diff"], note:S[x.key+"|n"]||"",
    zone:zoneOf(meta.pri,effortOf(x.key,x.item))
   };
  }).filter(Boolean);
@@ -2847,13 +2948,15 @@ function reportHTML(){
  const cssStr=x=>String(x).replace(/[\\"<>&\r\n]/g,c=>"\\"+c.charCodeAt(0).toString(16)+" ");
  const headTxt=cssStr((siteRaw||"Access audit")+(rev?"  ·  Rev "+rev:""));
  const discPh=getFieldVal("Access Audit Details","Disclaimer").includes("[PLACEHOLDER");
+ const drafted=flags.filter(f=>f.stmtDraft).length;
  const draftOpen=reviewOpen().length, tbcInReport=flags.filter(f=>/TBC/.test(f.item.c||"")), unworded=flags.filter(f=>!f.stmtStd);
  const un=unnamedInstances();
 
  /* ---- screen-only notes for the auditor (removed from print and export) ---- */
  let h=`<div class="pg report2">`;
- if(draftOpen||tbcInReport.length||unworded.length||discPh) h+=`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
+ if(draftOpen||tbcInReport.length||unworded.length||discPh||drafted) h+=`<div class="draftbox" role="note"><b>Draft content: review before this goes to a client.</b>
    ${discPh?`The disclaimer is still the placeholder (Access Audit Details).`:""}
+   ${drafted?`${drafted} finding${drafted===1?" uses":"s use"} draft wording made from the requirement: read each one.`:""}
    ${draftOpen?`${draftOpen} item${draftOpen===1?"":"s"} still need review with the access consultant.`:""}
    ${unworded.length?`${unworded.length} of ${flags.length} finding${flags.length===1?"":"s"} use the fallback wording "Not met: …" because the template has no finding statement for that question yet.`:""}
    ${tbcInReport.length?`${tbcInReport.length} finding${tbcInReport.length===1?"":"s"} cite a clause marked "TBC".`:""}
@@ -2988,10 +3091,11 @@ function reportHTML(){
     <div class="fhead"><span class="fno">${r}</span><span class="badge ${f.gc}">${esc(f.gl)}</span><span class="fstmt">${esc(f.stmt)}</span></div>
     ${f.stmtStd?`<div class="freq"><b>Requirement:</b> ${esc(f.item.t)}${f.item.c?` <span class="cl">(${esc(f.item.c)})</span>`:""}</div>`
                :(f.item.c?`<div class="freq"><span class="cl">${esc(f.item.c)}</span></div>`:"")}
+    ${f.measured?`<div class="freq"><b>Measured:</b> ${esc(f.measured.shown)} (required: ${esc(f.measured.req)})</div>`:""}
     ${f.note?`<div class="rf-note"><b>Site note:</b> ${esc(f.note)}</div>`:""}
-    ${rfField(f.key,"impact","Who this affects",f.item.imp?"":"A wheelchair user cannot… / A person who is blind cannot…",(f.item.imp||"").trim())}
+    ${rfField(f.key,"impact","Who this affects",f.impDef?"":"A wheelchair user cannot… / A person who is blind cannot…",f.impDef)}
     <div class="screen-only">
-     ${rfField(f.key,"action","Action: the works instruction (shown in section 4)","Extend the lower handrail by 160 mm with a matching return to the wall.",(f.item.act||"").trim())}
+     ${rfField(f.key,"action","Action: the works instruction (shown in section 4)","Extend the lower handrail by 160 mm with a matching return to the wall.",f.actDef)}
      <div class="tf-row">
        ${diffSelect(f.key,f.diff)}${!f.diffSet&&!EXPORTING?`<span class="effsug">suggested</span>`:""}
        <label class="tf-label">Fix by:
@@ -3468,6 +3572,12 @@ content.addEventListener("click",e=>{
    saveA();render();return;}
 });
 content.addEventListener("input",e=>{
+ const ms=e.target.closest("[data-meas]");
+ if(ms){ const k=ms.dataset.meas, it=findItem(k.split("~")[0].replace(/_\d+$/,""))||null;
+   const v=ms.value.trim(); if(v) S[k+"|m"]=v; else delete S[k+"|m"]; saveA();
+   const r=measureRule(ms.closest(".qrow").querySelector(".qt span").textContent), out=document.getElementById(ms.getAttribute("aria-describedby"));
+   if(r&&out){ const ok=v?measureOk(r,v):null; out.textContent=measureVerdict(r,v); out.className="mverd "+(ok===false?"bad":ok?"ok":""); }
+   return; }
  const ed=e.target.closest("[data-edit]");
  if(ed){const it=findItem(ed.dataset.edit);if(it){const f=ed.dataset.field;
    if(f==="opts")it.opts=ed.value.split(",").map(s=>s.trim()).filter(Boolean);
